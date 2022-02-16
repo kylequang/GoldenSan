@@ -14,8 +14,8 @@ export default function App() {
     <NavigationContainer >
       <Stack.Navigator>
         <Stack.Screen
-          name="Login"
-          component={LoginScreen}
+          name="sendOTP"
+          component={PhoneNumber}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -23,11 +23,7 @@ export default function App() {
           component={HomeScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="sendOTP"
-          component={PhoneNumber}
-          options={{ headerShown: false }}
-        />
+
       </Stack.Navigator>
     </NavigationContainer>
 
