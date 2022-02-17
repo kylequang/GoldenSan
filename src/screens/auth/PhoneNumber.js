@@ -29,18 +29,6 @@ const PhoneNumber = ({ navigation }) => {
 
     const appVerifier = window.recaptchaVerifier;
     const sendOTP123 = () => {
-        // console.log('hi')
-        // if (phoneNumber === "") return;
-        // let verify = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        //     'size': 'invisible'
-        // });
-        // auth.signInWithPhoneNumber(phoneNumber, verify).then((result) => {
-        //     console.log('sai');
-        //     setResult(result);
-        // })
-        //     .catch((err) => {
-        //         alert(err);
-        //     });
         setStep('SEND_OTP');
     }
     const verifyOTP = () => {

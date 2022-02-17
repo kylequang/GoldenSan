@@ -9,6 +9,7 @@ import PhoneNumber from './src/screens/auth/PhoneNumber';
 import Information from './src/screens/auth/Information';
 import Loading from './src/components/animation/Loading';
 import RepainerLoading from './src/components/animation/RepainerLoading';
+import Fixer from './src/screens/home/Fixer';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,20 +17,25 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator>
+      <Stack.Screen
+          initialRouteName='allFix'
+          name="allFix"
+          component={Fixer}
+          options={{ headerShown: false }}
+        />
         {/* <Stack.Screen
           initialRouteName='loading'
           name="loading"
           component={Loading}
           options={{ headerShown: false }}
         /> */}
-        <Stack.Screen
+        {/* <Stack.Screen
           initialRouteName='loading'
           name="loading"
           component={RepainerLoading}
           options={{ headerShown: false }}
-        />
+        /> */}
         <Stack.Screen
-
           name="sendOTP"
           component={PhoneNumber}
           options={{ headerShown: false }}
@@ -44,10 +50,8 @@ export default function App() {
           component={Information}
           options={{ headerShown: false }}
         />
-
       </Stack.Navigator>
     </NavigationContainer>
-
   );
 }
 
