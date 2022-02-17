@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import {
-    SafeAreaView,
     StyleSheet,
     View,
     TouchableOpacity,
@@ -10,7 +9,8 @@ import {
 } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Colors } from "react-native/Libraries/NewAppScreen";
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RadioButton } from 'react-native-paper';
 const PhoneNumber = ({ navigation }) => {
 
     const [value, setValue] = useState("");
@@ -24,7 +24,7 @@ const PhoneNumber = ({ navigation }) => {
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
     const [result, setResult] = useState('');
-
+    const [checked, setChecked] = useState('house');
 
 
     const appVerifier = window.recaptchaVerifier;
@@ -45,9 +45,7 @@ const PhoneNumber = ({ navigation }) => {
     }
     const verifyOTP = () => {
         setStep('VERIFY_OTP_SUCCESS');
-        navigation.navigate('toHome');
     }
-
     return (
         <>
             {
@@ -108,6 +106,50 @@ const PhoneNumber = ({ navigation }) => {
                     </SafeAreaView>
                 </View>
             }
+            {
+                step === 'VERIFY_OTP_SUCCESS' && <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper_Role}>
+                        <Image
+                            style={{ width: 200, height: 200 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <Text style={{ fontSize: 25 }}>Bạn là ai ?</Text>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/house.png')}
+                                />
+                                <Text>Hộ Gia Đình</Text>
+                                <RadioButton
+                                    value="house"
+                                    status={checked === 'house' ? 'checked' : 'unchecked'}
+                                    onPress={() => setChecked('house')}
+                                />
+                            </View>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/repainner.png')}
+                                />
+                                <Text>Thợ Sữa Chữa</Text>
+                                <RadioButton
+                                    value="repainer"
+                                    status={checked === 'repainer' ? 'checked' : 'unchecked'}
+                                    onPress={() => setChecked('repainer')}
+                                />
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={()=> navigation.navigate('inputInfo')}
+                        >
+                            <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+
+            }
 
         </>
     );
@@ -118,13 +160,31 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.lighter,
     },
-
     wrapper: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
     },
-
+    wrapper_Role: {
+        alignItems: 'center'
+    },
+    row: {
+        flexDirection: 'row',
+        height: '50%'
+    },
+    column: {
+        margin: 15,
+        width: '40%',
+        alignItems: 'center'
+    },
+    imageRole: {
+        height: 200,
+        width: 180,
+        borderRadius: 20,
+        backgroundColor: '#ff6600',
+        marginBottom: 15,
+        marginTop: 15
+    },
     button: {
         marginTop: 20,
         height: 50,
@@ -140,17 +200,17 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.34,
         shadowRadius: 6.27,
         elevation: 10,
+        borderRadius: 20
     },
+
 
     buttonText: {
         color: "white",
-        fontSize: 14,
+        fontSize: 20,
     },
-
     welcome: {
-        padding: 20,
+        padding: 20
     },
-
     status: {
         padding: 20,
         marginBottom: 20,
