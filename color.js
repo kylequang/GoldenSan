@@ -1,0 +1,1 @@
+export const color='#ff6600';

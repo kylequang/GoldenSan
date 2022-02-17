@@ -142,7 +142,7 @@ const PhoneNumber = ({ navigation }) => {
                         </View>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={verifyOTP}
+                            onPress={()=> navigation.navigate('inputInfo')}
                         >
                             <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
                         </TouchableOpacity>
