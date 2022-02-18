@@ -11,7 +11,8 @@ import Loading from './src/components/animation/Loading';
 import RepainerLoading from './src/components/animation/RepainerLoading';
 import Fixer from './src/screens/home/Fixer';
 import Adv from './src/components/animation/Adv';
-
+import index from './src/screens/client/Index';
+import DetailCategory from './src/screens/client/DetailCategory';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -21,7 +22,12 @@ export default function App() {
       <Stack.Screen
           initialRouteName='test'
           name="test"
-          component={Adv}
+          component={index}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="detailCategory"
+          component={DetailCategory}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
