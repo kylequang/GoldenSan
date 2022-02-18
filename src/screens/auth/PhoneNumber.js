@@ -17,9 +17,6 @@ const PhoneNumber = ({ navigation }) => {
     const [formattedValue, setFormattedValue] = useState("");
     const phoneInput = useRef(null);
 
-
-
-
     const [phoneNumber, setPhoneNumber] = useState("");
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
