@@ -10,6 +10,7 @@ import Information from './src/screens/auth/Information';
 import Loading from './src/components/animation/Loading';
 import RepainerLoading from './src/components/animation/RepainerLoading';
 import Fixer from './src/screens/home/Fixer';
+import Adv from './src/components/animation/Adv';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,36 +19,9 @@ export default function App() {
     <NavigationContainer >
       <Stack.Navigator>
       <Stack.Screen
-          initialRouteName='allFix'
-          name="allFix"
-          component={Fixer}
-          options={{ headerShown: false }}
-        />
-        {/* <Stack.Screen
-          initialRouteName='loading'
-          name="loading"
-          component={Loading}
-          options={{ headerShown: false }}
-        /> */}
-        {/* <Stack.Screen
-          initialRouteName='loading'
-          name="loading"
-          component={RepainerLoading}
-          options={{ headerShown: false }}
-        /> */}
-        <Stack.Screen
-          name="sendOTP"
-          component={PhoneNumber}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="toHome"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="inputInfo"
-          component={Information}
+          initialRouteName='test'
+          name="test"
+          component={Adv}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
