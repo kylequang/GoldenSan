@@ -10,7 +10,7 @@ import Loading from './src/components/animation/Loading';
 import RepainerLoading from './src/components/animation/RepainerLoading';
 import Fixer from './src/screens/home/Fixer';
 import Adv from './src/components/animation/Adv';
-import index from './src/screens/client/Index';
+import Index from './src/screens/client/IndexClient';
 import DetailCategory from './src/screens/client/DetailCategory';
 import BottomTab from './src/navigation/client/BottomTab';
 import Manage from './src/screens/client/Manage';
