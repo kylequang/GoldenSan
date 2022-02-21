@@ -1,134 +1,74 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/core'
 import { SafeAreaView } from 'react-native-safe-area-context';
-export default function Index() {
-  const navigation = useNavigation()
+import HeaderUser from '../../components/HeaderUser';
+const dataCategory=[
+  {
+      id:1,
+      name:'Thợ Sửa Điện',
+      image:require('../../../assets/image/category/thodien.png')
+  },
+  {
+      id:2,
+      name:'Thợ Sửa Nước',
+      image:require('../../../assets/image/category/thonuoc.png'),
+  },
+  {
+      id:3,
+      name:'Thợ Máy Lạnh',
+      image:require('../../../assets/image/category/thomaylanh.png'),
+  },
+  {
+      id:4,
+      name:'Thợ Máy Tính',
+      image:require('../../../assets/image/category/thomaytinh.png'),
+  },
+  {
+      id:5,
+      name:'Thợ Sửa Khóa',
+      image:require('../../../assets/image/category/thosuakhoa.png'),
+  },
+  {
+      id:6,
+      name:'Thợ Sửa Xây Dựng',
+      image:require('../../../assets/image/category/thoxaydung.png'),
+  },
+  {
+      id:7,
+      name:'Thợ Sửa Xe',
+      image:require('../../../assets/image/category/thotaxxi.png'),
+  },
+  {
+      id:8,
+      name:'Thợ Sửa WC',
+      image:require('../../../assets/image/category/thowc.png'),
+  },
+];
+export default function Index({ navigation }) {
+  const renderItem = ({ item }) => {
+    return (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('detailCategory', { name: item.name })}
+        >
+          <Image
+            style={styles.img}
+            source={item.image}
+          />
+          <Text style={styles.textCategory}>{item.name}</Text>
+        </TouchableOpacity>
+    );
+  };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.row}>
-        <View style={styles.viewIMG}>
-          <Image
-            style={{ height: 70, width: 70 }}
-            source={require('../../../assets/image/avatarDefault.png')}
+      <HeaderUser /> 
+          <FlatList
+            data={dataCategory}
+            numColumns={2}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
           />
-        </View>
-        <View style={styles.viewText}>
-          <View>
-            <Text style={{ fontSize: 20 }}>Xin chào Lê Quang Kỳ !</Text>
-          </View>
-        </View>
-      </View>
-      <ScrollView>
-        <View style={styles.category}>
-          <View style={styles.row}>
-            <View style={styles.column}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-              <Image
-                style={styles.img}
-                source={require('../../../assets/image/category/thodien.png')}
-              />
-              <Text style={styles.textCategory}>Thợ Sửa Điện</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.column}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-              <Image
-                style={styles.img}
-                source={require('../../../assets/image/category/thonuoc.png')}
-              />
-              <Text style={styles.textCategory}>Thợ Sửa Nước</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View style={styles.column}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-              <Image
-                style={styles.img}
-                source={require('../../../assets/image/category/thomaylanh.png')}
-              />
-              <Text style={styles.textCategory}>Thợ Máy Lạnh</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.column}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-              <Image
-                style={styles.img}
-                source={require('../../../assets/image/category/thomaytinh.png')}
-              />
-              <Text style={styles.textCategory}>Thợ Máy Tính</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View style={styles.column}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-                <Image
-                  style={styles.img}
-                  source={require('../../../assets/image/category/thosuakhoa.png')}
-                />
-                <Text style={styles.textCategory}>Thợ Sửa Khóa</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.column}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-                <Image
-                  style={styles.img}
-                  source={require('../../../assets/image/category/thoxaydung.png')}
-                />
-                <Text style={styles.textCategory}>Thợ Xây Dựng</Text>
-              </TouchableOpacity>
-            </View>
-
-          </View>
-          <View style={styles.row}>
-            <View style={styles.column}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-              <Image
-                style={styles.img}
-                source={require('../../../assets/image/category/thotaxxi.png')}
-              />
-              <Text style={styles.textCategory}>Thợ Sửa Xe</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.column}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('detailCategory')}
-              >
-                <Image
-                  style={styles.img}
-                  source={require('../../../assets/image/category/thowc.png')}
-                />
-                <Text style={styles.textCategory}>Thợ Sửa WC</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-
     </SafeAreaView>
   )
 }
@@ -145,29 +85,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 5
   },
-  column: {
-    width: '50%',
-    marginBottom: 5,
-    padding: 5
-  },
-  viewIMG: {
-    width: '30%',
-    alignItems: 'center'
-  },
-  viewText: {
-    width: '70%',
-    alignItems: 'center'
-  },
   img: {
     height: 150,
     width: 130,
   },
-  category: {
-    flex: 1,
-    marginTop: 20,
-  },
   button: {
-    alignItems: 'center'
+    alignItems: 'center',
+    width:'50%',
+    marginBottom: 5,
+    padding: 5
   },
   textCategory: {
     fontSize: 15,
