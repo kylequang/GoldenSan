@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Index from '../../screens/client/Index';
+import Index from '../../screens/client/IndexClient';
 import Manage from '../../screens/client/Manage';
 
 const Tab = createBottomTabNavigator();
