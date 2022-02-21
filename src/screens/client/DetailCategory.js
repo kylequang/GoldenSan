@@ -33,7 +33,7 @@ export default function DetailCategory({ navigation }) {
             <View style={styles.content}>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate('detailCategory', { name: item.name })}
+                    onPress={() => navigation.navigate('listRepaimen', { name: item.name })}
                 >
                     <Image style={styles.img} source={item.image} />
                     <View>

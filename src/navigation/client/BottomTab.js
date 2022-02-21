@@ -6,7 +6,6 @@ import Manage from '../../screens/client/Manage';
 
 const Tab = createBottomTabNavigator();
 
-
 export default function BottomTab() {
     return (
         <Tab.Navigator
@@ -15,9 +14,9 @@ export default function BottomTab() {
                 headerShown: false,
                 tabBarIcon: ({ focused, color }) => {
                     let iconName;
-                    if (route.name === 'Trang Chủ')
+                    if (route.name === "Trang Chủ")
                         iconName = focused ? 'home-outline' : 'home-outline';
-                    else (route.name === 'Hồ Sơ')
+                    else if(route.name === 'Hồ Sơ')
                     iconName = focused ? 'account' : 'account';
                     return (
                         <MaterialCommunityIcons name={iconName} size={30} color={color} />
@@ -33,7 +32,7 @@ export default function BottomTab() {
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
             <Tab.Screen
-                name="MoreStack"
+                name="Hồ Sơ"
                 component={Manage}
                 options={{
                     title: 'Hồ Sơ',
