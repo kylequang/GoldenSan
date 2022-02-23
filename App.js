@@ -32,7 +32,7 @@ export default function App() {
         <Stack.Screen
           initialRouteName='test'
           name="test"
-          component={BottomTab}
+          component={PhoneNumber}
           options={{ headerShown: false }}
         />
         <Stack.Screen

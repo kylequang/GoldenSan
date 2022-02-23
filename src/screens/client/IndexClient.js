@@ -62,7 +62,6 @@ export default function Index({ navigation }) {
     };
     return (
         <SafeAreaView style={styles.container}>
-            <HeaderUser />
             <FlatList
                 data={dataCategory}
                 numColumns={2}

@@ -84,6 +84,8 @@ const styles = StyleSheet.create({
     },
     des:{
       fontSize:15,
-
     }
 })
+
+
+

@@ -15,9 +15,11 @@ export default function BottomTab() {
                 tabBarIcon: ({ focused, color }) => {
                     let iconName;
                     if (route.name === "Trang Chủ")
-                        iconName = focused ? 'home-outline' : 'home-outline';
+                        iconName = focused ? 'home' : 'home';
                     else if(route.name === 'Hồ Sơ')
                     iconName = focused ? 'account' : 'account';
+                    else if(route.name === 'Thông Báo')
+                    iconName = focused?'ring':'ring';
                     return (
                         <MaterialCommunityIcons name={iconName} size={30} color={color} />
                     );
@@ -31,6 +33,7 @@ export default function BottomTab() {
             })}
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
+            <Tab.Screen name="Thông Báo" component={Index} />
             <Tab.Screen
                 name="Hồ Sơ"
                 component={Manage}
