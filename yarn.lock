@@ -1875,6 +1875,11 @@
   "resolved" "https://registry.npmjs.org/@react-native-firebase/firestore/-/firestore-14.5.0.tgz"
   "version" "14.5.0"
 
+"@react-native-google-signin/google-signin@^7.1.0":
+  "integrity" "sha512-F8eaK4hATG/r+YSObKK15eFbJ2dZsf/fEL8+7T7iL4kDM4+oUJ43qUYv6fbvdsR29aRHaHcezVrfLVIY1Gswiw=="
+  "resolved" "https://registry.npmjs.org/@react-native-google-signin/google-signin/-/google-signin-7.1.0.tgz"
+  "version" "7.1.0"
+
 "@react-native/assets@1.0.0":
   "integrity" "sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ=="
   "resolved" "https://registry.npmjs.org/@react-native/assets/-/assets-1.0.0.tgz"
@@ -3166,6 +3171,13 @@
   "integrity" "sha512-VM6OOecjt0aPu5/eCdGGJfNjvAZIemaQym0JF/+SA5IlLiPpEfbVCDTO/5yiS8Zb5fKpeABx+GCRmtfnFqvRRw=="
   "resolved" "https://registry.npmjs.org/expo-error-recovery/-/expo-error-recovery-3.0.5.tgz"
   "version" "3.0.5"
+
+"expo-facebook@~12.1.0":
+  "integrity" "sha512-YKsuLkru3fLaVl28sIF7bbJeq1QAB/eVdxBy+W4UzkCm/l6K9/7J+9bhtT7BOJOBSK77puuuhfLPicPxTXthtQ=="
+  "resolved" "https://registry.npmjs.org/expo-facebook/-/expo-facebook-12.1.1.tgz"
+  "version" "12.1.1"
+  dependencies:
+    "@expo/config-plugins" "^4.0.2"
 
 "expo-file-system@~13.1.3":
   "integrity" "sha512-/C2FKCzrdWuEt4m8Pzl9J4MhKgfU0denVLbqoKjidv8DnsLQrscFNlLhXuiooqWwsxB2OWAtGEVnPGJBWVuNEQ=="
@@ -5449,6 +5461,16 @@
     "prop-types" "15.7.2"
     "react-async-hook" "3.6.1"
 
+"react-native-fbsdk-next@^7.2.0":
+  "integrity" "sha512-8RTS1060sGfQv6m9fFOC/tPBvIqEi0QPR9SKQQodqPXUpzDFqc6xIdJjAbt8m6waDRunvDJuFOvV9gw1YfvU4g=="
+  "resolved" "https://registry.npmjs.org/react-native-fbsdk-next/-/react-native-fbsdk-next-7.2.0.tgz"
+  "version" "7.2.0"
+
+"react-native-google-signin@^2.1.1":
+  "integrity" "sha512-6l3fiLdX/bfhh0BoxGq+jGkagFsO+mrE/eRV4+3/0k8+FDxO90vdPpQdDiwlM5vWXRxWthTzMM09/jHw+4cvNw=="
+  "resolved" "https://registry.npmjs.org/react-native-google-signin/-/react-native-google-signin-2.1.1.tgz"
+  "version" "2.1.1"
+
 "react-native-iphone-x-helper@^1.3.1":
   "integrity" "sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg=="
   "resolved" "https://registry.npmjs.org/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz"
@@ -5538,7 +5560,7 @@
     "normalize-css-color" "^1.0.2"
     "prop-types" "^15.6.0"
 
-"react-native@*", "react-native@^0.64.3", "react-native@>=0.42.0", "react-native@>=0.46", "react-native@>=0.64.0-rc.0 || 0.0.0-*":
+"react-native@*", "react-native@^0.64.3", "react-native@>=0.40", "react-native@>=0.42.0", "react-native@>=0.46", "react-native@>=0.63.3", "react-native@>=0.64.0-rc.0 || 0.0.0-*":
   "integrity" "sha512-2OEU74U0Ek1/WeBzPbg6XDsCfjF/9fhrNX/5TFgEiBKd5mNc9LOZ/OlMmkb7iues/ZZ/oc51SbEfLRQdcW0fVw=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.64.3.tgz"
   "version" "0.64.3"
@@ -5586,7 +5608,7 @@
   "resolved" "https://registry.npmjs.org/react-timer-mixin/-/react-timer-mixin-0.13.4.tgz"
   "version" "0.13.4"
 
-"react@*", "react@^16.13.1", "react@^16.14.0", "react@^16.3.0", "react@^16.8.0 || ^17.0.0", "react@^17.0.0", "react@>=16.3.0", "react@>=16.5.1", "react@>=16.8", "react@>=16.8.0", "react@>=17.0.1", "react@16.x.x", "react@17.0.1":
+"react@*", "react@^16.13.1", "react@^16.14.0", "react@^16.3.0", "react@^16.8.0 || ^17.0.0", "react@^17.0.0", "react@>=15.4.0 || ^16.0.0-alpha", "react@>=16.3.0", "react@>=16.5.1", "react@>=16.8", "react@>=16.8.0", "react@>=17.0.1", "react@16.x.x", "react@17.0.1":
   "integrity" "sha512-lG9c9UuMHdcAexXtigOZLX8exLWkW0Ku29qPRU8uhF2R9BN96dLCt0psvzPLlHc5OWkgymP3qwTRgbnw5BKx3w=="
   "resolved" "https://registry.npmjs.org/react/-/react-17.0.1.tgz"
   "version" "17.0.1"

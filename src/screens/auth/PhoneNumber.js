@@ -13,6 +13,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { RadioButton } from 'react-native-paper';
 import Loading from '../../components/animation/Loading';
 import RepainerLoading from "../../components/animation/RepainerLoading";
+
+import * as Facebook from 'expo-facebook';
+import { FacebookAuthProvider } from "firebase/auth";
+import { AccessToken, LoginManager } from "react-native-fbsdk-next";
+
+import { auth, firebase } from '../../database/firebase';
+
 const PhoneNumber = ({ navigation }) => {
 
     const [value, setValue] = useState("");
@@ -27,6 +34,8 @@ const PhoneNumber = ({ navigation }) => {
     const [result, setResult] = useState('');
     const [checked, setChecked] = useState('house');
 
+
+    const [user_Info, setUser_Info] = useState({})
 
 
 
@@ -45,8 +54,40 @@ const PhoneNumber = ({ navigation }) => {
             setTimeout(() => {
                 setShowLoading(false)
             }, 5000);
-        },
-    )
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+                if (user) {
+                    navigation.replace('loginfb')
+                }
+            })
+            return unsubscribe
+        }
+    );
+
+    async function logIn() {
+        try {
+            await Facebook.initializeAsync({
+                appId: '470392018091052',
+            });
+            const { type, token } =
+                await Facebook.logInWithReadPermissionsAsync({
+                    permissions: ['public_profile'],
+                });
+
+            if (type === 'success') {
+                //Get the user's name using Facebook's Graph API
+                const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture`);
+                console.log('Đăng nhập thành công!', `Xin chào ${(await response.json()).name}!`);
+                //Create a Firebase credential with the AccessToken
+                const facebookCredential = FacebookAuthProvider.credential(token);
+                //Sign -in the user with the credential
+                auth.signInWithCredential(facebookCredential);
+            } else {
+                alert('Đăng nhập thất bại')
+            }
+        } catch ({ message }) {
+            alert(`Facebook Login Error: ${message}`);
+        }
+    }
 
     if (showLoading) {
         return (
@@ -90,13 +131,9 @@ const PhoneNumber = ({ navigation }) => {
                         <View style={styles.row}>
                             <TouchableOpacity
                                 style={styles.buttonSocial}
+                                onPress={logIn}
                             >
-                                <Text style={styles.buttonText}>FaceBook</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.buttonSocial}
-                            >
-                                <Text style={styles.buttonText}>Google</Text>
+                                <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
@@ -132,7 +169,8 @@ const PhoneNumber = ({ navigation }) => {
                 </View>
             }
             {
-                step === 'VERIFY_OTP_SUCCESS' && <View style={styles.container}>
+                step === 'VERIFY_OTP_SUCCESS' &&
+                <View style={styles.container}>
                     <SafeAreaView style={styles.wrapper_Role}>
                         <Image
                             style={{ width: 200, height: 200 }}
@@ -171,11 +209,10 @@ const PhoneNumber = ({ navigation }) => {
                         >
                             <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
                         </TouchableOpacity>
+                        <Text>{user_Info.name}</Text>
                     </SafeAreaView>
                 </View>
-
             }
-
         </>
     );
 };
@@ -210,9 +247,9 @@ const styles = StyleSheet.create({
         marginTop: 15
     },
     button0: {
-        marginTop: 20,
-        height: 50,
-        width: 300,
+        marginTop: 30,
+        height: 40,
+        width: '38%',
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "gray",
@@ -227,9 +264,9 @@ const styles = StyleSheet.create({
         borderRadius: 20
     },
     button: {
-        marginTop: 20,
-        height: 50,
-        width: 300,
+        marginTop: 30,
+        height: 40,
+        width: '45%',
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#ff6600",
@@ -244,18 +281,18 @@ const styles = StyleSheet.create({
         borderRadius: 20
     },
     buttonSocial: {
-        marginTop: 30,
+        marginTop: 70,
         height: 40,
-        width: '30%',
+        width: '70%',
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#ff6600",
+        backgroundColor: "#3385ff",
         shadowColor: "rgba(0,0,0,0.4)",
         shadowOffset: {
             width: 1,
             height: 5,
         },
-        borderRadius: 20
+        borderRadius: 15
     },
     buttonText: {
         color: "white",

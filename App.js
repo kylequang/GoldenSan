@@ -18,6 +18,7 @@ import HeaderUser from './src/components/HeaderUser';
 import ListRepaimen from './src/screens/client/ListRepaimen';
 import DetailRepaimen from './src/screens/client/DetailRepaimen';
 import { useEffect, useState } from 'react';
+import LoginFB from './src/screens/auth/LoginFB';
 const Stack = createNativeStackNavigator();
 
 function truncate(str, n) {
@@ -25,7 +26,7 @@ function truncate(str, n) {
 }
 
 export default function App() {
-  const [time,setTime]=useState(true);
+  const [time, setTime] = useState(true);
   return (
     <NavigationContainer >
       <Stack.Navigator>
@@ -39,10 +40,18 @@ export default function App() {
           name="detailCategory"
           component={DetailCategory}
           options={({ route }) => ({
-            title:route.params.name,
+            title: route.params.name,
             headerTitleAlign: 'center',
           })
           }
+        />
+        <Stack.Screen
+          name="loginfb"
+          component={LoginFB}
+        />
+         <Stack.Screen
+          name="inputInfo"
+          component={Information}
         />
         <Stack.Screen
           name="listRepaimen"
