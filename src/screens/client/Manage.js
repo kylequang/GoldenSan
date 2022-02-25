@@ -7,13 +7,14 @@ import {
     ScrollView,
     Switch,
 } from "react-native";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderUser from "../../components/HeaderUser";
+import { auth } from '../../database/firebase';
 
-export default function Manage() {
+export default function Manage({ navigation }) {
     return (
         <SafeAreaView>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -49,7 +50,13 @@ export default function Manage() {
                     </View>
                 </View>
                 <View style={styles.footer}>
-                    <TouchableOpacity style={styles.BtnItem}>
+                    <TouchableOpacity style={styles.BtnItem}
+                        onPress={
+                            () => {
+                                auth.signOut().then(() => { console.log("Sign out") })
+                                AsyncStorage.clear().then(() => console.log('Cleared'))
+                                navigation.navigate('test')
+                            }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>
                             <Ionicons name="log-out-outline" size={19} color={"black"} />
@@ -69,7 +76,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 10,
-        marginBottom:15
+        marginBottom: 15
     },
     contentRow: {
         flexDirection: 'row',

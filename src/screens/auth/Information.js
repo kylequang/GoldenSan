@@ -12,10 +12,10 @@ import { RadioButton } from 'react-native-paper';
 import { Formik } from 'formik'
 import * as yup from 'yup'
 
-export default function Information() {
+export default function Information({navigation}) {
 
   const [checked, setChecked] = useState('nam');
-
+  const [checkInput, setCheckInput] = useState(true);
   const loginValidationSchema = yup.object().shape({
     fullName: yup
       .string()
@@ -24,19 +24,20 @@ export default function Information() {
     email: yup
       .string()
       .email("Vui lòng nhập email")
-      .required('Email là bắt buộc'),
+      .required('Yêu cầu nhập email'),
     password: yup
       .string()
       .min(8, ({ min }) => `Password must be at least ${min} characters`)
-      .required('Password is required'),
+      .required('Yêu cầu nhập mật khẩu'),
   })
+
   return (
     <View style={styles.loginContainer}>
       <Text>Thông tin cá nhân</Text>
       <Formik
         validationSchema={loginValidationSchema}
         initialValues={{ email: '', password: '' }}
-        onSubmit={values => console.log(values)}
+        onSubmit={navigation.navigate('home')}
       >
         {({
           handleChange,
@@ -52,9 +53,8 @@ export default function Information() {
               placeholder="Họ và Tên"
               style={styles.textInput}
               onChangeText={handleChange('fullName')}
-              onBlur={handleBlur('fullName')}
+              // onBlur={handleBlur('fullName')}
               value={values.fullName}
-              keyboardType=""
             />
             {errors.fullName &&
               <Text style={{ fontSize: 10, color: 'red' }}>{errors.fullName}</Text>
@@ -114,19 +114,16 @@ export default function Information() {
                   onPress={() => setChecked('nu')}
                 />
               </View>
-
             </View>
-
             <Button
               onPress={handleSubmit}
               title="Tiếp Tục"
-              disabled={!isValid}
+              disabled={ !isValid }
             />
           </>
         )}
       </Formik>
     </View>
-
   )
 }
 const styles = StyleSheet.create({
@@ -148,5 +145,12 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 10,
+    paddingLeft: 10
   },
+  button1: {
+    backgroundColor: 'gray'
+  },
+  button2: {
+    backgroundColor: 'red'
+  }
 })

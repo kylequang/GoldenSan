@@ -25,6 +25,7 @@ function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
 }
 
+
 export default function App() {
   const [time, setTime] = useState(true);
   return (
@@ -34,6 +35,11 @@ export default function App() {
           initialRouteName='test'
           name="test"
           component={PhoneNumber}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="home"
+          component={BottomTab}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -49,9 +55,10 @@ export default function App() {
           name="loginfb"
           component={LoginFB}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="inputInfo"
           component={Information}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="listRepaimen"

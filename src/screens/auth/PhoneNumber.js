@@ -5,9 +5,10 @@ import {
     TouchableOpacity,
     Text,
     TextInput,
-    Image
+    Image,
 } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RadioButton } from 'react-native-paper';
@@ -16,12 +17,9 @@ import RepainerLoading from "../../components/animation/RepainerLoading";
 
 import * as Facebook from 'expo-facebook';
 import { FacebookAuthProvider } from "firebase/auth";
-import { AccessToken, LoginManager } from "react-native-fbsdk-next";
-
 import { auth, firebase } from '../../database/firebase';
 
 const PhoneNumber = ({ navigation }) => {
-
     const [value, setValue] = useState("");
     const [formattedValue, setFormattedValue] = useState("");
     const phoneInput = useRef(null);
@@ -34,11 +32,6 @@ const PhoneNumber = ({ navigation }) => {
     const [result, setResult] = useState('');
     const [checked, setChecked] = useState('house');
 
-
-    const [user_Info, setUser_Info] = useState({})
-
-
-
     const appVerifier = window.recaptchaVerifier;
     const sendOTP123 = () => {
         setStep('SEND_OTP');
@@ -49,6 +42,12 @@ const PhoneNumber = ({ navigation }) => {
     }
     const [showLoading, setShowLoading] = useState(true)
 
+    checkLogin = async () => {
+        const userToken = await AsyncStorage.getItem('login');
+        if(userToken!==null)
+        navigation.navigate(userToken ? 'home' : 'home');
+    };
+
     useEffect(
         () => {
             setTimeout(() => {
@@ -56,7 +55,7 @@ const PhoneNumber = ({ navigation }) => {
             }, 5000);
             const unsubscribe = auth.onAuthStateChanged((user) => {
                 if (user) {
-                    navigation.replace('loginfb')
+                    setStep('FB');
                 }
             })
             return unsubscribe
@@ -74,13 +73,14 @@ const PhoneNumber = ({ navigation }) => {
                 });
 
             if (type === 'success') {
-                //Get the user's name using Facebook's Graph API
-                const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture`);
-                console.log('Đăng nhập thành công!', `Xin chào ${(await response.json()).name}!`);
                 //Create a Firebase credential with the AccessToken
                 const facebookCredential = FacebookAuthProvider.credential(token);
                 //Sign -in the user with the credential
                 auth.signInWithCredential(facebookCredential);
+                setStep('FB');
+                setShowLoading(true);
+                AsyncStorage.setItem('login', 'success')
+
             } else {
                 alert('Đăng nhập thất bại')
             }
@@ -94,6 +94,7 @@ const PhoneNumber = ({ navigation }) => {
             <RepainerLoading />
         )
     }
+    checkLogin()
     return (
         <>
             {
@@ -128,14 +129,16 @@ const PhoneNumber = ({ navigation }) => {
                         >
                             <Text style={styles.buttonText}>Tiếp tục</Text>
                         </TouchableOpacity>
-                        <View style={styles.row}>
-                            <TouchableOpacity
-                                style={styles.buttonSocial}
-                                onPress={logIn}
-                            >
-                                <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
-                            </TouchableOpacity>
-                        </View>
+
+                        <Text style={{ marginTop: 30, fontSize: 20 }}>Hoặc</Text>
+
+                        <TouchableOpacity
+                            style={styles.buttonSocial}
+                            onPress={logIn}
+                        >
+                            <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
+                        </TouchableOpacity>
+
                     </SafeAreaView>
                 </View>
             }
@@ -154,7 +157,7 @@ const PhoneNumber = ({ navigation }) => {
                             placeholder="Nhập mã xác minh"
                             onChangeText={(otp) => {
                                 setOtp(otp)
-                                if (otp.length === 6)
+                                if (otp.length == 6)
                                     setVerifyButton(false)
                             }}
                         />
@@ -209,7 +212,6 @@ const PhoneNumber = ({ navigation }) => {
                         >
                             <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
                         </TouchableOpacity>
-                        <Text>{user_Info.name}</Text>
                     </SafeAreaView>
                 </View>
             }
@@ -248,8 +250,8 @@ const styles = StyleSheet.create({
     },
     button0: {
         marginTop: 30,
-        height: 40,
-        width: '38%',
+        height: 50,
+        width: '70%',
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "gray",
@@ -261,12 +263,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.34,
         shadowRadius: 6.27,
         elevation: 10,
-        borderRadius: 20
+        borderRadius: 15
     },
     button: {
         marginTop: 30,
         height: 40,
-        width: '45%',
+        width: '70%',
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#ff6600",
@@ -281,8 +283,8 @@ const styles = StyleSheet.create({
         borderRadius: 20
     },
     buttonSocial: {
-        marginTop: 70,
-        height: 40,
+        marginTop: 30,
+        height: 50,
         width: '70%',
         justifyContent: "center",
         alignItems: "center",

@@ -23,7 +23,5 @@ export default function LoginFB({ navigation }) {
                 console.log('User info for provider: ', userInfo);
             })}
         </View>
-
-
     )
 }
