@@ -21,6 +21,7 @@
     "@react-navigation/native-stack": "^6.5.0",
     "expo": "~44.0.0",
     "expo-facebook": "~12.1.0",
+    "expo-firebase-recaptcha": "~2.1.0",
     "expo-status-bar": "~1.2.0",
     "firebase": "^9.6.6",
     "formik": "^2.2.9",
@@ -30,12 +31,15 @@
     "react-native-animated-loader": "^0.0.9",
     "react-native-fbsdk-next": "^7.2.0",
     "react-native-google-signin": "^2.1.1",
+    "react-native-pager-view": "^5.4.11",
     "react-native-paper": "^4.11.2",
     "react-native-phone-number-input": "^2.1.0",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
     "react-native-tab-view": "^3.1.1",
+    "react-native-table-component": "^1.2.2",
     "react-native-web": "0.17.1",
+    "react-native-webview": "^11.17.2",
     "yup": "^0.32.11"
   },
   "devDependencies": {

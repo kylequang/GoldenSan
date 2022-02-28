@@ -19,6 +19,10 @@ import ListRepaimen from './src/screens/client/ListRepaimen';
 import DetailRepaimen from './src/screens/client/DetailRepaimen';
 import { useEffect, useState } from 'react';
 import LoginFB from './src/screens/auth/LoginFB';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Phone from './src/screens/auth/Phone';
+
 const Stack = createNativeStackNavigator();
 
 function truncate(str, n) {
@@ -27,16 +31,28 @@ function truncate(str, n) {
 
 
 export default function App() {
-  const [time, setTime] = useState(true);
+
   return (
     <NavigationContainer >
       <Stack.Navigator>
-        <Stack.Screen
+        {/* {
+          userToken = await AsyncStorage.getItem('login') ? <Stack.Screen
+            name="home"
+            component={BottomTab}
+            options={{ headerShown: false }}
+          /> : <Stack.Screen
+            initialRouteName='test'
+            name="test"
+            component={PhoneNumber}
+            options={{ headerShown: false }}
+          />
+        } */}
+        {/* <Stack.Screen
           initialRouteName='test'
           name="test"
           component={PhoneNumber}
           options={{ headerShown: false }}
-        />
+        /> */}
         <Stack.Screen
           name="home"
           component={BottomTab}
@@ -71,10 +87,11 @@ export default function App() {
         <Stack.Screen
           name="detailRepaimen"
           component={DetailRepaimen}
-          options={({ route }) => ({
-            title: truncate(route.params.name, 25),
-            headerTitleAlign: 'center',
-          })}
+          // options={({ route }) => ({
+          //   title: truncate(route.params.name, 25),
+          //   headerTitleAlign: 'center',
+          // })}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

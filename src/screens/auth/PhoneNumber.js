@@ -7,7 +7,8 @@ import {
     TextInput,
     Image,
 } from "react-native";
-import PhoneInput from "react-native-phone-number-input";
+import { Ionicons } from "@expo/vector-icons";
+import PhoneInput, { getCountryCode } from "react-native-phone-number-input";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,53 +17,97 @@ import Loading from '../../components/animation/Loading';
 import RepainerLoading from "../../components/animation/RepainerLoading";
 
 import * as Facebook from 'expo-facebook';
-import { FacebookAuthProvider } from "firebase/auth";
+import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth, firebase } from '../../database/firebase';
+import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+import { getApp } from 'firebase/app';
+
+// Firebase references
+const app = getApp();
+// Double-check that we can run the example
+if (!app?.options || Platform.OS === 'web') {
+    throw new Error('This example only works on Android or iOS, and requires a valid Firebase config.');
+}
+
 
 const PhoneNumber = ({ navigation }) => {
-    const [value, setValue] = useState("");
-    const [formattedValue, setFormattedValue] = useState("");
+
+    //
+    const [logInEd, setLogInEd] = useState(false);
     const phoneInput = useRef(null);
 
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [verifyButton, setVerifyButton] = useState(true)
+    const recaptchaVerifier = useRef(null);
 
-    const [otp, setOtp] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [message, showMessage] = useState();
+
+    const [verificationId, setVerificationId] = useState(null);
+    const [verificationCode, setVerificationCode] = useState('');
+    const attemptInvisibleVerification = false;
+
+
+
+
+
+
+
+    const [verifyButton, setVerifyButton] = useState(true)
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
-    const [result, setResult] = useState('');
+    // const [result, setResult] = useState('');
     const [checked, setChecked] = useState('house');
 
-    const appVerifier = window.recaptchaVerifier;
-    const sendOTP123 = () => {
+    const sendOTP = async () => {
+        try {
+            const phoneProvider = new PhoneAuthProvider(auth);
+            const verificationId = await phoneProvider.verifyPhoneNumber(
+                phoneNumber,
+                recaptchaVerifier.current
+            );
+            setVerificationId(verificationId);
+            showMessage({
+                text: 'Verification code has been sent to your phone.',
+            });
+        } catch (err) {
+            showMessage({ text: `Error: ${err.message}`, color: 'red' });
+        }
+
         setStep('SEND_OTP');
         setVerifyButton(true)
     }
+
     const verifyOTP = () => {
         setStep('VERIFY_OTP_SUCCESS');
     }
-    const [showLoading, setShowLoading] = useState(true)
-
-    checkLogin = async () => {
-        const userToken = await AsyncStorage.getItem('login');
-        if(userToken!==null)
-        navigation.navigate(userToken ? 'home' : 'home');
-    };
+    const [showLoading, setShowLoading] = useState(true);
 
     useEffect(
-        () => {
+        async () => {
+
             setTimeout(() => {
                 setShowLoading(false)
             }, 5000);
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-                if (user) {
-                    setStep('FB');
-                }
-            })
-            return unsubscribe
+
+            // const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            //     if (user.displayName = "Kỳ Lê Quang") {
+            //         AsyncStorage.setItem('login', 'success')
+            //         console.log(user);
+            //         console.log(user.displayName);
+            //         console.log(user.uid);
+            //     }
+            // })
+            // return unsubscribe
         }
     );
 
-    async function logIn() {
+    // const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    //     if (user.displayName = "Kỳ Lê Quang") {
+    //         AsyncStorage.setItem('login', 'success')
+    //         console.log(user);
+    //         console.log(user.displayName);
+    //         console.log(user.uid);
+    //     }
+    // })
+    async function logInFB() {
         try {
             await Facebook.initializeAsync({
                 appId: '470392018091052',
@@ -71,16 +116,12 @@ const PhoneNumber = ({ navigation }) => {
                 await Facebook.logInWithReadPermissionsAsync({
                     permissions: ['public_profile'],
                 });
-
             if (type === 'success') {
                 //Create a Firebase credential with the AccessToken
                 const facebookCredential = FacebookAuthProvider.credential(token);
                 //Sign -in the user with the credential
                 auth.signInWithCredential(facebookCredential);
-                setStep('FB');
-                setShowLoading(true);
-                AsyncStorage.setItem('login', 'success')
-
+                AsyncStorage.setItem('login', 'success');
             } else {
                 alert('Đăng nhập thất bại')
             }
@@ -88,20 +129,28 @@ const PhoneNumber = ({ navigation }) => {
             alert(`Facebook Login Error: ${message}`);
         }
     }
-
-    if (showLoading) {
-        return (
-            <RepainerLoading />
-        )
-    }
-    checkLogin()
+    // const checkLoginEd = async () => {
+    //     const userToken = await AsyncStorage.getItem('login');
+    //     return userToken;
+    // }
+    //Loading UI
+    if (showLoading) return <RepainerLoading />
+    // if (checkLoginEd !== null) { navigation.navigate('home') }
     return (
         <>
+
+            <FirebaseRecaptchaVerifierModal
+                ref={recaptchaVerifier}
+                firebaseConfig={app.options}
+                style={{justifyContent:'center'}}
+            />
             {
-                showLoading === false && step === 'INPUT_PHONE_NUMBER' && <View style={styles.container}>
+                showLoading === false
+                && step === 'INPUT_PHONE_NUMBER'
+                && <View style={styles.container}>
                     <SafeAreaView style={styles.wrapper}>
                         <Image
-                            style={{ width: 200, height: 200 }}
+                            style={{ width: 180, height: 150 }}
                             source={require('../../../assets/logo/logo.png')}
                         />
                         <View style={styles.welcome}>
@@ -109,36 +158,39 @@ const PhoneNumber = ({ navigation }) => {
                         </View>
                         <PhoneInput
                             ref={phoneInput}
-                            defaultValue={value}
+                            defaultValue={phoneNumber}
                             defaultCode="VN"
+                            placeholder="Số Điện Thoại"
                             layout="first"
                             onChangeText={(phone) => {
-                                setPhoneNumber(phone);
+                                setPhoneNumber('+'+phoneInput.current?.getCallingCode()+phone);
                                 if (9 <= phoneNumber.length <= 11)
                                     setVerifyButton(false)
-                            }}
-                            onChangeFormattedText={(text) => {
-                                setFormattedValue(text);
                             }}
                             countryPickerProps={{ withAlphaFilter: true }}
                         />
                         <TouchableOpacity
                             style={phoneNumber.length <= 8 ? styles.button0 : styles.button}
                             disabled={verifyButton}
-                            onPress={sendOTP123}
+                            onPress={sendOTP}
                         >
-                            <Text style={styles.buttonText}>Tiếp tục</Text>
+                            <Text style={styles.buttonText}>Gửi mã OTP</Text>
                         </TouchableOpacity>
-
                         <Text style={{ marginTop: 30, fontSize: 20 }}>Hoặc</Text>
-
                         <TouchableOpacity
-                            style={styles.buttonSocial}
-                            onPress={logIn}
+                            style={[styles.buttonSocial, { backgroundColor: '#3333ff' }]}
+                            onPress={logInFB}
                         >
+                            <Ionicons name="logo-facebook" size={19} color={"white"} />
                             <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
                         </TouchableOpacity>
-
+                        <TouchableOpacity
+                            style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
+                            onPress={logInFB}
+                        >
+                            <Ionicons name="logo-google" size={22} color={"white"} />
+                            <Text style={styles.buttonText}>Đăng nhập với Google</Text>
+                        </TouchableOpacity>
                     </SafeAreaView>
                 </View>
             }
@@ -156,15 +208,27 @@ const PhoneNumber = ({ navigation }) => {
                         <TextInput
                             placeholder="Nhập mã xác minh"
                             onChangeText={(otp) => {
-                                setOtp(otp)
-                                if (otp.length == 6)
+                                setVerificationCode(otp)
+                                if (verificationCode.length == 6)
                                     setVerifyButton(false)
                             }}
                         />
                         <TouchableOpacity
-                            style={otp.length == 6 ? styles.button : styles.button0}
+                            style={verificationCode.length == 6 ? styles.button : styles.button0}
                             disabled={verifyButton}
-                            onPress={verifyOTP}
+                            onPress={async () => {
+                                try {
+                                    const credential = PhoneAuthProvider.credential(
+                                        verificationId,
+                                        verificationCode
+                                    );
+                                    await signInWithCredential(auth, credential);
+                                    showMessage({ text: 'Phone authentication successful 👍' });
+                                } catch (err) {
+                                    showMessage({ text: `Error: ${err.message}`, color: 'red' });
+                                }
+                            }}
+
                         >
                             <Text style={styles.buttonText}>Xác Nhận</Text>
                         </TouchableOpacity>
@@ -215,6 +279,30 @@ const PhoneNumber = ({ navigation }) => {
                     </SafeAreaView>
                 </View>
             }
+            {message ? (
+                <TouchableOpacity
+                    style={[
+                        StyleSheet.absoluteFill,
+                        { backgroundColor: 0xffffffee, justifyContent: 'center' },
+                    ]}
+                    onPress={() => showMessage(undefined)}>
+                    <Text
+                        style={{
+                            color: message.color || 'blue',
+                            fontSize: 17,
+                            textAlign: 'center',
+                            margin: 20,
+                        }}>
+                        {message.text}
+                    </Text>
+                </TouchableOpacity>
+            ) : (
+                undefined
+            )}
+            {attemptInvisibleVerification &&
+            <View style={{justifyContent:'center',alignItems:'center'}}>
+            <FirebaseRecaptchaBanner />
+            </View> }
         </>
     );
 };
@@ -250,7 +338,7 @@ const styles = StyleSheet.create({
     },
     button0: {
         marginTop: 30,
-        height: 50,
+        height: 45,
         width: '70%',
         justifyContent: "center",
         alignItems: "center",
@@ -267,7 +355,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 30,
-        height: 40,
+        height: 45,
         width: '70%',
         justifyContent: "center",
         alignItems: "center",
@@ -284,11 +372,11 @@ const styles = StyleSheet.create({
     },
     buttonSocial: {
         marginTop: 30,
-        height: 50,
+        height: 45,
         width: '70%',
-        justifyContent: "center",
+        paddingLeft: 5,
         alignItems: "center",
-        backgroundColor: "#3385ff",
+        flexDirection: 'row',
         shadowColor: "rgba(0,0,0,0.4)",
         shadowOffset: {
             width: 1,
@@ -299,6 +387,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "white",
         fontSize: 20,
+        marginLeft: 7
     },
     welcome: {
         padding: 20

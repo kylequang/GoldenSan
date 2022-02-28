@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, LogBox, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderUser from '../../components/HeaderUser';
+import { getData } from '../../service/getData';
+import Loading from '../../components/animation/Loading';
 const dataCategory = [
     {
         id: 1,
@@ -46,6 +48,13 @@ const dataCategory = [
     },
 ];
 export default function Index({ navigation }) {
+
+    const [category, setCategory] = useState([]);
+
+    useEffect(async () => {
+        LogBox.ignoreLogs(['Setting a timer'])
+        setCategory(await getData('category'))
+    })
     const renderItem = ({ item }) => {
         return (
             <TouchableOpacity
