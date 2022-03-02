@@ -1,8 +1,9 @@
-import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Checkbox } from 'react-native-paper';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { FlatList } from 'react-native-web';
+
 
 
 
@@ -10,55 +11,75 @@ import { FlatList } from 'react-native-web';
 
 const listWork = [
     {
+        id: 1,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: true
     },
     {
+        id: 2,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: true
     }, {
+        id: 3,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 4,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 5,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 6,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 7,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 8,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 9,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 10,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: true
     }
 ]
 
 export default function BookOrder() {
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
-    const [fullTimeDate, setFullTimeDate] = useState('');
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
+
 
     const onChange = (event, selectedValue) => {
         setShow(Platform.OS === 'ios');
@@ -86,36 +107,42 @@ export default function BookOrder() {
             1}/${date.getFullYear()} ${time.getHours()}:${time.getMinutes()}`;
     };
 
+    
+
+    const [selectWork, setSelectWork] = useState(listWork)
 
 
 
+    const handleChange = (id) => {
+        let temp = selectWork.map((work) => {
+            if (id === work.id) {
+                return { ...work, isChecked: !work.isChecked };
+            }
+            return work;
+        });
+        setSelectWork(temp);
+        console.log(selectWork)
+
+    }
 
 
+    const renderListWork = ({ item }) => (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Checkbox
+                status={item.isChecked ? 'checked' : 'unchecked'}
+                onPress={() => {
+                    handleChange(item.id);
+                }}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            />
+            <Text>{item.service}</Text>
+            <Text style={{ marginLeft: 30 }}>{item.price}/Giờ</Text>
+            <Text style={{ marginLeft: 30 }}>{item.insurance}/Tháng</Text>
+        </View>
+    )
 
     return (
         <View style={styles.container}>
-
-
-
             <Text style={{ fontSize: 18, marginBottom: 10 }}>THÔNG TIN LIÊN HỆ</Text>
             <View style={styles.contact}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -144,13 +171,13 @@ export default function BookOrder() {
                     onChange={onChange}
                 />
             )}
-
-
             <View style={styles.listWork}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN CÔNG VIỆC</Text>
-                <FlatList 
-                    data={listWork}
-                />
+                <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN CÔNG VIỆC</Text>
+
+                <FlatList
+                    data={selectWork}
+                    renderItem={renderListWork}
+                    keyExtractor={item => item.id} />
             </View>
         </View>
     );
@@ -179,8 +206,7 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderWidth: 1
     },
-    listWork:{
-        marginTop:10,
-        backgroundColor:'red'
+    listWork: {
+        marginTop: 10,
     }
 })

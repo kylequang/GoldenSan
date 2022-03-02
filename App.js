@@ -36,7 +36,7 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator
-        // initialRouteName='bookOrder'
+        initialRouteName='bookOrder'
         >
         {/* {
           userToken = await AsyncStorage.getItem('login') ? <Stack.Screen
@@ -98,7 +98,6 @@ export default function App() {
         />
         <Stack.Screen
           name="bookOrder"
-          initialRouteName='bookOrder'
           component={BookOrder}
           options={({ route }) => ({
             // title: truncate(route.params.name, 25),

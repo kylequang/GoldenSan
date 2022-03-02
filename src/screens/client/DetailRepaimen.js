@@ -17,51 +17,71 @@ function IntroduceRepairmen() {
 
 const listWork = [
     {
+        id: 1,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     },
     {
+        id: 2,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 3,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 4,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 5,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 6,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 7,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 8,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 9,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }, {
+        id: 10,
         service: 'Thay Bóng Đèn',
         price: 150000,
-        insurance: 1
+        insurance: 1,
+        isChecked: false
     }
 ]
 function ServiceTable() {
     const renderListWork = ({ item }) => (
-        <DataTable.Row >
+        <DataTable.Row key={item.id}>
             <DataTable.Cell>{item.service}</DataTable.Cell>
             <DataTable.Cell numeric>{item.price}</DataTable.Cell>
             <DataTable.Cell numeric>{item.insurance}</DataTable.Cell>
