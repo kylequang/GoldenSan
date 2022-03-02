@@ -5,7 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 const Tab = createMaterialTopTabNavigator();
 
-const dataListRepaimen = [
+const dataListRepairmen = [
     {
         id: 1,
         age:45,
@@ -18,6 +18,7 @@ const dataListRepaimen = [
         active: true,
         image: require('../../../assets/image/avatar/avatar1.png'),
         distance: 3,
+        active:true,
         tag:[
             "Điều Hòa",
             "Tủ Lạnh",
@@ -39,6 +40,7 @@ const dataListRepaimen = [
         active: true,
         image: require('../../../assets/image/avatar/avatar1.png'),
         distance: 3,
+        active:true,
         tag:[
             "Điều Hòa",
             "Tủ Lạnh",
@@ -60,6 +62,7 @@ const dataListRepaimen = [
         active: true,
         image: require('../../../assets/image/avatar/avatar1.png'),
         distance: 3,
+        active:true,
         tag:[
             "Điều Hòa",
             "Tủ Lạnh",
@@ -81,6 +84,7 @@ const dataListRepaimen = [
         active: true,
         image: require('../../../assets/image/avatar/avatar1.png'),
         distance: 3,
+        active:true,
         tag:[
             "Điều Hòa",
             "Tủ Lạnh",
@@ -120,7 +124,7 @@ function NearAddress({ navigation }) {
     return (
         <View style={styles.container}>
             <FlatList
-                data={dataListRepaimen}
+                data={dataListRepairmen}
                 numColumns={1}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}

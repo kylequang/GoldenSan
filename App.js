@@ -22,6 +22,7 @@ import LoginFB from './src/screens/auth/LoginFB';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Phone from './src/screens/auth/Phone';
+import BookOrder from './src/screens/client/BookOrder';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +35,9 @@ export default function App() {
 
   return (
     <NavigationContainer >
-      <Stack.Navigator>
+      <Stack.Navigator
+        // initialRouteName='bookOrder'
+        >
         {/* {
           userToken = await AsyncStorage.getItem('login') ? <Stack.Screen
             name="home"
@@ -87,11 +90,21 @@ export default function App() {
         <Stack.Screen
           name="detailRepaimen"
           component={DetailRepaimen}
-          // options={({ route }) => ({
-          //   title: truncate(route.params.name, 25),
-          //   headerTitleAlign: 'center',
-          // })}
-          options={{ headerShown: false }}
+          options={({ route }) => ({
+            title: truncate(route.params.name, 25),
+            headerTitleAlign: 'center',
+          })}
+        // options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="bookOrder"
+          initialRouteName='bookOrder'
+          component={BookOrder}
+          options={({ route }) => ({
+            // title: truncate(route.params.name, 25),
+            title: 'sữa chữa',
+            headerTitleAlign: 'center',
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>
