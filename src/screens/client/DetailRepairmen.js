@@ -113,7 +113,7 @@ function ServiceTable() {
     )
 }
 
-export default function DetailRepaimen({ navigation, route }) {
+export default function DetailRepairmen({ navigation, route }) {
     const [repairman, setRepairman] = useState({});
     const [loading, setLoading] = useState(true);
 
@@ -122,7 +122,7 @@ export default function DetailRepaimen({ navigation, route }) {
         setTimeout(() => {
             setLoading(false)
         }, 1000)
-    })
+    },[])
 
     if (loading) return <Loading />
     return (
@@ -130,17 +130,16 @@ export default function DetailRepaimen({ navigation, route }) {
             <View style={styles.row}>
                 <View style={styles.header}>
                     <View style={styles.avatar}>
-
-                        <Image style={styles.img} source={repairman.image} />
-                        <View style={[styles.row, { position: 'absolute', bottom: 0, right: 30 }]}>
-                            <Text style={{ fontSize: 25 }}>{repairman.feedBack}</Text>
+                        <Image style={styles.img} source={{uri:repairman.avatarURL}} />
+                        <View style={[styles.row, { position: 'absolute', bottom: 0, left: 30 }]}>
+                            <Text style={{ fontSize: 25 }}>{repairman.totalScoreAVG}</Text>
                             <FontAwesome name="star" size={20} color={"#ffcc00"} />
                         </View>
                     </View>
                     <View style={styles.info}>
                         <Text style={styles.textInfo}>Độ tuổi: {repairman.age}</Text>
                         <Text style={styles.textInfo}>Giới tính:  {repairman.sex}</Text>
-                        <Text style={styles.textInfo}>Lượt đánh giá:  {repairman.countFeedBack}</Text>
+                        <Text style={styles.textInfo}>Lượt đánh giá:  {repairman.totalUserFeedBack}</Text>
                         <Text style={styles.textInfo}>Đã sửa chữa: 15</Text>
                     </View>
                 </View>

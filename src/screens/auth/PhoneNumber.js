@@ -96,7 +96,7 @@ const PhoneNumber = ({ navigation }) => {
             //     }
             // })
             // return unsubscribe
-        }
+        },[]
     );
 
     // const unsubscribe = auth.onAuthStateChanged(async (user) => {

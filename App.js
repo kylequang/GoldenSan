@@ -15,8 +15,8 @@ import DetailCategory from './src/screens/client/DetailCategory';
 import BottomTab from './src/navigation/client/BottomTab';
 import Manage from './src/screens/client/Manage';
 import HeaderUser from './src/components/HeaderUser';
-import ListRepaimen from './src/screens/client/ListRepaimen';
-import DetailRepaimen from './src/screens/client/DetailRepaimen';
+import ListRepairmen from './src/screens/client/ListRepairmen';
+import DetailRepairmen from './src/screens/client/DetailRepairmen';
 import { useEffect, useState } from 'react';
 import LoginFB from './src/screens/auth/LoginFB';
 
@@ -36,43 +36,17 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator
-        initialRouteName='bookOrder'
+        initialRouteName='home'
         >
-        {/* {
-          userToken = await AsyncStorage.getItem('login') ? <Stack.Screen
-            name="home"
-            component={BottomTab}
-            options={{ headerShown: false }}
-          /> : <Stack.Screen
-            initialRouteName='test'
-            name="test"
-            component={PhoneNumber}
-            options={{ headerShown: false }}
-          />
-        } */}
-        {/* <Stack.Screen
-          initialRouteName='test'
-          name="test"
+        <Stack.Screen
+          name="auth"
           component={PhoneNumber}
           options={{ headerShown: false }}
-        /> */}
+        />
         <Stack.Screen
           name="home"
           component={BottomTab}
           options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="detailCategory"
-          component={DetailCategory}
-          options={({ route }) => ({
-            title: route.params.name,
-            headerTitleAlign: 'center',
-          })
-          }
-        />
-        <Stack.Screen
-          name="loginfb"
-          component={LoginFB}
         />
         <Stack.Screen
           name="inputInfo"
@@ -80,28 +54,26 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="listRepaimen"
-          component={ListRepaimen}
+          name="listRepairmen"
+          component={ListRepairmen}
           options={({ route }) => ({
             title: truncate(route.params.name, 25),
             headerTitleAlign: 'center',
           })}
         />
-        <Stack.Screen
-          name="detailRepaimen"
-          component={DetailRepaimen}
+          <Stack.Screen
+          name="detailRepairmen"
+          component={DetailRepairmen}
           options={({ route }) => ({
             title: truncate(route.params.name, 25),
             headerTitleAlign: 'center',
           })}
-        // options={{ headerShown: false }}
         />
         <Stack.Screen
           name="bookOrder"
           component={BookOrder}
-          options={({ route }) => ({
-            // title: truncate(route.params.name, 25),
-            title: 'sữa chữa',
+          options={() => ({
+            title: 'Đặt Lịch Sữa Chữa',
             headerTitleAlign: 'center',
           })}
         />

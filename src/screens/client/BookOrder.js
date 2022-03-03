@@ -1,4 +1,4 @@
-import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { Checkbox } from 'react-native-paper';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,14 +15,14 @@ const listWork = [
         service: 'Thay Bóng Đèn',
         price: 150000,
         insurance: 1,
-        isChecked: true
+        isChecked: false
     },
     {
         id: 2,
         service: 'Thay Bóng Đèn',
         price: 150000,
         insurance: 1,
-        isChecked: true
+        isChecked: false
     }, {
         id: 3,
         service: 'Thay Bóng Đèn',
@@ -65,13 +65,14 @@ const listWork = [
         price: 150000,
         insurance: 1,
         isChecked: false
-    }, {
+    },
+    {
         id: 10,
         service: 'Thay Bóng Đèn',
         price: 150000,
         insurance: 1,
-        isChecked: true
-    }
+        isChecked: false
+    },
 ]
 
 export default function BookOrder() {
@@ -79,6 +80,7 @@ export default function BookOrder() {
     const [time, setTime] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
+
 
 
     const onChange = (event, selectedValue) => {
@@ -107,24 +109,36 @@ export default function BookOrder() {
             1}/${date.getFullYear()} ${time.getHours()}:${time.getMinutes()}`;
     };
 
-    
+
 
     const [selectWork, setSelectWork] = useState(listWork)
 
-
+    const [bookService, setBookService] = useState([]);
 
     const handleChange = (id) => {
         let temp = selectWork.map((work) => {
             if (id === work.id) {
+                if (work.isChecked == false) {
+                    setBookService([...bookService, work])
+                }
+                else {
+                    bookService.map((temp) => {
+                        if (temp.id === work.id) {
+                            setBookService((bookService) => bookService.filter(item => item.id !== work.id))
+                        }
+                    }
+                    )
+                }
                 return { ...work, isChecked: !work.isChecked };
             }
             return work;
         });
         setSelectWork(temp);
-        console.log(selectWork)
-
     }
 
+    const formatPrice = (price) => {
+        return price.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    }
 
     const renderListWork = ({ item }) => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -133,53 +147,87 @@ export default function BookOrder() {
                 onPress={() => {
                     handleChange(item.id);
                 }}
-
             />
             <Text>{item.service}</Text>
-            <Text style={{ marginLeft: 30 }}>{item.price}/Giờ</Text>
-            <Text style={{ marginLeft: 30 }}>{item.insurance}/Tháng</Text>
+            <Text style={{ marginLeft: 30 }}> {formatPrice(item.price)}</Text>
+            <Text style={{ marginLeft: 30 }}>{item.insurance} tuần</Text>
         </View>
     )
 
     return (
-        <View style={styles.container}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>THÔNG TIN LIÊN HỆ</Text>
-            <View style={styles.contact}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ marginBottom: 5 }}>Họ Tên: Lê Quang Kỳ</Text>
-                    <Text>Thay đổi</Text>
+        <>
+            <View style={styles.container}>
+                <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ</Text>
+                <View style={styles.contact}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={{ marginBottom: 5 }}>Họ Tên: Lê Quang Kỳ</Text>
+                        <Text>Thay đổi</Text>
+                    </View>
+                    <Text style={{ marginBottom: 5 }}>SDT: 0374448052</Text>
+                    <Text style={{ marginBottom: 5 }}>Địa Chỉ: 101B Lê Hữu Trác, Phước Mỹ, Sơn Trà</Text>
                 </View>
-                <Text style={{ marginBottom: 5 }}>SDT: 0374448052</Text>
-                <Text style={{ marginBottom: 5 }}>Địa Chỉ: 101B Lê Hữu Trác, Phước Mỹ, Sơn Trà</Text>
-            </View>
 
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 5 }}>
-                    CHỌN THỜI GIAN:</Text>
-                <TouchableOpacity onPress={showDatePicker} style={styles.button}>
-                    <Text style={{ fontSize: 18 }}>
-                        {formatDate(date, time)}
-                    </Text>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 5 }}>
+                        CHỌN THỜI GIAN:</Text>
+                    <TouchableOpacity onPress={showDatePicker} style={styles.button}>
+                        <Text style={{ fontSize: 18 }}>
+                            {formatDate(date, time)}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                {show && (
+                    <DateTimePicker
+                        value={date}
+                        minimumDate={Date.parse(new Date())}
+                        display='default'
+                        mode={mode}
+                        onChange={onChange}
+                    />
+                )}
+                <View style={styles.listWork}>
+                    <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN CÔNG VIỆC</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Dịch Vụ</Text>
+                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Giờ</Text>
+                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Bảo Hành</Text>
+                    </View>
+                    <FlatList
+                        data={selectWork}
+                        renderItem={renderListWork}
+                        keyExtractor={item => item.id} />
+                        {console.log(listWork)}
+                </View>
+            </View>
+            <View style={{
+                width: '80%',
+                height: 40,
+                marginLeft: '10%',
+                marginRight: '10%',
+                marginBottom: 7,
+            }}>
+                <TouchableOpacity style={{
+                    backgroundColor: '#ff8000',
+                    width: '100%',
+                    height: 40,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 10
+                }}
+                    disabled={bookService.length == 0}
+                    onPress={() => {
+                        console.log('hi')
+                    }}
+                >
+                    <Text style={{
+                        fontSize: 18,
+                        color: 'white', fontWeight: 'bold'
+                    }}>XÁC NHẬN VÀ TIẾP TỤC</Text>
+                    {console.log(bookService)}
                 </TouchableOpacity>
             </View>
-            {show && (
-                <DateTimePicker
-                    value={date}
-                    minimumDate={Date.parse(new Date())}
-                    display='default'
-                    mode={mode}
-                    onChange={onChange}
-                />
-            )}
-            <View style={styles.listWork}>
-                <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN CÔNG VIỆC</Text>
 
-                <FlatList
-                    data={selectWork}
-                    renderItem={renderListWork}
-                    keyExtractor={item => item.id} />
-            </View>
-        </View>
+        </>
     );
 }
 
@@ -187,7 +235,8 @@ export default function BookOrder() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20
+        paddingLeft: 20,
+        paddingRight: 20
     },
     contact: {
         padding: 15,
@@ -195,7 +244,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderWidth: 2,
         borderColor: '#33cc33',
-
     },
     button: {
         width: '40%',
@@ -208,5 +256,7 @@ const styles = StyleSheet.create({
     },
     listWork: {
         marginTop: 10,
+        marginBottom: 20,
+        height: 380
     }
 })
