@@ -2,12 +2,17 @@ import { Text, StyleSheet, Image, LogBox, TouchableOpacity, FlatList } from 'rea
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getData } from '../../service/getData';
-
+import RepairmenLoading from '../../components/animation/RepairmenLoading';
 
 export default function Index({ navigation }) {
     const [category, setCategory] = useState([]);
+    const [showLoading, setShowLoading] = useState(true);
+
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer']);
+        setTimeout(() => {
+            setShowLoading(false)
+        }, 4000);
         setCategory(await getData('category'));
         console.log('Category');
     }, [])
@@ -26,7 +31,7 @@ export default function Index({ navigation }) {
             </TouchableOpacity>
         );
     };
-
+    if (showLoading) return <RepairmenLoading />
     return (
         <SafeAreaView style={styles.container}>
             {

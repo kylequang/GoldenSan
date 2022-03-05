@@ -31,7 +31,7 @@ const listWork = [
         isChecked: false
     }, {
         id: 4,
-        service: 'Thay Bóng Đèn',
+        service: 'Thay Bóng Đèn',   
         price: 150000,
         insurance: 1,
         isChecked: false

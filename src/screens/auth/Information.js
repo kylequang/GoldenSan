@@ -1,133 +1,124 @@
-import React, { useState, useRef } from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
-  StatusBar,
-  TextInput,
-  Button,
-} from 'react-native';
+import React, { useState, useRef, useEffect } from "react";
 import { RadioButton } from 'react-native-paper';
+import { StyleSheet, Text, TextInput, Alert, Button, View } from 'react-native';
 import { Formik } from 'formik'
 import * as yup from 'yup'
 
-export default function Information({navigation}) {
+const Information = () => {
 
-  const [checked, setChecked] = useState('nam');
-  const [checkInput, setCheckInput] = useState(true);
-  const loginValidationSchema = yup.object().shape({
-    fullName: yup
-      .string()
-      .email("Nhập họ tên đầy đủ của bạn")
-      .required('Yêu cầu nhập họ và tên'),
-    email: yup
-      .string()
-      .email("Vui lòng nhập email")
-      .required('Yêu cầu nhập email'),
-    password: yup
-      .string()
-      .min(8, ({ min }) => `Password must be at least ${min} characters`)
-      .required('Yêu cầu nhập mật khẩu'),
-  })
-
+  const [checkSex, setCheckSex] = useState('nam');
   return (
     <View style={styles.loginContainer}>
-      <Text>Thông tin cá nhân</Text>
+      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
       <Formik
-        validationSchema={loginValidationSchema}
-        initialValues={{ email: '', password: '' }}
-        onSubmit={navigation.navigate('home')}
+        initialValues={{
+          name: '',
+          email: '',
+          Phone: '',
+          password: ''
+        }}
+        onSubmit={values => {
+          console.log(values.email)
+          Alert.alert(JSON.stringify(values))
+        }
+        }
+        validationSchema={yup.object().shape({
+          name: yup
+            .string()
+            .required('Trường này là bắt buộc.'),
+          email: yup
+            .string()
+            .email()
+            .required('Trường này là bắt buộc.'),
+          Phone: yup
+            .number()
+            .required('Trường này là bắt buộc'),
+          password: yup
+            .string()
+            .min(4, 'Mật khẩu không được dưới 4 kí tự.')
+            .max(11, 'Mật khẩu không được vượt quá 12 kí tự.')
+            .required('Trường này bắt buộc'),
+        })}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          isValid,
-        }) => (
+        {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
           <>
             <TextInput
-              name="fullName"
-              placeholder="Họ và Tên"
+              value={values.name}
               style={styles.textInput}
-              onChangeText={handleChange('fullName')}
-              // onBlur={handleBlur('fullName')}
-              value={values.fullName}
+              onBlur={() => setFieldTouched('name')}
+              onChangeText={handleChange('name')}
+              placeholder="Họ tên của bạn"
             />
-            {errors.fullName &&
-              <Text style={{ fontSize: 10, color: 'red' }}>{errors.fullName}</Text>
+            {touched.name && errors.name &&
+              <Text style={styles.errorsText}>{errors.name}</Text>
             }
-
             <TextInput
-              name="email"
-              placeholder="Địa chỉ Email"
-              style={styles.textInput}
-              onChangeText={handleChange('email')}
-              onBlur={handleBlur('email')}
               value={values.email}
-              keyboardType="email-address"
+              style={styles.textInput}
+              onBlur={() => setFieldTouched('email')}
+              onChangeText={handleChange('email')}
+              placeholder="Email của bạn"
             />
-            {errors.email &&
-              <Text style={{ fontSize: 10, color: 'red' }}>{errors.email}</Text>
+            {touched.email && errors.email &&
+              <Text style={styles.errorsText}>{errors.email}</Text>
             }
             <TextInput
-              name="password"
+              value={values.Phone}
+              style={styles.textInput}
+              placeholder="Số điện thoại"
+              onBlur={() => setFieldTouched('Phone')}
+              onChangeText={handleChange('Phone')}
+            />
+            {touched.Phone && errors.Phone &&
+              <Text style={styles.errorsText}>{errors.Phone}</Text>
+            }
+            <TextInput
+              value={values.password}
+              style={styles.textInput}
               placeholder="Mật khẩu"
-              style={styles.textInput}
+              onBlur={() => setFieldTouched('password')}
               onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              value={values.password}
-              secureTextEntry
+              secureTextEntry={true}
             />
-            {errors.password &&
-              <Text style={{ fontSize: 10, color: 'red' }}>{errors.password}</Text>
+            {touched.password && errors.password &&
+              <Text style={styles.errorsText}>{errors.password}</Text>
             }
-            <TextInput
-              name="password"
-              placeholder="Xác nhận mật khẩu"
-              style={styles.textInput}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              value={values.password}
-              secureTextEntry
-            />
-            {errors.password &&
-              <Text style={{ fontSize: 10, color: 'red' }}>{errors.password}</Text>
-            }
-
             <View style={{ flexDirection: 'row' }}>
-              <View>
+              <View style={{ flexDirection: "column",margin:10,alignItems:'center' }}>
                 <Text>Nam</Text>
                 <RadioButton
                   value="nam"
-                  status={checked === 'nam' ? 'checked' : 'unchecked'}
-                  onPress={() => setChecked('nam')}
+                  status={checkSex === 'nam' ? 'checked' : 'unchecked'}
+                  onPress={() => setCheckSex('nam')}
                 />
               </View>
-              <View>
+              <View style={{ flexDirection: "column",margin:10,alignItems:'center'}}>
                 <Text>Nữ</Text>
                 <RadioButton
                   value="nu"
-                  status={checked === 'nu' ? 'checked' : 'unchecked'}
-                  onPress={() => setChecked('nu')}
+                  status={checkSex === 'nu' ? 'checked' : 'unchecked'}
+                  onPress={() => setCheckSex('nu')}
                 />
               </View>
             </View>
             <Button
+              color="blue"
+              style={styles.btnButton}
+              title='Tiếp tục'
+              disabled={!isValid}
               onPress={handleSubmit}
-              title="Tiếp Tục"
-              disabled={ !isValid }
             />
           </>
         )}
       </Formik>
     </View>
-  )
-}
-const styles = StyleSheet.create({
 
+  );
+}
+
+export default Information;
+
+const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -147,10 +138,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingLeft: 10
   },
-  button1: {
-    backgroundColor: 'gray'
+  errorsText: {
+    fontSize: 15,
+    color: 'red'
   },
-  button2: {
-    backgroundColor: 'red'
-  }
-})
+
+});

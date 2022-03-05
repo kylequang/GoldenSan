@@ -7,7 +7,7 @@ import HomeScreen from './src/screens/home/HomeScreen';
 import PhoneNumber from './src/screens/auth/PhoneNumber';
 import Information from './src/screens/auth/Information';
 import Loading from './src/components/animation/Loading';
-import RepainerLoading from './src/components/animation/RepainerLoading';
+import RepainerLoading from './src/components/animation/RepairmenLoading';
 import Fixer from './src/screens/home/Fixer';
 import Adv from './src/components/animation/Adv';
 import Index from './src/screens/client/IndexClient';
@@ -36,16 +36,28 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator
-        initialRouteName='home'
-        >
+        initialRouteName='auth'
+      >
+         <Stack.Screen
+          name="testForm"
+          component={Information}
+          options={{ headerShown: false }}
+        />
+
+
         <Stack.Screen
           name="auth"
           component={PhoneNumber}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="home"
+          name="home_user"
           component={BottomTab}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="home_repairmen"
+          component={Information}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -61,7 +73,7 @@ export default function App() {
             headerTitleAlign: 'center',
           })}
         />
-          <Stack.Screen
+        <Stack.Screen
           name="detailRepairmen"
           component={DetailRepairmen}
           options={({ route }) => ({

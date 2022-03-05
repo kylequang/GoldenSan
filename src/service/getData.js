@@ -1,7 +1,4 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-
-import { collection, getDocs,query, where } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where } from 'firebase/firestore'
 import { db } from '../../src/database/firebase'
 
 export const getData = async (nameCollection) => {
@@ -22,5 +19,25 @@ export const getDetailRepairmen = async (role) => {
     data.push(doc.data())
   })
   return data;
+}
+
+export const phoneCheckAccountSurvive = async (phoneNumber) => {
+  const { docs } = await db
+    .collection('client')
+    .where('phoneNumber', '==', phoneNumber)
+    .get()
+  return docs.map((doc) => doc.data());
+       // db
+        //     .collection('client')
+        //     // Filter results
+        //     .where('role', '==','user')
+        //     .limit(1)
+        //     .get()
+        //     .then(querySnapshot => {
+        //         querySnapshot.forEach(documentSnapshot => {
+        //             console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+        //             console.log('hi')
+        //         });
+        //     });
 }
 

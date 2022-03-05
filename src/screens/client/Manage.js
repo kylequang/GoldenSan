@@ -55,7 +55,7 @@ export default function Manage({ navigation }) {
                             () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 AsyncStorage.clear().then(() => console.log('Cleared'))
-                                navigation.navigate('test')
+                                navigation.navigate('auth')
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>
