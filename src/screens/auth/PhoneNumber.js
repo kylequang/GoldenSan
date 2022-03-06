@@ -83,7 +83,6 @@ const PhoneNumber = ({ navigation }) => {
 
     const test = async () => {
         const data = await phoneCheckAccountSurvive(tempPhone);
-        console.log(data);
         if (data.length != 0) {
             navigation.navigate('home_user');
         } else {
@@ -102,15 +101,13 @@ const PhoneNumber = ({ navigation }) => {
             await signInWithCredential(auth, credential);
             showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
             //check phone survive in app's database
-            if (await phoneCheckAccountSurvive(tempPhone).length != 0) { // if true
+            const checkAccount = await phoneCheckAccountSurvive(tempPhone);
+            if (checkAccount.length != 0) { // if true
                 //check role of user ( client or repairmen)
                 navigation.navigate('home_user')
             } else {    //if false
-
                 setStep('VERIFY_SUCCESS');
                 //if it is not survive app's database then create and push it into database
-
-                console.log('ko tồn tại')
             }
         } catch (err) {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
@@ -193,8 +190,8 @@ const PhoneNumber = ({ navigation }) => {
                         <TouchableOpacity
                             style={phoneNumber.length <= 11 ? styles.button0 : styles.button}
                             disabled={verifyButton}
-                            // onPress={sendOTP}
-                            onPress={test}
+                            onPress={sendOTP}
+                        //onPress={test}
                         >
                             <Text style={styles.buttonText}>Gửi mã OTP</Text>
                         </TouchableOpacity>
@@ -291,10 +288,31 @@ const PhoneNumber = ({ navigation }) => {
                     </SafeAreaView>
                 </View>
             }
+
+
+
+
             {
                 step === 'Enter_Info' &&
                 <View style={styles.loginContainer}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
+
+
+
+                    <Text>Chọn ảnh đại diện!</Text>
+                    <Button title="Chọn Ảnh Từ Thư Viện" onPress={pickImage} />
+
+
+
+
+
+
+
+
+
+
+
+
                     <Formik
                         initialValues={{
                             name: '',
@@ -307,12 +325,14 @@ const PhoneNumber = ({ navigation }) => {
                                 .collection('client')
                                 .add({
                                     name: values.name,
-                                    email:values.email
+                                    email: values.email,
+                                    phoneNumber: tempPhone,
+                                    role: checked,
+                                    sex: checkSex,
                                 })
                                 .then(() => {
                                     console.log('User added!');
                                 });
-                            console.log(values.email)
                         }
                         }
                         validationSchema={yup.object().shape({

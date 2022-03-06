@@ -1,6 +1,8 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import 'firebase/compat/storage';
+import { getStorage} from "firebase/storage";
 const firebaseConfig = {
     apiKey: "AIzaSyB7DFDID-iY1J61YPG3sNmEzhWQ_9g6Hsw",
     authDomain: "graduationproject-b2c00.firebaseapp.com",
@@ -18,7 +20,7 @@ if (firebase.apps.length === 0) {
 }
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
+const storage= getStorage();
 const auth = firebase.auth();
 
-export { db, auth,firebase };
+export { db, auth,firebase,storage };

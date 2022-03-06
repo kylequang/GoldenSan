@@ -23,6 +23,9 @@ import LoginFB from './src/screens/auth/LoginFB';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Phone from './src/screens/auth/Phone';
 import BookOrder from './src/screens/client/BookOrder';
+import UploadImg from './src/screens/auth/UploadImg';
+import TakeCamera from './src/screens/auth/TakeCamera';
+import App1 from './xyz';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,11 +39,17 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator
-        initialRouteName='auth'
+        initialRouteName='upload'
       >
-         <Stack.Screen
-          name="testForm"
-          component={Information}
+        <Stack.Screen
+          name="camera"
+          component={TakeCamera}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="upload"
+          component={UploadImg}
           options={{ headerShown: false }}
         />
 
