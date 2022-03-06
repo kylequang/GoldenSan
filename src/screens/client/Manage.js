@@ -13,6 +13,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderUser from "../../components/HeaderUser";
 import { auth } from '../../database/firebase';
+import { NativeModules } from "react-native"
 
 export default function Manage({ navigation }) {
     return (
@@ -55,7 +56,8 @@ export default function Manage({ navigation }) {
                             () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 AsyncStorage.clear().then(() => console.log('Cleared'))
-                                navigation.navigate('auth')
+                              
+                                NativeModules.DevSettings.reload();
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>

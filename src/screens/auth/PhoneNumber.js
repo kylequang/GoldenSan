@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
     StyleSheet,
+    LogBox,
     View,
     TouchableOpacity,
     Text,
@@ -9,6 +10,7 @@ import {
     Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/core'
 import PhoneInput from "react-native-phone-number-input";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -19,10 +21,16 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import * as Facebook from 'expo-facebook';
 import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "firebase/auth";
-import { auth, firebase, db } from '../../database/firebase';
+import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { getApp } from 'firebase/app';
+import { doc, setDoc } from "firebase/firestore";
 import { phoneCheckAccountSurvive } from '../../../src/service/getData';
+import * as ImagePicker from 'expo-image-picker';
+import { getDownloadURL, ref, uploadBytesResumable, uploadBytes, } from 'firebase/storage';
+import { async } from "@firebase/util";
+
+
 // Firebase references
 const app = getApp();
 // Double-check that we can run the example
@@ -32,6 +40,7 @@ if (!app?.options || Platform.OS === 'web') {
 
 
 const PhoneNumber = ({ navigation }) => {
+
 
 
     const phoneInput = useRef(null);
@@ -49,20 +58,42 @@ const PhoneNumber = ({ navigation }) => {
     const attemptInvisibleVerification = false;
     const [verifyButton, setVerifyButton] = useState(true)
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
-    const [checked, setChecked] = useState('house');
+    const [checkRole, setCheckRole] = useState('house');
 
     const [showLoading, setShowLoading] = useState(true);
 
+    const [uid, setUid] = useState(null);
+    const [rememberLogin, setRememberLogin] = useState(false);
+
+
+
+    const nav = useNavigation()
     useEffect(
-        async () => {
+        () => {
+           
             setTimeout(() => {
                 setShowLoading(false)
             }, 4000);
+            // checkRememberLogin();
+
+            LogBox.ignoreLogs(['Setting a timer']);
         }, []);
 
+    async function checkRememberLogin() {
+        try {
+            let login = await AsyncStorage.getItem("rememberLogin");
+           if(login!==null){
+               navigation.navigate('home_user')
+           }
+        } catch (error) {
+            console.log("Something went wrong", error);
+        }
+    }
 
     //send OTP code to phoneNumber
     const sendOTP = async () => {
+        await AsyncStorage.setItem('rememberLogin', 'hi123')
+        navigation.navigate('home_user')
         try {
             const phoneProvider = new PhoneAuthProvider(auth);
             const verificationId = await phoneProvider.verifyPhoneNumber(
@@ -80,17 +111,6 @@ const PhoneNumber = ({ navigation }) => {
         }
     }
 
-
-    const test = async () => {
-        const data = await phoneCheckAccountSurvive(tempPhone);
-        if (data.length != 0) {
-            navigation.navigate('home_user');
-        } else {
-            setStep('VERIFY_SUCCESS')
-        }
-    }
-
-
     //verify otp code
     const verifyOTP = async () => {
         try {
@@ -98,13 +118,23 @@ const PhoneNumber = ({ navigation }) => {
                 verificationId,
                 verificationCode
             );
-            await signInWithCredential(auth, credential);
+            const client = await signInWithCredential(auth, credential);
+            console.log(client.user.uid);
+            console.log(client.user);
+            setUid(client.user.uid);
             showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
             //check phone survive in app's database
             const checkAccount = await phoneCheckAccountSurvive(tempPhone);
             if (checkAccount.length != 0) { // if true
                 //check role of user ( client or repairmen)
-                navigation.navigate('home_user')
+                try {
+                    await AsyncStorage.setItem('rememberLogin', JSON.stringify(uid))
+                    navigation.navigate('home_user')
+                } catch (e) {
+                    // save error
+                }
+
+
             } else {    //if false
                 setStep('VERIFY_SUCCESS');
                 //if it is not survive app's database then create and push it into database
@@ -149,11 +179,49 @@ const PhoneNumber = ({ navigation }) => {
 
 
 
+
+
+
+    const [image, setImage] = useState(null);
+    const [photoURL, setPhotoURL] = useState(null);
+
+    let openImagePickerAsync = async () => {
+        let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync(); // permission
+        if (permissionResult.granted === false) {
+            alert("Quyền truy cập bị từ chối!");
+            return;
+        }
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        if (!result.cancelled) {
+            setImage(result.uri)
+
+        }
+        const filename = image.substring(image.lastIndexOf('/') + 1);
+        const avatarRef = ref(storage, 'client/' + filename);
+        const img = await fetch(image);
+        const bytes = await img.blob();
+        await uploadBytes(avatarRef, bytes).then(async (e) => {
+            const url = await getDownloadURL(avatarRef)
+            setPhotoURL(url)
+            console.log('link avatar', photoURL)
+        });
+    }
     //Process enter information of user
     const [checkSex, setCheckSex] = useState('nam');
 
+    // checkRememberLogin();
+
     //Loading UI
     if (showLoading) return <RepairmenLoading />
+    if(!showLoading){
+        checkRememberLogin();
+    }
+
     return (
         <>
             <FirebaseRecaptchaVerifierModal
@@ -262,20 +330,20 @@ const PhoneNumber = ({ navigation }) => {
                                 <Text>Hộ Gia Đình</Text>
                                 <RadioButton
                                     value="house"
-                                    status={checked === 'house' ? 'checked' : 'unchecked'}
-                                    onPress={() => setChecked('house')}
+                                    status={checkRole === 'house' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('house')}
                                 />
                             </View>
                             <View style={styles.column}>
                                 <Image
                                     style={styles.imageRole}
-                                    source={require('../../../assets/image/repainner.png')}
+                                    source={require('../../../assets/image/repairmen.png')}
                                 />
                                 <Text>Thợ Sữa Chữa</Text>
                                 <RadioButton
-                                    value="repainer"
-                                    status={checked === 'repainer' ? 'checked' : 'unchecked'}
-                                    onPress={() => setChecked('repainer')}
+                                    value="repairmen"
+                                    status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('repairmen')}
                                 />
                             </View>
                         </View>
@@ -288,31 +356,14 @@ const PhoneNumber = ({ navigation }) => {
                     </SafeAreaView>
                 </View>
             }
-
-
-
-
             {
                 step === 'Enter_Info' &&
-                <View style={styles.loginContainer}>
+                <SafeAreaView style={styles.loginContainer}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
-
-
-
-                    <Text>Chọn ảnh đại diện!</Text>
-                    <Button title="Chọn Ảnh Từ Thư Viện" onPress={pickImage} />
-
-
-
-
-
-
-
-
-
-
-
-
+                    <View style={{ alignItems: 'center' }}>
+                        <Button title="Chọn Ảnh Đại Diện" onPress={openImagePickerAsync} />
+                        {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
+                    </View>
                     <Formik
                         initialValues={{
                             name: '',
@@ -320,19 +371,34 @@ const PhoneNumber = ({ navigation }) => {
                             Phone: '',
                             password: ''
                         }}
-                        onSubmit={values => {
-                            db
-                                .collection('client')
-                                .add({
-                                    name: values.name,
-                                    email: values.email,
-                                    phoneNumber: tempPhone,
-                                    role: checked,
-                                    sex: checkSex,
-                                })
-                                .then(() => {
-                                    console.log('User added!');
-                                });
+                        onSubmit={async (values) => {
+                            // db
+                            //     .collection('client')
+                            //     .add({
+                            //         name: values.name,
+                            //         email: values.email,
+                            //         phoneNumber: phoneNumber,
+                            //         role: checked,
+                            //         sex: checkSex,
+                            //         photoURL: photoURL
+                            //     })
+                            //     .then(() => {
+                            //         console.log('User added!');
+                            //     });
+                            await setDoc(doc(db, "client", uid), {
+                                name: values.name,
+                                email: values.email,
+                                phoneNumber: tempPhone,
+                                role: checkRole,
+                                sex: checkSex,
+                                photoURL: photoURL,
+                                uid: uid
+                            });
+                            if (checkRole === 'house') {
+                                navigation.navigate('home_user')
+                            }
+
+                            console.log('add client')
                         }
                         }
                         validationSchema={yup.object().shape({
@@ -424,7 +490,7 @@ const PhoneNumber = ({ navigation }) => {
                             </>
                         )}
                     </Formik>
-                </View>
+                </SafeAreaView>
             }
             {message ? (
                 <TouchableOpacity
@@ -471,13 +537,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     column: {
-        margin: 15,
+        margin: 5,
         width: '40%',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10
     },
     imageRole: {
-        height: 200,
-        width: 180,
+        height: 150,
+        width: 120,
+        padding: 20,
         borderRadius: 20,
         backgroundColor: '#ff6600',
         marginBottom: 15,

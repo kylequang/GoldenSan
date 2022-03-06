@@ -7,7 +7,7 @@ import HomeScreen from './src/screens/home/HomeScreen';
 import PhoneNumber from './src/screens/auth/PhoneNumber';
 import Information from './src/screens/auth/Information';
 import Loading from './src/components/animation/Loading';
-import RepainerLoading from './src/components/animation/RepairmenLoading';
+import RepairmenLoading from './src/components/animation/RepairmenLoading';
 import Fixer from './src/screens/home/Fixer';
 import Adv from './src/components/animation/Adv';
 import Index from './src/screens/client/IndexClient';
@@ -25,22 +25,39 @@ import Phone from './src/screens/auth/Phone';
 import BookOrder from './src/screens/client/BookOrder';
 import UploadImg from './src/screens/auth/UploadImg';
 import TakeCamera from './src/screens/auth/TakeCamera';
-import App1 from './xyz';
 
-const Stack = createNativeStackNavigator();
 
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
 }
+import { LogBox } from 'react-native';
+import AuthScreen from './src/navigation/AuthScreen';
 
+LogBox.ignoreAllLogs();
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
+  const getTokenUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      setToken(token);
+      setLoading(false);
+    } catch {
+
+    }
+
+  }
+  useEffect(() => {
+    getTokenUser();
+  }, []);
   return (
     <NavigationContainer >
-      <Stack.Navigator
-        initialRouteName='upload'
-      >
+      {
+        loading ? (<RepairmenLoading />) : token === null ? (<AuthScreen />) :(<BottomTab/>)
+      }
+      {/* <Stack.Navigator >
         <Stack.Screen
           name="camera"
           component={TakeCamera}
@@ -52,8 +69,6 @@ export default function App() {
           component={UploadImg}
           options={{ headerShown: false }}
         />
-
-
         <Stack.Screen
           name="auth"
           component={PhoneNumber}
@@ -98,7 +113,7 @@ export default function App() {
             headerTitleAlign: 'center',
           })}
         />
-      </Stack.Navigator>
+      </Stack.Navigator> */}
     </NavigationContainer>
   );
 }
