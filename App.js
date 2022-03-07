@@ -25,7 +25,7 @@ import Phone from './src/screens/auth/Phone';
 import BookOrder from './src/screens/client/BookOrder';
 import UploadImg from './src/screens/auth/UploadImg';
 import TakeCamera from './src/screens/auth/TakeCamera';
-
+import RoleStack from './src/navigation/RoleStack';
 
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
@@ -37,25 +37,23 @@ LogBox.ignoreAllLogs();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [rememberLogin, setRememberLogin] = useState(null);
 
-  const getTokenUser = async () => {
+  const getRememberLogin = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      setToken(token);
+      const rememberLogin = await AsyncStorage.getItem('rememberLogin');
+      setRememberLogin(rememberLogin);
       setLoading(false);
     } catch {
-
     }
-
   }
   useEffect(() => {
-    getTokenUser();
+    getRememberLogin();
   }, []);
   return (
     <NavigationContainer >
       {
-        loading ? (<RepairmenLoading />) : token === null ? (<AuthScreen />) :(<BottomTab/>)
+        loading ? (<RepairmenLoading />) : rememberLogin === null ? (<AuthScreen />) : (<RoleStack />)
       }
       {/* <Stack.Navigator >
         <Stack.Screen

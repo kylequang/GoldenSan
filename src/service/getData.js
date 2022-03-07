@@ -1,5 +1,6 @@
-import { collection, getDocs, getDoc, query, where } from 'firebase/firestore'
-import { db } from '../../src/database/firebase'
+import { async } from '@firebase/util'
+import { collection, getDocs, getDoc, query, where,doc } from 'firebase/firestore'
+import { db, auth } from '../../src/database/firebase'
 
 export const getData = async (nameCollection) => {
   const data = []
@@ -27,17 +28,22 @@ export const phoneCheckAccountSurvive = async (phoneNumber) => {
     .where('phoneNumber', '==', phoneNumber)
     .get()
   return docs.map((doc) => doc.data());
-       // db
-        //     .collection('client')
-        //     // Filter results
-        //     .where('role', '==','user')
-        //     .limit(1)
-        //     .get()
-        //     .then(querySnapshot => {
-        //         querySnapshot.forEach(documentSnapshot => {
-        //             console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
-        //             console.log('hi')
-        //         });
-        //     });
+}
+export const checkAccountSurvive = async (uid) => {
+  const docRef = doc(db, 'client', uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return true;
+  } else {
+  return false;
+  }
 }
 
+export const getCurrentUser = () => {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log(user)
+    }
+  });
+}

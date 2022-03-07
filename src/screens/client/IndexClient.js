@@ -14,11 +14,7 @@ export default function Index({ navigation }) {
         setTimeout(() => {
             setShowLoading(false)
         }, 4000);
-        console.log('hi') 
         setCategory(await getData('category'));
-       
-           
-        
         console.log('Category');
     }, [])
 
@@ -36,7 +32,7 @@ export default function Index({ navigation }) {
             </TouchableOpacity>
         );
     };
-    if (showLoading) return <RepairmenLoading />
+    // if (showLoading) return <RepairmenLoading />
     return (
         <SafeAreaView style={styles.container}>
             {
