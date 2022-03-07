@@ -43,11 +43,13 @@ export default function App() {
     try {
       const rememberLogin = await AsyncStorage.getItem('rememberLogin');
       setRememberLogin(rememberLogin);
-      setLoading(false);
     } catch {
     }
   }
   useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 4000)
     getRememberLogin();
   }, []);
   return (
