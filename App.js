@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, StackActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import HomeScreen from './src/screens/home/HomeScreen';
@@ -27,24 +27,20 @@ import UploadImg from './src/screens/auth/UploadImg';
 import TakeCamera from './src/screens/auth/TakeCamera';
 import RoleStack from './src/navigation/RoleStack';
 
-function truncate(str, n) {
-  return str.length > n ? str.substr(0, n - 1) + '...' : str;
-}
 import { LogBox } from 'react-native';
 import AuthScreen from './src/navigation/AuthScreen';
+import BottomRepairmen from './src/navigation/repairmen/BottomRepairmen';
 
 LogBox.ignoreAllLogs();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [rememberLogin, setRememberLogin] = useState(null);
 
   const getRememberLogin = async () => {
-    try {
-      const rememberLogin = await AsyncStorage.getItem('rememberLogin');
-      setRememberLogin(rememberLogin);
-    } catch {
-    }
+    const rememberLogin = await AsyncStorage.getItem('rememberLogin');
+    setRememberLogin(rememberLogin);
   }
   useEffect(() => {
     setTimeout(() => {
@@ -57,63 +53,6 @@ export default function App() {
       {
         loading ? (<RepairmenLoading />) : rememberLogin === null ? (<AuthScreen />) : (<RoleStack />)
       }
-      {/* <Stack.Navigator >
-        <Stack.Screen
-          name="camera"
-          component={TakeCamera}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="upload"
-          component={UploadImg}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="auth"
-          component={PhoneNumber}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="home_user"
-          component={BottomTab}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="home_repairmen"
-          component={Information}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="inputInfo"
-          component={Information}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="listRepairmen"
-          component={ListRepairmen}
-          options={({ route }) => ({
-            title: truncate(route.params.name, 25),
-            headerTitleAlign: 'center',
-          })}
-        />
-        <Stack.Screen
-          name="detailRepairmen"
-          component={DetailRepairmen}
-          options={({ route }) => ({
-            title: truncate(route.params.name, 25),
-            headerTitleAlign: 'center',
-          })}
-        />
-        <Stack.Screen
-          name="bookOrder"
-          component={BookOrder}
-          options={() => ({
-            title: 'Đặt Lịch Sữa Chữa',
-            headerTitleAlign: 'center',
-          })}
-        />
-      </Stack.Navigator> */}
     </NavigationContainer>
   );
 }

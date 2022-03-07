@@ -1,5 +1,6 @@
 import { async } from '@firebase/util'
-import { collection, getDocs, getDoc, query, where,doc } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
+import { collection, getDocs, getDoc, query, where, doc } from 'firebase/firestore'
 import { db, auth } from '../../src/database/firebase'
 
 export const getData = async (nameCollection) => {
@@ -22,6 +23,7 @@ export const getDetailRepairmen = async (role) => {
   return data;
 }
 
+
 export const phoneCheckAccountSurvive = async (phoneNumber) => {
   const { docs } = await db
     .collection('client')
@@ -29,21 +31,14 @@ export const phoneCheckAccountSurvive = async (phoneNumber) => {
     .get()
   return docs.map((doc) => doc.data());
 }
-export const checkAccountSurvive = async (uid) => {
-  const docRef = doc(db, 'client', uid);
-  const docSnap = await getDoc(docRef);
 
-  if (docSnap.exists()) {
-    return true;
-  } else {
-  return false;
-  }
+export const checkAccountSurvive = async (nameCollection, uid) => {
+  const docRef = doc(db, nameCollection, uid);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
 }
 
-export const getCurrentUser = () => {
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log(user)
-    }
-  });
+export const getRoleUserAsyncStorage = async () => {
+  const jsonValue = await AsyncStorage.getItem('newUser')
+  return jsonValue != null ? JSON.parse(jsonValue) : null
 }

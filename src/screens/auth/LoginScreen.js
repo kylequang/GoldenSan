@@ -10,7 +10,6 @@ import {
     Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/core'
 import PhoneInput from "react-native-phone-number-input";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -24,12 +23,11 @@ import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "f
 import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { getApp } from 'firebase/app';
-import { doc, setDoc } from "firebase/firestore";
-import { checkAccountSurvive, phoneCheckAccountSurvive } from '../../../src/service/getData';
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { checkAccountOfClient, checkAccountSurvive, phoneCheckAccountSurvive } from '../../../src/service/getData';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytesResumable, uploadBytes, } from 'firebase/storage';
 import { NativeModules } from "react-native"
-
 
 // Firebase references
 const app = getApp();
@@ -41,47 +39,42 @@ if (!app?.options || Platform.OS === 'web') {
 
 const PhoneNumber = ({ navigation }) => {
 
-
-
     const phoneInput = useRef(null);
-
     const recaptchaVerifier = useRef(null);
-
     const [phoneNumber, setPhoneNumber] = useState("");
     const [tempPhone, setTempPhone] = useState("");
-
-
     const [message, showMessage] = useState();
-
     const [verificationId, setVerificationId] = useState(null);
     const [verificationCode, setVerificationCode] = useState('');
     const attemptInvisibleVerification = false;
     const [verifyButton, setVerifyButton] = useState(true)
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
-    const [checkRole, setCheckRole] = useState('house');
-
+    const [checkRole, setCheckRole] = useState('client');
     const [showLoading, setShowLoading] = useState(true);
-
     const [uid, setUid] = useState(null);
-    const [rememberLogin, setRememberLogin] = useState(false);
 
-
-
-    const nav = useNavigation()
-    useEffect(
-        () => {
-
-            setTimeout(() => {
-                setShowLoading(false)
-            }, 4000);
-            // checkRememberLogin();
-
-            LogBox.ignoreLogs(['Setting a timer']);
-        }, []);
+    const [checkAccountRepairmen,setCheckAccountRepairmen]=useState();
+    useEffect(() => {
+        setTimeout(() => {
+            setShowLoading(false)
+        }, 4000);
+        LogBox.ignoreLogs(['Setting a timer']);
+    }, []);
 
 
     //send OTP code to phoneNumber
     const sendOTP = async () => {
+        const doc = await checkAccountSurvive('client','e0iu9NDm6nNNrrMFzEUDcCqUSsM2');
+        setTimeout(()=>{
+            console.log(doc)
+        },5000)
+        if(doc!=null){
+            console.log(123)
+        }else{
+            console.log(321)
+        }
+        //console.log({...doc}) ;
+        return '';
         try {
             const phoneProvider = new PhoneAuthProvider(auth);
             const verificationId = await phoneProvider.verifyPhoneNumber(
@@ -107,24 +100,61 @@ const PhoneNumber = ({ navigation }) => {
                 verificationCode
             );
             const client = await signInWithCredential(auth, credential);
-            console.log(client.user);
             setUid(client.user.uid);
             showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
             //check phone survive in app's database
             const checkAccount = await phoneCheckAccountSurvive(tempPhone);
-            if (checkAccount.length != 0) { // if true
+
+            const checkAccountRepairmen  = await checkAccountSurvive('client',client.user.uid);
+            const checkAccountOfClient = await checkAccountSurvive('repairmen',client.user.uid);
+
+            console.log(await checkAccountSurvive('client',client.user.uid))
+            console.log('Repairmen Database',checkAccountRepairmen)
+            console.log('Client Database:',checkAccountOfClient )
+
+            if (checkAccountRepairmen === null && checkAccountOfClient=== null) { // không tồn tại tài khoản trong firebase
+                setStep('VERIFY_SUCCESS');
+            } else if (checkAccountRepairmen != null) {
                 //check role of user ( client or repairmen)
+                console.log(checkAccount);
                 try {
                     await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-                    await AsyncStorage.setItem('rememberLogin', JSON.stringify(uid))
-                    NativeModules.DevSettings.reload();
+                    await AsyncStorage.setItem('rememberLogin', 'yes')
+                    // NativeModules.DevSettings.reload();
                 } catch (e) {
                     // save error
                 }
-            } else {    //if false
-                setStep('VERIFY_SUCCESS');
-                //if it is not survive app's database then create and push it into database
+            } else if (checkAccountOfClient != null) {
+                //check role of user ( client or repairmen)
+                console.log(checkAccount);
+                try {
+                    await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                    await AsyncStorage.setItem('rememberLogin', 'yes')
+                    // NativeModules.DevSettings.reload();
+                } catch (e) {
+                    // save error
+                }
             }
+
+
+
+
+
+
+            // if (checkAccount.length != 0) { // if true
+            //     //check role of user ( client or repairmen)
+            //     console.log(checkAccount);
+            //     try {
+            //         await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+            //         await AsyncStorage.setItem('rememberLogin', 'yes')
+            //         // NativeModules.DevSettings.reload();
+            //     } catch (e) {
+            //         // save error
+            //     }
+            // } else {    //if false
+            //     setStep('VERIFY_SUCCESS');
+            //     //if it is not survive app's database then create and push it into database
+            // }
         } catch (err) {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
@@ -143,29 +173,50 @@ const PhoneNumber = ({ navigation }) => {
                     permissions: ['public_profile'],
                 });
             if (type === 'success') {
-                //Create a Firebase credential with the AccessToken
                 const facebookCredential = FacebookAuthProvider.credential(token);
-                //Sign -in the user with the credential
-                //auth.signInWithCredential(facebookCredential);
-
                 const client = await signInWithCredential(auth, facebookCredential);
                 setUid(client.user.uid);
-                console.log(uid)
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-                await AsyncStorage.setItem('rememberLogin', JSON.stringify(uid))
-
-                const check=await checkAccountSurvive(uid)
-                if (check) {
-                    NativeModules.DevSettings.reload();
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client)); // Lưu data của người dùng 
+                const docRef = doc(db, 'client', client.user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    console.log(docSnap.data());
+                    await AsyncStorage.setItem('role', docSnap.data().role); // Lưu vai trò của người dùng
+                    await AsyncStorage.setItem('rememberLogin', JSON.stringify(uid));
+                    navigation.navigate('checkRole'); // Sau khi login thì tiến hành kiểm tra vai trò của người dùng
                 } else {
-                    setStep('VERIFY_SUCCESS');
-                    //if it is not survive app's database then create and push it into database
+                    setStep('VERIFY_SUCCESS_BY_FB'); //
                 }
             } else {
                 alert('Đăng nhập thất bại')
             }
         } catch ({ message }) {
-            alert(`Facebook Login Error: ${message}`);
+        }
+    }
+
+    const addUserByFB = async () => {
+        const value = await getDataUser();
+        console.log(value.user);
+
+        await setDoc(doc(db, checkRole, uid), {
+            name: value.user.displayName,
+            email: '',
+            phoneNumber: '',
+            role: checkRole,
+            sex: checkSex,
+            photoURL: value.user.photoURL,
+            uid: uid
+        });
+        await AsyncStorage.setItem('role', checkRole);
+        await AsyncStorage.setItem('rememberLogin', 'yes');
+        NativeModules.DevSettings.reload();
+    }
+
+    const getDataUser = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('dataUser')
+            return jsonValue != null ? JSON.parse(jsonValue) : null
+        } catch (e) {
         }
     }
 
@@ -212,9 +263,6 @@ const PhoneNumber = ({ navigation }) => {
     }
     //Process enter information of user
     const [checkSex, setCheckSex] = useState('nam');
-
-    // checkRememberLogin();
-
     //Loading UI
     if (showLoading) return <RepairmenLoading />
 
@@ -326,9 +374,9 @@ const PhoneNumber = ({ navigation }) => {
                                 />
                                 <Text>Hộ Gia Đình</Text>
                                 <RadioButton
-                                    value="house"
-                                    status={checkRole === 'house' ? 'checked' : 'unchecked'}
-                                    onPress={() => setCheckRole('house')}
+                                    value="client"
+                                    status={checkRole === 'client' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('client')}
                                 />
                             </View>
                             <View style={styles.column}>
@@ -347,6 +395,50 @@ const PhoneNumber = ({ navigation }) => {
                         <TouchableOpacity
                             style={styles.button}
                             onPress={verifyRole}
+                        >
+                            <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+            }
+            {
+                step === 'VERIFY_SUCCESS_BY_FB' &&
+                <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper_Role}>
+                        <Image
+                            style={{ width: 200, height: 200 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <Text style={{ fontSize: 25 }}>Bạn là ai ?</Text>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/house.png')}
+                                />
+                                <Text>Hộ Gia Đình</Text>
+                                <RadioButton
+                                    value="client"
+                                    status={checkRole === 'client' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('client')}
+                                />
+                            </View>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/repairmen.png')}
+                                />
+                                <Text>Thợ Sữa Chữa</Text>
+                                <RadioButton
+                                    value="repairmen"
+                                    status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('repairmen')}
+                                />
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={addUserByFB}
                         >
                             <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
                         </TouchableOpacity>
@@ -391,11 +483,8 @@ const PhoneNumber = ({ navigation }) => {
                                 photoURL: photoURL,
                                 uid: uid
                             });
-                            if (checkRole === 'house') {
-                                navigation.navigate('home_user')
-                            }
-
-                            console.log('add client')
+                            navigation.navigate('checkRole');
+                            
                         }
                         }
                         validationSchema={yup.object().shape({
