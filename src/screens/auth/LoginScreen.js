@@ -53,7 +53,7 @@ const PhoneNumber = ({ navigation }) => {
     const [showLoading, setShowLoading] = useState(true);
     const [uid, setUid] = useState(null);
 
-    const [checkAccountRepairmen,setCheckAccountRepairmen]=useState();
+    const [checkAccountRepairmen, setCheckAccountRepairmen] = useState();
     useEffect(() => {
         setTimeout(() => {
             setShowLoading(false)
@@ -64,17 +64,6 @@ const PhoneNumber = ({ navigation }) => {
 
     //send OTP code to phoneNumber
     const sendOTP = async () => {
-        const doc = await checkAccountSurvive('client','e0iu9NDm6nNNrrMFzEUDcCqUSsM2');
-        setTimeout(()=>{
-            console.log(doc)
-        },5000)
-        if(doc!=null){
-            console.log(123)
-        }else{
-            console.log(321)
-        }
-        //console.log({...doc}) ;
-        return '';
         try {
             const phoneProvider = new PhoneAuthProvider(auth);
             const verificationId = await phoneProvider.verifyPhoneNumber(
@@ -102,59 +91,29 @@ const PhoneNumber = ({ navigation }) => {
             const client = await signInWithCredential(auth, credential);
             setUid(client.user.uid);
             showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
-            //check phone survive in app's database
-            const checkAccount = await phoneCheckAccountSurvive(tempPhone);
 
-            const checkAccountRepairmen  = await checkAccountSurvive('client',client.user.uid);
-            const checkAccountOfClient = await checkAccountSurvive('repairmen',client.user.uid);
+            const checkAccountOfRepairmen = await checkAccountSurvive('repairmen', client.user.uid);
+            const checkAccountOfClient = await checkAccountSurvive('client', client.user.uid);
 
-            console.log(await checkAccountSurvive('client',client.user.uid))
-            console.log('Repairmen Database',checkAccountRepairmen)
-            console.log('Client Database:',checkAccountOfClient )
-
-            if (checkAccountRepairmen === null && checkAccountOfClient=== null) { // không tồn tại tài khoản trong firebase
+            if (checkAccountOfRepairmen == null && checkAccountOfClient == null) { // không tồn tại tài khoản trong firebase
+                console.log('ko tồn tại')
                 setStep('VERIFY_SUCCESS');
-            } else if (checkAccountRepairmen != null) {
-                //check role of user ( client or repairmen)
-                console.log(checkAccount);
-                try {
-                    await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-                    await AsyncStorage.setItem('rememberLogin', 'yes')
-                    // NativeModules.DevSettings.reload();
-                } catch (e) {
-                    // save error
-                }
+            } else if (checkAccountOfRepairmen != null) {
+                console.log('Tồn tại tài khoản trong thợ sữa chữa')
+                await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                await AsyncStorage.setItem('rememberLogin', 'yes')
+                // NativeModules.DevSettings.reload();
+                navigation.navigate('checkRole')
+
             } else if (checkAccountOfClient != null) {
-                //check role of user ( client or repairmen)
-                console.log(checkAccount);
-                try {
-                    await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-                    await AsyncStorage.setItem('rememberLogin', 'yes')
-                    // NativeModules.DevSettings.reload();
-                } catch (e) {
-                    // save error
-                }
+                console.log('Tồn tại tài khoản trong Hộ Gia Đình')
+                await AsyncStorage.setItem('role', checkAccountOfClient.role);
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                await AsyncStorage.setItem('rememberLogin', 'yes')
+                // NativeModules.DevSettings.reload();
+                navigation.navigate('checkRole')
             }
-
-
-
-
-
-
-            // if (checkAccount.length != 0) { // if true
-            //     //check role of user ( client or repairmen)
-            //     console.log(checkAccount);
-            //     try {
-            //         await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-            //         await AsyncStorage.setItem('rememberLogin', 'yes')
-            //         // NativeModules.DevSettings.reload();
-            //     } catch (e) {
-            //         // save error
-            //     }
-            // } else {    //if false
-            //     setStep('VERIFY_SUCCESS');
-            //     //if it is not survive app's database then create and push it into database
-            // }
         } catch (err) {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
@@ -182,7 +141,7 @@ const PhoneNumber = ({ navigation }) => {
                 if (docSnap.exists()) {
                     console.log(docSnap.data());
                     await AsyncStorage.setItem('role', docSnap.data().role); // Lưu vai trò của người dùng
-                    await AsyncStorage.setItem('rememberLogin', JSON.stringify(uid));
+                    await AsyncStorage.setItem('rememberLogin', 'yes');
                     navigation.navigate('checkRole'); // Sau khi login thì tiến hành kiểm tra vai trò của người dùng
                 } else {
                     setStep('VERIFY_SUCCESS_BY_FB'); //
@@ -209,7 +168,8 @@ const PhoneNumber = ({ navigation }) => {
         });
         await AsyncStorage.setItem('role', checkRole);
         await AsyncStorage.setItem('rememberLogin', 'yes');
-        NativeModules.DevSettings.reload();
+        // NativeModules.DevSettings.reload();
+        navigation.navigate('roleCheck')
     }
 
     const getDataUser = async () => {
@@ -220,17 +180,10 @@ const PhoneNumber = ({ navigation }) => {
         }
     }
 
-
     const verifyRole = () => {
         //Process User enter information personal
         setStep('Enter_Info');
     }
-
-
-
-
-
-
 
     const [image, setImage] = useState(null);
     const [photoURL, setPhotoURL] = useState(null);
@@ -461,20 +414,8 @@ const PhoneNumber = ({ navigation }) => {
                             password: ''
                         }}
                         onSubmit={async (values) => {
-                            // db
-                            //     .collection('client')
-                            //     .add({
-                            //         name: values.name,
-                            //         email: values.email,
-                            //         phoneNumber: phoneNumber,
-                            //         role: checked,
-                            //         sex: checkSex,
-                            //         photoURL: photoURL
-                            //     })
-                            //     .then(() => {
-                            //         console.log('User added!');
-                            //     });
-                            await setDoc(doc(db, "client", uid), {
+                            await AsyncStorage.setItem('role', checkRole)
+                            await setDoc(doc(db, checkRole, uid), {
                                 name: values.name,
                                 email: values.email,
                                 phoneNumber: tempPhone,
@@ -484,7 +425,6 @@ const PhoneNumber = ({ navigation }) => {
                                 uid: uid
                             });
                             navigation.navigate('checkRole');
-                            
                         }
                         }
                         validationSchema={yup.object().shape({
@@ -497,6 +437,11 @@ const PhoneNumber = ({ navigation }) => {
                                 .required('Trường này là bắt buộc.'),
                             Phone: yup
                                 .number()
+                                .required('Trường này là bắt buộc'),
+                            age: yup
+                                .number()
+                                .min(10)
+                                .max(70)
                                 .required('Trường này là bắt buộc'),
                             password: yup
                                 .string()
@@ -530,9 +475,9 @@ const PhoneNumber = ({ navigation }) => {
                                 <TextInput
                                     value={values.Phone}
                                     style={styles.textInput}
-                                    placeholder="Số điện thoại"
-                                    onBlur={() => setFieldTouched('Phone')}
-                                    onChangeText={handleChange('Phone')}
+                                    placeholder="10 < Tuổi <70"
+                                    onBlur={() => setFieldTouched('age')}
+                                    onChangeText={handleChange('age')}
                                 />
                                 {touched.Phone && errors.Phone &&
                                     <Text style={styles.errorsText}>{errors.Phone}</Text>
