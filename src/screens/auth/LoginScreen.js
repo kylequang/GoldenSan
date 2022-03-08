@@ -118,10 +118,6 @@ const PhoneNumber = ({ navigation }) => {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
     }
-
-
-
-
     async function logInFB() {
         try {
             await Facebook.initializeAsync({
