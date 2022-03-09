@@ -111,7 +111,6 @@ const PhoneNumber = ({ navigation }) => {
                 await AsyncStorage.setItem('role', checkAccountOfClient.role);
                 await AsyncStorage.setItem('dataUser', JSON.stringify(client));
                 await AsyncStorage.setItem('rememberLogin', 'yes')
-                // NativeModules.DevSettings.reload();
                 navigation.navigate('checkRole')
             }
         } catch (err) {
@@ -128,6 +127,7 @@ const PhoneNumber = ({ navigation }) => {
                     permissions: ['public_profile'],
                 });
             if (type === 'success') {
+                console.log(123)
                 const facebookCredential = FacebookAuthProvider.credential(token);
                 const client = await signInWithCredential(auth, facebookCredential);
                 setUid(client.user.uid);
@@ -406,11 +406,13 @@ const PhoneNumber = ({ navigation }) => {
                         initialValues={{
                             name: '',
                             email: '',
-                            age:'',
-                            password: ''
+                            age: '',
+                            password: '',
+
                         }}
                         onSubmit={async (values) => {
-                            await AsyncStorage.setItem('role', checkRole)
+                            await AsyncStorage.setItem('role', checkRole);
+                            await AsyncStorage.setItem('rememberLogin', 'yes');
                             await setDoc(doc(db, checkRole, uid), {
                                 name: values.name,
                                 email: values.email,
@@ -418,7 +420,9 @@ const PhoneNumber = ({ navigation }) => {
                                 role: checkRole,
                                 sex: checkSex,
                                 photoURL: photoURL,
-                                uid: uid
+                                uid: uid,
+                                status: 'active'
+
                             });
                             navigation.navigate('checkRole');
                         }

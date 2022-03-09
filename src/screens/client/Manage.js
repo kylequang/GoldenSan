@@ -53,10 +53,10 @@ export default function Manage({ navigation }) {
                 <View style={styles.footer}>
                     <TouchableOpacity style={styles.BtnItem}
                         onPress={
-                            () => {
+                            async () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
-                                AsyncStorage.clear().then(() => console.log('Cleared'))
-                              
+                                await AsyncStorage.clear().then(() => console.log('Cleared'))
+
                                 NativeModules.DevSettings.reload();
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
