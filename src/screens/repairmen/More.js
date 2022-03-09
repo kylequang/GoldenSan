@@ -15,7 +15,7 @@ import HeaderUser from "../../components/HeaderUser";
 import { auth } from '../../database/firebase';
 import { NativeModules } from "react-native"
 
-export default function Manage({ navigation }) {
+export default function More({ navigation }) {
     return (
         <SafeAreaView>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>

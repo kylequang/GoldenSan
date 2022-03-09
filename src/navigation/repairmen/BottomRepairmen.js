@@ -1,15 +1,16 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Index from '../../screens/client/IndexClient';
-import Manage from '../../screens/client/Manage';
+import IndexRepairmen from '../../screens/repairmen/IndexRepairmen';
+import Activity_Order from '../../screens/repairmen/Activity_Order';
+import More from '../../screens/repairmen/More';
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomTab() {
+export default function BottomRepairmen() {
     return (
         <Tab.Navigator
-            initialRouteName="Trang Chủ"
+            initialRouteName="Home_Repairmen"
             screenOptions={({ route }) => ({
                 headerShown: false,
                 tabBarIcon: ({ focused, color }) => {
@@ -18,7 +19,7 @@ export default function BottomTab() {
                         iconName = focused ? 'home' : 'home';
                     else if(route.name === 'Hồ Sơ')
                     iconName = focused ? 'account' : 'account';
-                    else if(route.name === 'Thông Báo')
+                    else if(route.name === 'Hoạt Động')
                     iconName = focused?'ring':'ring';
                     return (
                         <MaterialCommunityIcons name={iconName} size={30} color={color} />
@@ -32,15 +33,16 @@ export default function BottomTab() {
                 },
             })}
         >
-            <Tab.Screen name="Trang Chủ" component={Index} />
-            <Tab.Screen name="Thông Báo" component={Index} />
+            <Tab.Screen name="Trang Chủ" component={IndexRepairmen} />
+         
             <Tab.Screen
-                name="Hồ Sơ"
-                component={Manage}
+                name="Hoạt Động"
+                component={Activity_Order}
                 options={{
-                    title: 'Hồ Sơ',
+                    title: 'Hoạt Động',
                 }}
             />
+               <Tab.Screen name="Hồ Sơ" component={More} />
         </Tab.Navigator>
     );
 }

@@ -1,162 +1,673 @@
-import { useNavigation } from '@react-navigation/core'
-import React, { useEffect, useState } from 'react'
-import { Ionicons } from '@expo/vector-icons'
+import React, { useState, useRef, useEffect } from "react";
 import {
     StyleSheet,
-    Text,
+    LogBox,
     View,
-    TextInput,
     TouchableOpacity,
+    Text,
+    TextInput,
+    Button,
     Image,
-} from 'react-native'
-import { auth } from '../../database/firebase';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import PhoneInput from "react-native-phone-number-input";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RadioButton } from 'react-native-paper';
+import RepairmenLoading from "../../components/animation/RepairmenLoading";
+import { Formik } from 'formik';
+import * as yup from 'yup';
+import * as Facebook from 'expo-facebook';
+import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+import { auth, storage, db } from '../../database/firebase';
+import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+import { getApp } from 'firebase/app';
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { checkAccountOfClient, checkAccountSurvive, phoneCheckAccountSurvive } from '../../../src/service/getData';
+import * as ImagePicker from 'expo-image-picker';
+import { getDownloadURL, ref, uploadBytesResumable, uploadBytes, } from 'firebase/storage';
+import { NativeModules } from "react-native"
 
-const LoginScreen = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [hidePass, setHidePass] = useState(true)
-
-    const navigation = useNavigation()
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                navigation.replace('toHome')
-            }
-        })
-        return unsubscribe
-    }, [])
-
-    const handleSignUp = () => {
-        auth
-            .createUserWithEmailAndPassword(email, password)
-            .then((userCredentials) => {
-                const user = userCredentials.user
-                console.log('Registered with:', user.email)
-            })
-            .catch((error) => alert(error.message))
-    }
-
-    const handleLogin = () => {
-        auth
-            .signInWithEmailAndPassword(email, password)
-            .then((userCredentials) => {
-                const user = userCredentials.user
-                console.log('Logged in with:', user.email)
-            })
-            .catch((error) => alert(error.message))
-    }
-
-    return (
-        <View behavior="padding" style={styles.container}>
-            <Image
-                style={{ width: 100, height: 100 }}
-                source={require('../../../assets/logo/logo_login.jpg')}
-            />
-            <View style={styles.inputContainer}>
-                <View style={styles.input}>
-                    <Text>Email</Text>
-                    <TextInput
-                        placeholder="Enter your email"
-                        value={email}
-                        onChangeText={(text) => setEmail(text)}
-                    />
-                </View>
-                <View style={styles.input}>
-                    <Text>Password</Text>
-                    <TextInput
-                        placeholder="Enter your password"
-                        value={password}
-                        onChangeText={(text) => setPassword(text)}
-                        secureTextEntry={hidePass ? true : false}
-                    />
-                    <Ionicons
-                        style={styles.iconPass}
-                        name={hidePass ? 'ios-eye-off-outline' : 'ios-eye-outline'}
-                        size={20}
-                        color="grey"
-                        onPress={() => setHidePass(!hidePass)}
-                    />
-                </View>
-                <TouchableOpacity
-                    style={styles.forgotButton}
-                    onPress={() => navigation.navigate('ForgotPassword')}
-                >
-                    <Text style={styles.forgotText}>Forgot password?</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleLogin} style={styles.button}>
-                    <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={handleSignUp}
-                    style={[styles.button, styles.buttonOutline]}
-                >
-                    <Text style={styles.buttonOutlineText}>Register</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    )
+// Firebase references
+const app = getApp();
+// Double-check that we can run the example
+if (!app?.options || Platform.OS === 'web') {
+    throw new Error('This example only works on Android or iOS, and requires a valid Firebase config.');
 }
 
-export default LoginScreen
+
+const PhoneNumber = ({ navigation }) => {
+
+    const phoneInput = useRef(null);
+    const recaptchaVerifier = useRef(null);
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [tempPhone, setTempPhone] = useState("");
+    const [message, showMessage] = useState();
+    const [verificationId, setVerificationId] = useState(null);
+    const [verificationCode, setVerificationCode] = useState('');
+    const attemptInvisibleVerification = false;
+    const [verifyButton, setVerifyButton] = useState(true)
+    const [step, setStep] = useState('INPUT_PHONE_NUMBER');
+    const [checkRole, setCheckRole] = useState('client');
+    const [showLoading, setShowLoading] = useState(true);
+    const [uid, setUid] = useState(null);
+
+    const [checkAccountRepairmen, setCheckAccountRepairmen] = useState();
+    useEffect(() => {
+        setTimeout(() => {
+            setShowLoading(false)
+        }, 4000);
+        LogBox.ignoreLogs(['Setting a timer']);
+    }, []);
+
+
+    //send OTP code to phoneNumber
+    const sendOTP = async () => {
+        try {
+            const phoneProvider = new PhoneAuthProvider(auth);
+            const verificationId = await phoneProvider.verifyPhoneNumber(
+                phoneNumber,
+                recaptchaVerifier.current
+            );
+            setVerificationId(verificationId);
+            showMessage({
+                text: 'Mã Xác Minh Đã Được Gửi Đến SDT Của Bạn !.'
+            });
+            setStep('SEND_OTP');
+            setVerifyButton(true)
+        } catch (err) {
+            showMessage({ text: `Error: ${err.message}`, color: 'red' });
+        }
+    }
+
+    //verify otp code
+    const verifyOTP = async () => {
+        try {
+            const credential = PhoneAuthProvider.credential(
+                verificationId,
+                verificationCode
+            );
+            const client = await signInWithCredential(auth, credential);
+            setUid(client.user.uid);
+            showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
+
+            const checkAccountOfRepairmen = await checkAccountSurvive('repairmen', client.user.uid);
+            const checkAccountOfClient = await checkAccountSurvive('client', client.user.uid);
+
+            if (checkAccountOfRepairmen == null && checkAccountOfClient == null) { // không tồn tại tài khoản trong firebase
+                console.log('ko tồn tại')
+                setStep('VERIFY_SUCCESS');
+            } else if (checkAccountOfRepairmen != null) {
+                console.log('Tồn tại tài khoản trong thợ sữa chữa')
+                await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                await AsyncStorage.setItem('rememberLogin', 'yes')
+                // NativeModules.DevSettings.reload();
+                navigation.navigate('checkRole')
+
+            } else if (checkAccountOfClient != null) {
+                console.log('Tồn tại tài khoản trong Hộ Gia Đình')
+                await AsyncStorage.setItem('role', checkAccountOfClient.role);
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                await AsyncStorage.setItem('rememberLogin', 'yes')
+                // NativeModules.DevSettings.reload();
+                navigation.navigate('checkRole')
+            }
+        } catch (err) {
+            showMessage({ text: `Error: ${err.message}`, color: 'red' });
+        }
+    }
+
+
+
+
+    async function logInFB() {
+        try {
+            await Facebook.initializeAsync({
+                appId: '470392018091052',
+            });
+            const { type, token } =
+                await Facebook.logInWithReadPermissionsAsync({
+                    permissions: ['public_profile'],
+                });
+            if (type === 'success') {
+                const facebookCredential = FacebookAuthProvider.credential(token);
+                const client = await signInWithCredential(auth, facebookCredential);
+                setUid(client.user.uid);
+                await AsyncStorage.setItem('dataUser', JSON.stringify(client)); // Lưu data của người dùng 
+                const docRef = doc(db, 'client', client.user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    console.log(docSnap.data());
+                    await AsyncStorage.setItem('role', docSnap.data().role); // Lưu vai trò của người dùng
+                    await AsyncStorage.setItem('rememberLogin', 'yes');
+                    navigation.navigate('checkRole'); // Sau khi login thì tiến hành kiểm tra vai trò của người dùng
+                } else {
+                    setStep('VERIFY_SUCCESS_BY_FB'); //
+                }
+            } else {
+                alert('Đăng nhập thất bại')
+            }
+        } catch ({ message }) {
+        }
+    }
+
+    const addUserByFB = async () => {
+        const value = await getDataUser();
+        console.log(value.user);
+
+        await setDoc(doc(db, checkRole, uid), {
+            name: value.user.displayName,
+            email: '',
+            phoneNumber: '',
+            role: checkRole,
+            sex: checkSex,
+            photoURL: value.user.photoURL,
+            uid: uid
+        });
+        await AsyncStorage.setItem('role', checkRole);
+        await AsyncStorage.setItem('rememberLogin', 'yes');
+        // NativeModules.DevSettings.reload();
+        navigation.navigate('roleCheck')
+    }
+
+    const getDataUser = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('dataUser')
+            return jsonValue != null ? JSON.parse(jsonValue) : null
+        } catch (e) {
+        }
+    }
+
+    const verifyRole = () => {
+        //Process User enter information personal
+        setStep('Enter_Info');
+    }
+
+    const [image, setImage] = useState(null);
+    const [photoURL, setPhotoURL] = useState(null);
+
+    let openImagePickerAsync = async () => {
+        let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync(); // permission
+        if (permissionResult.granted === false) {
+            alert("Quyền truy cập bị từ chối!");
+            return;
+        }
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        if (!result.cancelled) {
+            setImage(result.uri)
+
+        }
+        const filename = image.substring(image.lastIndexOf('/') + 1);
+        const avatarRef = ref(storage, 'client/' + filename);
+        const img = await fetch(image);
+        const bytes = await img.blob();
+        await uploadBytes(avatarRef, bytes).then(async (e) => {
+            const url = await getDownloadURL(avatarRef)
+            setPhotoURL(url)
+            console.log('link avatar', photoURL)
+        });
+    }
+    //Process enter information of user
+    const [checkSex, setCheckSex] = useState('nam');
+    //Loading UI
+    if (showLoading) return <RepairmenLoading />
+
+
+    return (
+        <>
+            <FirebaseRecaptchaVerifierModal
+                ref={recaptchaVerifier}
+                firebaseConfig={app.options}
+                style={{ justifyContent: 'center' }}
+            />
+            {
+                showLoading === false
+                && step === 'INPUT_PHONE_NUMBER'
+                && <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper}>
+                        <Image
+                            style={{ width: 180, height: 150 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <View style={styles.welcome}>
+                            <Text style={{ fontSize: 18 }}>Chào mừng bạn đến với chúng tôi!</Text>
+                        </View>
+                        <PhoneInput
+                            ref={phoneInput}
+                            defaultValue={phoneNumber}
+                            defaultCode="VN"
+                            placeholder="Số Điện Thoại"
+                            layout="first"
+                            onChangeText={(phone) => {
+                                setTempPhone(phone);
+                                setPhoneNumber('+' + phoneInput.current?.getCallingCode() + phone);
+                                if (11 <= phoneNumber.length <= 13)
+                                    setVerifyButton(false)
+                            }}
+                            countryPickerProps={{ withAlphaFilter: true }}
+                        />
+                        <TouchableOpacity
+                            style={phoneNumber.length <= 11 ? styles.button0 : styles.button}
+                            disabled={verifyButton}
+                            onPress={sendOTP}
+
+                        >
+                            <Text style={styles.buttonText}>Gửi mã OTP</Text>
+                        </TouchableOpacity>
+                        <Text style={{ marginTop: 30, fontSize: 20 }}>Hoặc</Text>
+                        <TouchableOpacity
+                            style={[styles.buttonSocial, { backgroundColor: '#3333ff' }]}
+                            onPress={logInFB}
+                        >
+                            <Ionicons name="logo-facebook" size={19} color={"white"} />
+                            <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
+
+                        >
+                            <Ionicons name="logo-google" size={22} color={"white"} />
+                            <Text style={styles.buttonText}>Đăng nhập với Google</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+            }
+            {
+                step === 'SEND_OTP' &&
+                <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper}>
+                        <Image
+                            style={{ width: 200, height: 200 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <View style={styles.welcome}>
+                            <Text>Nhập mã xác minh!</Text>
+                        </View>
+                        <TextInput
+                            placeholder="Nhập mã xác minh"
+                            onChangeText={(otp) => {
+                                setVerificationCode(otp)
+                                if (verificationCode.length == 5) {
+                                    setVerifyButton(false)
+                                    console.log('change status of button')
+                                }
+                            }}
+                        />
+                        <TouchableOpacity
+                            style={verificationCode.length == 6 ? styles.button : styles.button0}
+                            disabled={verifyButton}
+                            onPress={verifyOTP}
+                        >
+                            <Text style={styles.buttonText}>Xác Nhận</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+            }
+            {
+                step === 'VERIFY_SUCCESS' &&
+                <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper_Role}>
+                        <Image
+                            style={{ width: 200, height: 200 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <Text style={{ fontSize: 25 }}>Bạn là ai ?</Text>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/house.png')}
+                                />
+                                <Text>Hộ Gia Đình</Text>
+                                <RadioButton
+                                    value="client"
+                                    status={checkRole === 'client' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('client')}
+                                />
+                            </View>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/repairmen.png')}
+                                />
+                                <Text>Thợ Sữa Chữa</Text>
+                                <RadioButton
+                                    value="repairmen"
+                                    status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('repairmen')}
+                                />
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={verifyRole}
+                        >
+                            <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+            }
+            {
+                step === 'VERIFY_SUCCESS_BY_FB' &&
+                <View style={styles.container}>
+                    <SafeAreaView style={styles.wrapper_Role}>
+                        <Image
+                            style={{ width: 200, height: 200 }}
+                            source={require('../../../assets/logo/logo.png')}
+                        />
+                        <Text style={{ fontSize: 25 }}>Bạn là ai ?</Text>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/house.png')}
+                                />
+                                <Text>Hộ Gia Đình</Text>
+                                <RadioButton
+                                    value="client"
+                                    status={checkRole === 'client' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('client')}
+                                />
+                            </View>
+                            <View style={styles.column}>
+                                <Image
+                                    style={styles.imageRole}
+                                    source={require('../../../assets/image/repairmen.png')}
+                                />
+                                <Text>Thợ Sữa Chữa</Text>
+                                <RadioButton
+                                    value="repairmen"
+                                    status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
+                                    onPress={() => setCheckRole('repairmen')}
+                                />
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={addUserByFB}
+                        >
+                            <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                </View>
+            }
+            {
+                step === 'Enter_Info' &&
+                <SafeAreaView style={styles.loginContainer}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
+                    <View style={{ alignItems: 'center' }}>
+                        <Button title="Chọn Ảnh Đại Diện" onPress={openImagePickerAsync} />
+                        {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
+                    </View>
+                    <Formik
+                        initialValues={{
+                            name: '',
+                            email: '',
+                            Phone: '',
+                            password: ''
+                        }}
+                        onSubmit={async (values) => {
+                            await AsyncStorage.setItem('role', checkRole)
+                            await setDoc(doc(db, checkRole, uid), {
+                                name: values.name,
+                                email: values.email,
+                                phoneNumber: tempPhone,
+                                role: checkRole,
+                                sex: checkSex,
+                                photoURL: photoURL,
+                                uid: uid
+                            });
+                            navigation.navigate('checkRole');
+                        }
+                        }
+                        validationSchema={yup.object().shape({
+                            name: yup
+                                .string()
+                                .required('Trường này là bắt buộc.'),
+                            email: yup
+                                .string()
+                                .email()
+                                .required('Trường này là bắt buộc.'),
+                            Phone: yup
+                                .number()
+                                .required('Trường này là bắt buộc'),
+                            age: yup
+                                .number()
+                                .min(10)
+                                .max(70)
+                                .required('Trường này là bắt buộc'),
+                            password: yup
+                                .string()
+                                .min(4, 'Mật khẩu không được dưới 4 kí tự.')
+                                .max(11, 'Mật khẩu không được vượt quá 12 kí tự.')
+                                .required('Trường này bắt buộc'),
+                        })}
+                    >
+                        {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
+                            <>
+                                <TextInput
+                                    value={values.name}
+                                    style={styles.textInput}
+                                    onBlur={() => setFieldTouched('name')}
+                                    onChangeText={handleChange('name')}
+                                    placeholder="Họ tên của bạn"
+                                />
+                                {touched.name && errors.name &&
+                                    <Text style={styles.errorsText}>{errors.name}</Text>
+                                }
+                                <TextInput
+                                    value={values.email}
+                                    style={styles.textInput}
+                                    onBlur={() => setFieldTouched('email')}
+                                    onChangeText={handleChange('email')}
+                                    placeholder="Email của bạn"
+                                />
+                                {touched.email && errors.email &&
+                                    <Text style={styles.errorsText}>{errors.email}</Text>
+                                }
+                                <TextInput
+                                    value={values.Phone}
+                                    style={styles.textInput}
+                                    placeholder="10 < Tuổi <70"
+                                    onBlur={() => setFieldTouched('age')}
+                                    onChangeText={handleChange('age')}
+                                />
+                                {touched.Phone && errors.Phone &&
+                                    <Text style={styles.errorsText}>{errors.Phone}</Text>
+                                }
+                                <TextInput
+                                    value={values.password}
+                                    style={styles.textInput}
+                                    placeholder="Mật khẩu"
+                                    onBlur={() => setFieldTouched('password')}
+                                    onChangeText={handleChange('password')}
+                                    secureTextEntry={true}
+                                />
+                                {touched.password && errors.password &&
+                                    <Text style={styles.errorsText}>{errors.password}</Text>
+                                }
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
+                                        <Text>Nam</Text>
+                                        <RadioButton
+                                            value="nam"
+                                            status={checkSex === 'nam' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('nam')}
+                                        />
+                                    </View>
+                                    <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
+                                        <Text>Nữ</Text>
+                                        <RadioButton
+                                            value="nu"
+                                            status={checkSex === 'nu' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('nu')}
+                                        />
+                                    </View>
+                                </View>
+                                <Button
+                                    color="blue"
+                                    style={styles.btnButton}
+                                    title='Tiếp tục'
+                                    disabled={!isValid}
+                                    onPress={handleSubmit}
+                                />
+                            </>
+                        )}
+                    </Formik>
+                </SafeAreaView>
+            }
+            {message ? (
+                <TouchableOpacity
+                    style={[
+                        StyleSheet.absoluteFill,
+                        { backgroundColor: 0xffffffee, justifyContent: 'center' },
+                    ]}
+                    onPress={() => showMessage(undefined)}>
+                    <Text
+                        style={{
+                            color: message.color || 'blue',
+                            fontSize: 17,
+                            textAlign: 'center',
+                            margin: 20,
+                        }}>
+                        {message.text}
+                    </Text>
+                </TouchableOpacity>
+            ) : (
+                undefined
+            )}
+            {attemptInvisibleVerification &&
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <FirebaseRecaptchaBanner />
+                </View>}
+        </>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: Colors.lighter,
+    },
+    wrapper: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    wrapper_Role: {
+        alignItems: 'center'
+    },
+    row: {
+        flexDirection: 'row',
+    },
+    column: {
+        margin: 5,
+        width: '40%',
         alignItems: 'center',
-        backgroundColor:'white'
+        padding: 10
     },
-    inputContainer: {
-        width: '90%',
+    imageRole: {
+        height: 150,
+        width: 120,
+        padding: 20,
+        borderRadius: 20,
+        backgroundColor: '#ff6600',
+        marginBottom: 15,
+        marginTop: 15
     },
-    input: {
-        backgroundColor: 'white',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginTop: 5,
-    },
-    buttonContainer: {
-        width: '90%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 40,
+    button0: {
+        marginTop: 30,
+        height: 45,
+        width: '70%',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "gray",
+        shadowColor: "rgba(0,0,0,0.4)",
+        shadowOffset: {
+            width: 1,
+            height: 5,
+        },
+        shadowOpacity: 0.34,
+        shadowRadius: 6.27,
+        elevation: 10,
+        borderRadius: 15
     },
     button: {
-        backgroundColor: '#DB147F',
-        width: '100%',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
+        marginTop: 30,
+        height: 45,
+        width: '70%',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#ff6600",
+        shadowColor: "rgba(0,0,0,0.4)",
+        shadowOffset: {
+            width: 1,
+            height: 5,
+        },
+        shadowOpacity: 0.34,
+        shadowRadius: 6.27,
+        elevation: 10,
+        borderRadius: 20
     },
-    buttonOutline: {
-        backgroundColor: 'white',
-        marginTop: 5,
-        borderColor: '#DB147F',
-        borderWidth: 2,
+    buttonSocial: {
+        marginTop: 30,
+        height: 45,
+        width: '80%',
+        padding: 10,
+        alignItems: "center",
+        flexDirection: 'row',
+        shadowColor: "rgba(0,0,0,0.4)",
+        shadowOffset: {
+            width: 1,
+            height: 5,
+        },
+        borderRadius: 15
     },
     buttonText: {
-        color: 'white',
-        fontWeight: '700',
-        fontSize: 16,
+        color: "white",
+        fontSize: 20,
+        marginLeft: 7
     },
-    buttonOutlineText: {
-        color: '#DB147F',
-        fontWeight: '700',
-        fontSize: 16,
+    welcome: {
+        padding: 20
     },
-    iconPass: {
-        position: 'absolute',
-        bottom: 10,
-        left: 320,
+    status: {
+        padding: 20,
+        marginBottom: 20,
+        justifyContent: "center",
+        alignItems: "flex-start",
+        color: "gray",
     },
-    forgotButton: {
-        alignItems: 'flex-end',
-        marginTop: 10,
+    loginContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        padding: 10,
+        elevation: 10,
+        backgroundColor: '#e6e6e6'
     },
-    forgotText: {
-        color: '#DB147F',
+    textInput: {
+        height: 40,
+        width: '80%',
+        margin: 10,
+        backgroundColor: 'white',
+        borderColor: 'gray',
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: 10,
+        paddingLeft: 10
     },
-})
+    errorsText: {
+        fontSize: 15,
+        color: 'red'
+    },
+});
+
+export default PhoneNumber;
