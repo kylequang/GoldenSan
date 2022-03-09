@@ -1,12 +1,16 @@
-import { View, Text, StyleSheet, FlatList, Alert, Modal, TouchableOpacity, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Alert, Modal, TouchableOpacity, TextInput, Button, Dimensions } from 'react-native';
 import { Checkbox } from 'react-native-paper';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 
+import Constants from 'expo-constants';
+import * as Location from 'expo-location';
 
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
 const listWork = [
@@ -39,12 +43,66 @@ const listWork = [
   }
 ]
 
+const listTag = [
+  {
+    id: 1,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 2,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 3,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 4,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 5,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 6,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  },
+  {
+    id: 7,
+    nameTag: 'Tivi',
+    description: 'Sửa lỗi màn hình tivi, lắp đặt...'
+  }
+]
 
 
 export default function IndexRepairmen() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectWork, setSelectWork] = useState(listWork);
+
+
+  const [pin, setPin] = useState({
+    latitude: 16.060932,
+    longitude: 108.241346,
+    latitudeDelta: 0.08,
+    longitudeDelta: 0.04
+  });
+  const [region, setRegion] = useState({
+    latitude: 1,
+    longitude: 1,
+    latitudeDelta: 1,
+    longitudeDelta: 1
+  })
+
+
+
   const formatPrice = (price) => {
     return price.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
   }
@@ -58,19 +116,122 @@ export default function IndexRepairmen() {
       </TouchableOpacity>
     </View>
   )
+  const renderListTag = ({ item }) => (
+    <View>
+      <Text>{item.nameTag}</Text>
+    </View>
+  )
 
+
+  console.log('reload')
   return (
     <SafeAreaView style={styles.container}>
-      <Text>TRang Chủ Dành Cho Thợ Sửa Chữa</Text>
+
+
+      <GooglePlacesAutocomplete
+        fetchDetails={true}
+        GooglePlacesSearchQuery={{
+          rankby: "distance"
+        }}
+        placeholder='Tìm kiếm'
+
+        onPress={(data, details = null) => {
+          console.log(data);
+          setRegion({
+            latitude: details.geometry.location.lat,
+            longitude: details.geometry.location.lng,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421
+          })
+        }}
+        query={{
+          key: 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0',
+          language: 'en',
+          components: "country:us",
+          types: "establishment",
+          radius: 30000,
+          location: `${region.latitude}, ${region.longitude}`
+        }}
+        styles={{
+          container: { flex: 0, position: "absolute", width: "100%", zIndex: 1 },
+          listView: { backgroundColor: "red" }
+        }}
+      />
+      <MapView style={{
+        width: '100%',
+        height: 400,
+      }}
+        initialRegion={{
+          latitude: 16.060932,
+          longitude: 108.241346,
+          latitudeDelta: 0.0043,
+          longitudeDelta: 0.0034
+        }}
+        provider="google"
+      >
+        <Marker coordinate={{ latitude: region.latitude, longitude: region.longitude }} />
+        <Marker
+          coordinate={pin}
+          pinColor="red"
+          draggable={true}
+          onDragStart={(e) => {
+            console.log("Drag start", e.nativeEvent.coordinates)
+          }}
+          onDragEnd={(e) => {
+            setPin({
+              latitude: e.nativeEvent.coordinate.latitude,
+              longitude: e.nativeEvent.coordinate.longitude
+            })
+          }}
+        >
+          <Callout>
+            <Text>Hiện Tại</Text>
+          </Callout>
+        </Marker>
+
+
+        <Circle radius={100} center={{
+          latitude: 16.060932,
+          longitude: 108.241346,
+        }} />
+
+
+      </MapView>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <View style={styles.chooseJob}>
         <Text>Nghề Nghiệp Của Bạn</Text>
       </View>
-
-
+      <View style={{ backgroundColor: 'red' }}>
+        <View style={[styles.row, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text style={{ fontSize: 20, marginRight: 5 }}>Vai Trò Của Bạn</Text>
+        </View>
+        <FlatList
+          data={listTag}
+          renderItem={renderListTag}
+          keyExtractor={item => item.id}
+        />
+      </View>
       <View style={styles.listService}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: 'center' }]}>
-          <Text style={{ fontSize: 20, marginRight: 5 }}>Kê Khai dịch vụ Của Bạn</Text>
+          <Text style={{ fontSize: 20, marginRight: 5 }}>Kê khai dịch vụ của bạn</Text>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <MaterialCommunityIcons name='briefcase-plus-outline' size={25} color='#ff6600' />
           </TouchableOpacity>
@@ -207,22 +368,21 @@ export default function IndexRepairmen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 5,
-    backgroundColor: 'gray'
+    padding: 10,
+    marginTop: 50,
   },
   row: {
     flexDirection: 'row'
   },
   chooseJob: {
     backgroundColor: 'yellow',
-    margin: 5,
     borderRadius: 10,
   }
   ,
   listService: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f234',
     borderRadius: 10,
-    margin: 5
+    marginVertical: 10
   }
   ,
   listWork: {
