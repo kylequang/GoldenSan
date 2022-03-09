@@ -71,7 +71,7 @@ export default function ListOrder() {
                 <View>
                     <View style={{ flexDirection: 'row',marginBottom:2,marginTop:2 }}>
                         <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
-                        <View style={{ marginLeft: 5, ju}}>
+                        <View style={{ marginLeft: 5 }}>
                             <Text style={{ fontSize: 18 }}>Thông tin liên lạc</Text>
                             <Text>SDT: 123456789</Text>
                             <Text>Địa chỉ: Đà Nẵng</Text>

@@ -1,14 +1,11 @@
-
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import RepairmenLoading from '../components/animation/RepairmenLoading';
 import BottomRepairmen from './repairmen/BottomRepairmen';
 import BottomTab from './client/BottomTab';
-import { getRoleUserAsyncStorage } from '../service/getData';
 import ListRepairmen from '../screens/client/ListRepairmen';
-import { auth } from '../database/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import DetailRepairmen from '../screens/client/DetailRepairmen';
+import BookOrder from '../screens/client/BookOrder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function truncate(str, n) {
@@ -23,17 +20,17 @@ export default function AppStack() {
     setTimeout(() => {
       setLoading(false);
     }, 4000);
-    
+
     const role = await AsyncStorage.getItem('role');
-    if(role==='client'){
+    if (role === 'client') {
       setRole('client')
-    }else if(role ==='repairmen'){
+    } else if (role === 'repairmen') {
       setRole('repairmen')
     }
 
   }, []);
 
-  
+
   return (
     <RoleStacks.Navigator >
       {loading ?
@@ -43,6 +40,18 @@ export default function AppStack() {
           (<RoleStacks.Screen name='home_repairmen' component={BottomRepairmen} options={{ headerShown: false }} />)}
       <RoleStacks.Screen name="listRepairmen"
         component={ListRepairmen}
+        options={({ route }) => ({
+          title: truncate(route.params.name, 25),
+          headerTitleAlign: 'center',
+        })} />
+        <RoleStacks.Screen name="detailRepairmen"
+        component={DetailRepairmen}
+        options={({ route }) => ({
+          title: truncate(route.params.name, 25),
+          headerTitleAlign: 'center',
+        })} />
+         <RoleStacks.Screen name="bookOrder"
+        component={BookOrder}
         options={({ route }) => ({
           title: truncate(route.params.name, 25),
           headerTitleAlign: 'center',

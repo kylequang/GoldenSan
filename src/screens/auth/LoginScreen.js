@@ -118,10 +118,6 @@ const PhoneNumber = ({ navigation }) => {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
     }
-
-
-
-
     async function logInFB() {
         try {
             await Facebook.initializeAsync({
@@ -410,7 +406,7 @@ const PhoneNumber = ({ navigation }) => {
                         initialValues={{
                             name: '',
                             email: '',
-                            Phone: '',
+                            age:'',
                             password: ''
                         }}
                         onSubmit={async (values) => {
@@ -435,9 +431,6 @@ const PhoneNumber = ({ navigation }) => {
                                 .string()
                                 .email()
                                 .required('Trường này là bắt buộc.'),
-                            Phone: yup
-                                .number()
-                                .required('Trường này là bắt buộc'),
                             age: yup
                                 .number()
                                 .min(10)
@@ -473,14 +466,14 @@ const PhoneNumber = ({ navigation }) => {
                                     <Text style={styles.errorsText}>{errors.email}</Text>
                                 }
                                 <TextInput
-                                    value={values.Phone}
+                                    value={values.age}
                                     style={styles.textInput}
                                     placeholder="10 < Tuổi <70"
                                     onBlur={() => setFieldTouched('age')}
                                     onChangeText={handleChange('age')}
                                 />
-                                {touched.Phone && errors.Phone &&
-                                    <Text style={styles.errorsText}>{errors.Phone}</Text>
+                                {touched.age && errors.age &&
+                                    <Text style={styles.errorsText}>{errors.age}</Text>
                                 }
                                 <TextInput
                                     value={values.password}

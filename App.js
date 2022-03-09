@@ -1,13 +1,13 @@
-
+import {LogBox } from 'react-native';
 import { useEffect, useState } from 'react';
-import { LogBox  } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer} from '@react-navigation/native';
 import RepairmenLoading from './src/components/animation/RepairmenLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RoleStack from './src/navigation/RoleStack';
 import AuthScreen from './src/navigation/AuthScreen';
+import RoleStack from './src/navigation/RoleStack';
 
 LogBox.ignoreAllLogs();
+
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function App() {
     getRememberLogin();
   }, []);
   return (
-    <NavigationContainer >
+    <NavigationContainer  >
       {
         loading ? (<RepairmenLoading />) : rememberLogin === null ? (<AuthScreen />) : (<RoleStack />)
       }
