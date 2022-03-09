@@ -267,7 +267,7 @@ const PhoneNumber = ({ navigation }) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
-                            onPress={logInFB}
+
                         >
                             <Ionicons name="logo-google" size={22} color={"white"} />
                             <Text style={styles.buttonText}>Đăng nhập với Google</Text>
