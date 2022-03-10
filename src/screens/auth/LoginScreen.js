@@ -52,8 +52,8 @@ const PhoneNumber = ({ navigation }) => {
     const [checkRole, setCheckRole] = useState('client');
     const [showLoading, setShowLoading] = useState(true);
     const [uid, setUid] = useState(null);
+    const [checkSex, setCheckSex] = useState('nam');
 
-    const [checkAccountRepairmen, setCheckAccountRepairmen] = useState();
     useEffect(() => {
         setTimeout(() => {
             setShowLoading(false)
@@ -181,9 +181,12 @@ const PhoneNumber = ({ navigation }) => {
         setStep('Enter_Info');
     }
 
-    const [image, setImage] = useState(null);
-    const [photoURL, setPhotoURL] = useState(null);
 
+
+    const [image, setImage] = useState(null);
+    const [photoURL, setPhotoURL] = useState('');
+    let url = '';
+    let uri1=null;
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync(); // permission
         if (permissionResult.granted === false) {
@@ -196,22 +199,54 @@ const PhoneNumber = ({ navigation }) => {
             aspect: [4, 3],
             quality: 1,
         });
-        if (!result.cancelled) {
-            setImage(result.uri)
+        const uri = result.uri;
+        setImage(uri);
+        uri1=uri
+        console.log(uri);
+        const filename = uri.substring(uri.lastIndexOf('/') + 1);
 
-        }
-        const filename = image.substring(image.lastIndexOf('/') + 1);
-        const avatarRef = ref(storage, 'client/' + filename);
-        const img = await fetch(image);
+        const avatarRef = ref(storage, filename);
+        const img = await fetch(uri);
         const bytes = await img.blob();
+      
         await uploadBytes(avatarRef, bytes).then(async (e) => {
-            const url = await getDownloadURL(avatarRef)
-            setPhotoURL(url)
-            console.log('link avatar', photoURL)
+            url = await getDownloadURL(avatarRef);
         });
+
+        if(url != ''){
+            console.log('Upload success');
+            setPhotoURL(url);
+        }
+ 
+        console.log('hi',photoURL);
+
+        // console.log('uri: ', result.uri)
+        // if (!result.cancelled) {
+        //     setImage(result.uri)
+        // }
+
+
+        // const filename = result.uri.substring(result.uri.lastIndexOf('/') + 1);
+
+        // console.log('fileName: '+filename);
+        // const filename = image.substring(image.lastIndexOf('/') + 1);
+
+        // const avatarRef = ref(storage, filename);
+        // const img = await fetch(image);
+        // const bytes = await img.blob();
+        // let url = '';
+        // uploadBytes(avatarRef, bytes).then(async (e) => {
+        //     url = await getDownloadURL(avatarRef)
+        //     if (url !== '') {
+        //         setPhotoURL(url)
+        //     }
+        // });
+        // await uploadBytes(avatarRef, bytes)
+        // const url = await getDownloadURL(avatarRef)
+        // setPhotoURL(url)
+        //await uploadImage(filename);
+        console.log(url);
     }
-    //Process enter information of user
-    const [checkSex, setCheckSex] = useState('nam');
     //Loading UI
     if (showLoading) return <RepairmenLoading />
 
@@ -272,6 +307,15 @@ const PhoneNumber = ({ navigation }) => {
                             <Ionicons name="logo-google" size={22} color={"white"} />
                             <Text style={styles.buttonText}>Đăng nhập với Google</Text>
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
+                            onPress={() => openImagePickerAsync()}
+                        >
+                            <Ionicons name="logo-google" size={22} color={"white"} />
+                            <Text style={styles.buttonText}>Test</Text>
+                        </TouchableOpacity>
+
                     </SafeAreaView>
                 </View>
             }
@@ -400,7 +444,7 @@ const PhoneNumber = ({ navigation }) => {
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
                     <View style={{ alignItems: 'center' }}>
                         <Button title="Chọn Ảnh Đại Diện" onPress={openImagePickerAsync} />
-                        {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
+                        { image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
                     </View>
                     <Formik
                         initialValues={{
