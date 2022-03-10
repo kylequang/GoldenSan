@@ -27,7 +27,6 @@ export default function AppStack() {
     } else if (role === 'repairmen') {
       setRole('repairmen')
     }
-
   }, []);
 
 
