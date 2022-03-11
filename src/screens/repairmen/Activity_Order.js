@@ -1,11 +1,12 @@
-import { View, Text, Dimensions, } from 'react-native'
-import React, { useState, useRef } from 'react'
+import { View, Text, Dimensions, FlatList } from 'react-native'
+import React, { useState, useRef, useEffect } from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import ListOrder from './ListOrder';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
+
 
 const activeTab = createMaterialTopTabNavigator();
 const GOOGLE_MAPS_APIKEY = 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0';
@@ -14,6 +15,7 @@ function HistoryOrder() {
   return (
     <View>
       <Text>Lịch Sử Đơn Hàng</Text>
+
     </View>
   )
 }
@@ -119,9 +121,78 @@ function FixingOrder() {
   )
 }
 function Cancel() {
+
+  const [location, setLocation] = useState([
+    {
+      pickupCords: {
+        'latitude': 16.059809822553397,
+        'longitude': 108.24354026119771,
+        'latitudeDelta': 0.0042,
+        'longitudeDelta': 0.0421
+      }
+    },
+    {
+      pickupCords: {
+        'latitude': 16.059070171942114,
+        'longitude': 108.24175335124662,
+        'latitudeDelta': 0.0042,
+        'longitudeDelta': 0.0421
+      }
+    }, {
+      pickupCords: {
+        'latitude': 16.051921522645138,
+        'longitude': 108.23802557056426,
+        'latitudeDelta': 0.0042,
+        'longitudeDelta': 0.0421
+      }
+    },
+    {
+      pickupCords: {
+        'latitude': 16.0484728028824,
+        'longitude': 108.22690889265418,
+        'latitudeDelta': 0.0042,
+        'longitudeDelta': 0.0421
+      }
+    }
+  ])
+
+  // const [location, setLocation] = useState([]);
+  // useEffect(() => {
+  //   const data = []
+  //   const querySnapshot = await getDocs(collection(db, 'repairmen'))
+  //   querySnapshot.forEach((doc) => {
+  //     data.push(doc.data())
+  //   })
+  //    setLocation(data)
+  // }, [])
+
+  const renderLocation = ({ item }) => (
+    <Marker coordinate={location[0].pickupCords} />
+  )
+  const mapRef = useRef()
   return (
     <View>
-      <Text>Đơn hàng bị hủy</Text>
+      <MapView initialRegion={location[0].pickupCords} ref={mapRef} style={{
+        width: Dimensions.get("window").width,
+        height: 500
+      }}
+        showsTraffic={true}
+        userLocationUpdateInterval={5000}
+      >
+
+        {/* <Marker coordinate={location[0].pickupCords} />
+        <Marker coordinate={location[1].pickupCords} />
+        <Marker coordinate={location[2].pickupCords} />
+        <Marker coordinate={location[3].pickupCords} /> */}
+        {
+          location.map((item, id) => (
+            <Marker key={id} coordinate={item.pickupCords} image={require('../../../assets/logo/icon_map_repairmen.png')} width={8}
+              height={8} />
+          ))
+        }
+
+        {/* <FlatList data={location} renderItem={renderLocation} keyExtractor={item => item.id} /> */}
+      </MapView>
     </View>
   )
 }
@@ -131,7 +202,6 @@ export default function Activity_Order() {
       <activeTab.Navigator style={{ marginTop: 20 }}
         initialRouteName='Đơn Hàng'
         screenOptions={{
-          // lazy: true,
           tabBarScrollEnabled: true,
           tabBarLabelStyle: { fontSize: 13 },
           tabBarItemStyle: { width: 100 },

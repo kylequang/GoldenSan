@@ -42,3 +42,13 @@ export const getRoleUserAsyncStorage = async () => {
   const jsonValue = await AsyncStorage.getItem('newUser')
   return jsonValue != null ? JSON.parse(jsonValue) : null
 }
+
+export const getLocationRepairmen = async () => {
+  const data = [];
+  const location = collection(db, "repairmen");
+  const querySnapshot = await getDocs(location);
+  querySnapshot.forEach((doc) => {
+    data.push(doc.data())
+  })
+  return data;
+}
