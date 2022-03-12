@@ -16,12 +16,15 @@ export default function BottomTab() {
                     let iconName;
                     if (route.name === "Trang Chủ")
                         iconName = focused ? 'home' : 'home';
-                    else if(route.name === 'Hồ Sơ')
-                    iconName = focused ? 'account' : 'account';
-                    else if(route.name === 'Thông Báo')
-                    iconName = focused?'ring':'ring';
+                    else if (route.name === 'Hoạt Động')
+                        iconName = focused ? 'clock' :'clock';
+                    else if (route.name === 'Hồ Sơ')
+                        iconName = focused ? 'account' : 'account';
+
+                    else if (route.name === 'Thông Báo')
+                        iconName = focused ? 'bell-ring' : 'bell-ring';
                     return (
-                        <MaterialCommunityIcons name={iconName} size={30} color={color} />
+                        <MaterialCommunityIcons name={iconName} size={25} color={color} />
                     );
                 },
                 tabBarActiveTintColor: '#ff6600',
@@ -33,6 +36,7 @@ export default function BottomTab() {
             })}
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
+            <Tab.Screen name="Hoạt Động" component={Index} />
             <Tab.Screen name="Thông Báo" component={Index} />
             <Tab.Screen
                 name="Hồ Sơ"

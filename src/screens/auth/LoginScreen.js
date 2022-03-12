@@ -19,6 +19,8 @@ import RepairmenLoading from "../../components/animation/RepairmenLoading";
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import * as Facebook from 'expo-facebook';
+import * as Location from 'expo-location';
+import Constants from 'expo-constants';
 import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
@@ -27,7 +29,6 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { checkAccountOfClient, checkAccountSurvive, phoneCheckAccountSurvive } from '../../../src/service/getData';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytesResumable, uploadBytes, } from 'firebase/storage';
-import { NativeModules } from "react-native"
 
 // Firebase references
 const app = getApp();
@@ -81,6 +82,25 @@ const PhoneNumber = ({ navigation }) => {
         }
     }
 
+    const [currentLocation, setCurrentLocation] = useState(null)
+
+    const getCurrentLocation = async () => {
+        if (Platform.OS === 'android' && !Constants.isDevice) {
+            setErrorMsg(
+                'Oops, this will not work on Snack in an Android emulator. Try it on your device!'
+            );
+            return;
+        }
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            setErrorMsg('Quyền Truy Cập Bị Từ Chối');
+            return;
+        }
+        let location = await Location.getCurrentPositionAsync({});
+        console.log(location);
+        setCurrentLocation(location);
+
+    }
     //verify otp code
     const verifyOTP = async () => {
         try {
@@ -98,18 +118,18 @@ const PhoneNumber = ({ navigation }) => {
             if (checkAccountOfRepairmen == null && checkAccountOfClient == null) { // không tồn tại tài khoản trong firebase
                 console.log('ko tồn tại')
                 setStep('VERIFY_SUCCESS');
-            } else if (checkAccountOfRepairmen != null) {
-                console.log('Tồn tại tài khoản trong thợ sữa chữa')
-                await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
-                await AsyncStorage.setItem('rememberLogin', 'yes')
-                // NativeModules.DevSettings.reload();
-                navigation.navigate('checkRole')
-
-            } else if (checkAccountOfClient != null) {
-                console.log('Tồn tại tài khoản trong Hộ Gia Đình')
-                await AsyncStorage.setItem('role', checkAccountOfClient.role);
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                await getCurrentLocation();
+            } else {
+                if (checkAccountOfRepairmen != null) {
+                    console.log('Tồn tại tài khoản trong thợ sữa chữa')
+                    await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
+                    await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                }
+                if (checkAccountOfClient != null) {
+                    console.log('Tồn tại tài khoản trong Hộ Gia Đình')
+                    await AsyncStorage.setItem('role', checkAccountOfClient.role);
+                    await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+                }
                 await AsyncStorage.setItem('rememberLogin', 'yes')
                 navigation.navigate('checkRole')
             }
@@ -164,7 +184,6 @@ const PhoneNumber = ({ navigation }) => {
         });
         await AsyncStorage.setItem('role', checkRole);
         await AsyncStorage.setItem('rememberLogin', 'yes');
-        // NativeModules.DevSettings.reload();
         navigation.navigate('checkRole')
     }
 
@@ -215,35 +234,6 @@ const PhoneNumber = ({ navigation }) => {
             console.log('Upload success');
             setPhotoURL(url);
         }
-
-        console.log('hi', photoURL);
-
-        // console.log('uri: ', result.uri)
-        // if (!result.cancelled) {
-        //     setImage(result.uri)
-        // }
-
-
-        // const filename = result.uri.substring(result.uri.lastIndexOf('/') + 1);
-
-        // console.log('fileName: '+filename);
-        // const filename = image.substring(image.lastIndexOf('/') + 1);
-
-        // const avatarRef = ref(storage, filename);
-        // const img = await fetch(image);
-        // const bytes = await img.blob();
-        // let url = '';
-        // uploadBytes(avatarRef, bytes).then(async (e) => {
-        //     url = await getDownloadURL(avatarRef)
-        //     if (url !== '') {
-        //         setPhotoURL(url)
-        //     }
-        // });
-        // await uploadBytes(avatarRef, bytes)
-        // const url = await getDownloadURL(avatarRef)
-        // setPhotoURL(url)
-        //await uploadImage(filename);
-        console.log(url);
     }
     //Loading UI
     if (showLoading) return <RepairmenLoading />
@@ -441,22 +431,26 @@ const PhoneNumber = ({ navigation }) => {
                             name: '',
                             email: '',
                             age: '',
-                            password: '',
-
                         }}
                         onSubmit={async (values) => {
                             await AsyncStorage.setItem('role', checkRole);
                             await AsyncStorage.setItem('rememberLogin', 'yes');
                             await setDoc(doc(db, checkRole, uid), {
                                 name: values.name,
+                                age: values.age,
                                 email: values.email,
                                 phoneNumber: tempPhone,
                                 role: checkRole,
                                 sex: checkSex,
                                 photoURL: photoURL,
                                 uid: uid,
-                                status: 'active'
-
+                                status: 'active',
+                                detailLocation: {
+                                    latitude: currentLocation.coords.latitude,
+                                    longitude: currentLocation.coords.longitude,
+                                    latitudeDelta: 0.0042,
+                                    longitudeDelta: 0.0421
+                                }
                             });
                             navigation.navigate('checkRole');
                         }
@@ -474,11 +468,6 @@ const PhoneNumber = ({ navigation }) => {
                                 .min(10)
                                 .max(70)
                                 .required('Trường này là bắt buộc'),
-                            password: yup
-                                .string()
-                                .min(4, 'Mật khẩu không được dưới 4 kí tự.')
-                                .max(11, 'Mật khẩu không được vượt quá 12 kí tự.')
-                                .required('Trường này bắt buộc'),
                         })}
                     >
                         {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
@@ -512,17 +501,6 @@ const PhoneNumber = ({ navigation }) => {
                                 />
                                 {touched.age && errors.age &&
                                     <Text style={styles.errorsText}>{errors.age}</Text>
-                                }
-                                <TextInput
-                                    value={values.password}
-                                    style={styles.textInput}
-                                    placeholder="Mật khẩu"
-                                    onBlur={() => setFieldTouched('password')}
-                                    onChangeText={handleChange('password')}
-                                    secureTextEntry={true}
-                                />
-                                {touched.password && errors.password &&
-                                    <Text style={styles.errorsText}>{errors.password}</Text>
                                 }
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>

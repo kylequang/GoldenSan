@@ -36,7 +36,6 @@ export default function BottomRepairmen() {
                 tabBarActiveTintColor: '#ff6600',
                 tabBarInactiveTintColor: 'gray',
                 headerTitleAlign: 'center',
-                // tabBarShowLabel:false
                 tabBarLabelStyle: {
                     marginBottom: 2,
                     fontSize: 12
