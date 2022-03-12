@@ -147,7 +147,6 @@ const PhoneNumber = ({ navigation }) => {
                     permissions: ['public_profile'],
                 });
             if (type === 'success') {
-                console.log(123)
                 const facebookCredential = FacebookAuthProvider.credential(token);
                 const client = await signInWithCredential(auth, facebookCredential);
                 setUid(client.user.uid);
@@ -175,12 +174,19 @@ const PhoneNumber = ({ navigation }) => {
 
         await setDoc(doc(db, checkRole, uid), {
             name: value.user.displayName,
-            email: '',
-            phoneNumber: '',
+            email: value.user.providerData[0].email,
+            phoneNumber: value.user.providerData[0].phoneNumber,
             role: checkRole,
             sex: checkSex,
             photoURL: value.user.photoURL,
-            uid: uid
+            uid: uid,
+            status: 'active',
+            detailLocation: {
+                latitude: currentLocation.coords.latitude,
+                longitude: currentLocation.coords.longitude,
+                latitudeDelta: 0.0042,
+                longitudeDelta: 0.0421
+            }
         });
         await AsyncStorage.setItem('role', checkRole);
         await AsyncStorage.setItem('rememberLogin', 'yes');
