@@ -128,7 +128,7 @@ export default function IndexRepairmen() {
     <SafeAreaView style={styles.container}>
 
 
-      <GooglePlacesAutocomplete
+      {/* <GooglePlacesAutocomplete
         fetchDetails={true}
         GooglePlacesSearchQuery={{
           rankby: "distance"
@@ -196,7 +196,7 @@ export default function IndexRepairmen() {
         }} />
 
 
-      </MapView>
+      </MapView> */}
 
 
 

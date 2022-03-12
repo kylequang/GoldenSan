@@ -6,6 +6,7 @@ import Activity_Order from '../../screens/repairmen/Activity_Order';
 import More from '../../screens/repairmen/More';
 import Contact from '../../screens/Contact';
 import Report from '../../screens/repairmen/Report';
+import MapRepairmen from '../../screens/repairmen/MapRepairmen';
 const Tab = createBottomTabNavigator();
 
 export default function BottomRepairmen() {
@@ -26,6 +27,8 @@ export default function BottomRepairmen() {
                         iconName = focused ? 'phone-classic' : 'phone-classic';
                     else if (route.name === 'Báo Cáo')
                         iconName = focused ? 'chart-bar' : 'chart-bar';
+                    else if (route.name === 'Bản Đồ')
+                        iconName = focused ? 'map-marker' : 'map-marker';
                     return (
                         <MaterialCommunityIcons name={iconName} size={30} color={color} />
                     );
@@ -44,6 +47,7 @@ export default function BottomRepairmen() {
             <Tab.Screen name="Hoạt Động" component={Activity_Order} />
             <Tab.Screen name="Báo Cáo" component={Report} />
             <Tab.Screen name='Liên Hệ' component={Contact} />
+            <Tab.Screen name='Bản Đồ' component={MapRepairmen} />
             <Tab.Screen name="Hồ Sơ" component={More} />
         </Tab.Navigator>
     );

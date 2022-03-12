@@ -165,7 +165,7 @@ const PhoneNumber = ({ navigation }) => {
         await AsyncStorage.setItem('role', checkRole);
         await AsyncStorage.setItem('rememberLogin', 'yes');
         // NativeModules.DevSettings.reload();
-        navigation.navigate('roleCheck')
+        navigation.navigate('checkRole')
     }
 
     const getDataUser = async () => {
@@ -181,12 +181,10 @@ const PhoneNumber = ({ navigation }) => {
         setStep('Enter_Info');
     }
 
-
-
     const [image, setImage] = useState(null);
     const [photoURL, setPhotoURL] = useState('');
     let url = '';
-    let uri1=null;
+    let uri1 = null;
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync(); // permission
         if (permissionResult.granted === false) {
@@ -201,24 +199,24 @@ const PhoneNumber = ({ navigation }) => {
         });
         const uri = result.uri;
         setImage(uri);
-        uri1=uri
+        uri1 = uri
         console.log(uri);
         const filename = uri.substring(uri.lastIndexOf('/') + 1);
 
         const avatarRef = ref(storage, filename);
         const img = await fetch(uri);
         const bytes = await img.blob();
-      
+
         await uploadBytes(avatarRef, bytes).then(async (e) => {
             url = await getDownloadURL(avatarRef);
         });
 
-        if(url != ''){
+        if (url != '') {
             console.log('Upload success');
             setPhotoURL(url);
         }
- 
-        console.log('hi',photoURL);
+
+        console.log('hi', photoURL);
 
         // console.log('uri: ', result.uri)
         // if (!result.cancelled) {
@@ -298,7 +296,7 @@ const PhoneNumber = ({ navigation }) => {
                             onPress={logInFB}
                         >
                             <Ionicons name="logo-facebook" size={19} color={"white"} />
-                            <Text style={styles.buttonText}>Đăng nhập với FaceBook</Text>
+                            <Text style={styles.buttonText}>Đăng nhập với Facebook</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
@@ -306,14 +304,6 @@ const PhoneNumber = ({ navigation }) => {
                         >
                             <Ionicons name="logo-google" size={22} color={"white"} />
                             <Text style={styles.buttonText}>Đăng nhập với Google</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
-                            onPress={() => openImagePickerAsync()}
-                        >
-                            <Ionicons name="logo-google" size={22} color={"white"} />
-                            <Text style={styles.buttonText}>Test</Text>
                         </TouchableOpacity>
 
                     </SafeAreaView>
@@ -342,7 +332,7 @@ const PhoneNumber = ({ navigation }) => {
                         />
                         <TouchableOpacity
                             style={verificationCode.length == 6 ? styles.button : styles.button0}
-                            disabled={verifyButton}
+                            disabled={verificationCode.length == 6 ? false : true}
                             onPress={verifyOTP}
                         >
                             <Text style={styles.buttonText}>Xác Nhận</Text>
@@ -444,7 +434,7 @@ const PhoneNumber = ({ navigation }) => {
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
                     <View style={{ alignItems: 'center' }}>
                         <Button title="Chọn Ảnh Đại Diện" onPress={openImagePickerAsync} />
-                        { image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
+                        {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
                     </View>
                     <Formik
                         initialValues={{
@@ -669,7 +659,8 @@ const styles = StyleSheet.create({
             width: 1,
             height: 5,
         },
-        borderRadius: 15
+        borderRadius: 15,
+
     },
     buttonText: {
         color: "white",
