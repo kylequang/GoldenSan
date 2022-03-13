@@ -3,6 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Index from '../../screens/client/IndexClient';
 import Manage from '../../screens/client/Manage';
+import Activity_Order from '../../screens/client/Activity_Order';
+import Notification from '../../screens/client/Notification';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,10 +18,12 @@ export default function BottomTab() {
                     let iconName;
                     if (route.name === "Trang Chủ")
                         iconName = focused ? 'home' : 'home';
-                    else if(route.name === 'Hồ Sơ')
-                    iconName = focused ? 'account' : 'account';
-                    else if(route.name === 'Thông Báo')
-                    iconName = focused?'ring':'ring';
+                    else if (route.name === 'Hoạt Động')
+                        iconName = focused ? 'clock' : 'clock';
+                    else if (route.name === 'Hồ Sơ')
+                        iconName = focused ? 'account' : 'account';
+                    else if (route.name === 'Thông Báo')
+                        iconName = focused ? 'bell' : 'bell';
                     return (
                         <MaterialCommunityIcons name={iconName} size={30} color={color} />
                     );
@@ -33,14 +37,9 @@ export default function BottomTab() {
             })}
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
-            <Tab.Screen name="Thông Báo" component={Index} />
-            <Tab.Screen
-                name="Hồ Sơ"
-                component={Manage}
-                options={{
-                    title: 'Hồ Sơ',
-                }}
-            />
+            <Tab.Screen name="Hoạt Động" component={Activity_Order}/>
+            <Tab.Screen name="Thông Báo" component={Notification} />
+            <Tab.Screen name="Hồ Sơ" component={Manage}/>
         </Tab.Navigator>
     );
 }

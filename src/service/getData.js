@@ -2,7 +2,7 @@ import { async } from '@firebase/util'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs, getDoc, query, where, doc, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../../src/database/firebase'
-
+import { getPreciseDistance } from 'geolib';
 
 
 import * as Location from 'expo-location';
@@ -58,10 +58,45 @@ export const getLocationRepairmen = async () => {
   return data;
 }
 
+
 export const getCurrentLocation = async () => {
-  let location = await Location.getCurrentPositionAsync({});
+  let { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') {
+    setErrorMsg('Quyền Truy Cập Bị Từ Chối');
+    return;
+  }
+  const location = await Location.getCurrentPositionAsync({});
   return location;
 }
+
+//calculator distance
+const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
+  var distance = getPreciseDistance(currentLocation, repairmenLocation);
+  return distance / 1000
+};
+
+// scan location near you
+export const scanLocation = async () => {
+  const currentLocation = await getCurrentLocation();
+  const listRepairmen = await getData('repairmen');
+  const dataRepairmen = [];
+  listRepairmen && listRepairmen.map(item => {
+    if (calculatePreciseDistance(
+      { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }
+      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <=1) {
+      dataRepairmen.push(item);
+    }
+  })
+  return dataRepairmen;
+}
+
+
+
+
+
+
+
+
 
 export const getAllRealTimeRepairmen = (callback) => {
   const repairmen = [];
@@ -83,7 +118,6 @@ export const getRealTimeLocationRepairmen = (callback) => {
     querySnapshot.forEach((doc) => {
       location.push(doc.data());
     });
-    console.log("Current location: ", location);
     callback(location)
   });
 

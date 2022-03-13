@@ -5,28 +5,12 @@ import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 export default function Report() {
-  const [pin, setPin] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324
-  })
-  const [region, setRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.1
-  })
 
-  const [errorMsg, setErrorMsg] = useState(null);
+
+
   const [currentLocation, setCurrentLocation] = useState(null)
 
   const getCurrentLocation = async () => {
-
-    if (Platform.OS === 'android' && !Constants.isDevice) {
-      setErrorMsg(
-        'Oops, this will not work on Snack in an Android emulator. Try it on your device!'
-      );
-      return;
-    }
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Quyền Truy Cập Bị Từ Chối');
@@ -35,7 +19,6 @@ export default function Report() {
     let location = await Location.getCurrentPositionAsync({});
     console.log(location);
     setCurrentLocation(location);
-    console.log('Địa chỉ', currentLocation);
   }
   useEffect(async () => {
     await getCurrentLocation();
@@ -75,15 +58,20 @@ export default function Report() {
           style={styles.map}
           initialRegion={{
             latitude: currentLocation.coords.latitude,
-            longitude:currentLocation.coords.longitude,
+            longitude: currentLocation.coords.longitude,
             latitudeDelta: 0.0042,
             longitudeDelta: 0.0421
           }}
           provider="google"
         >
-          <Marker coordinate={{ latitude:currentLocation.coords.latitude , longitude: currentLocation.coords.longitude }} />
+          <Marker coordinate={{ latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }} />
           <Marker
-            coordinate={pin}
+            coordinate={{
+              latitude: currentLocation.coords.latitude,
+              longitude: currentLocation.coords.longitude,
+              latitudeDelta: 0.0042,
+              longitudeDelta: 0.0421
+            }}
             pinColor="black"
             draggable={true}
           >
@@ -91,7 +79,7 @@ export default function Report() {
               <Text>I'm here</Text>
             </Callout>
           </Marker>
-          <Circle center={{latitude:currentLocation.coords.latitude , longitude: currentLocation.coords.longitude }} radius={500} />
+          <Circle center={{ latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }} radius={500} />
         </MapView>
       }
       {/* <MapView
