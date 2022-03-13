@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import {
     TouchableOpacity,
     StyleSheet,
     Text,
     View,
     ScrollView,
-    Switch,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5,MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderUser from "../../components/HeaderUser";
 import { auth } from '../../database/firebase';
@@ -42,7 +41,7 @@ export default function More({ navigation }) {
                     </View>
                     <View style={styles.row}>
                         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'phone-alt'} color="black" size={25} />
+                        <MaterialCommunityIcons name='phone-classic' size={30} color='#0D0A03' />
                             <Text style={{ marginLeft: 15, fontSize: 18 }}>Liên Hệ với Golden Sand</Text>
                         </View>
                         <View>

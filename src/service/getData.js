@@ -1,7 +1,12 @@
 import { async } from '@firebase/util'
 import { onAuthStateChanged } from 'firebase/auth'
-import { collection, getDocs, getDoc, query, where, doc } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where, doc, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../../src/database/firebase'
+
+
+
+import * as Location from 'expo-location';
+import Constants from 'expo-constants';
 
 export const getData = async (nameCollection) => {
   const data = []
@@ -51,4 +56,35 @@ export const getLocationRepairmen = async () => {
     data.push(doc.data())
   })
   return data;
+}
+
+export const getCurrentLocation = async () => {
+  let location = await Location.getCurrentPositionAsync({});
+  return location;
+}
+
+export const getAllRealTimeRepairmen = (callback) => {
+  const repairmen = [];
+  const getDataCollection = collection(db, 'repairmen');
+  onSnapshot(getDataCollection, (querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      repairmen.push(doc.data());
+    })
+    callback(repairmen)
+  })
+
+}
+
+
+export const getRealTimeLocationRepairmen = (callback) => {
+  const location = [];
+  const q = collection(db, "repairmen");
+  onSnapshot(q, (querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      location.push(doc.data());
+    });
+    console.log("Current location: ", location);
+    callback(location)
+  });
+
 }

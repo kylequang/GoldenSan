@@ -63,9 +63,7 @@ function FixingOrder() {
           height: 500
         }}
           showsUserLocation={true}
-
           showsTraffic={true}
-          // mapType='mutedStandard'
           userLocationUpdateInterval={5000}
         >
           <Marker coordinate={pickupCords} pinColor="green" draggable={true} >
@@ -73,13 +71,10 @@ function FixingOrder() {
               <Text>Bạn</Text>
             </Callout>
           </Marker>
-
-          {/* <Marker coordinate={dropLocationCords} /> */}
           <Marker coordinate={test2} />
           <MapViewDirections
             mode="DRIVING"
             origin={pickupCords}
-
             precision='high'
             // destination={dropLocationCords}
             destination={test2}
