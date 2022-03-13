@@ -5,13 +5,11 @@ import {
     Text,
     View,
     ScrollView,
-    Switch,
+    Image
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
-import HeaderUser from "../../components/HeaderUser";
 import { auth } from '../../database/firebase';
 import { NativeModules } from "react-native"
 
@@ -19,35 +17,20 @@ export default function Manage({ navigation }) {
     return (
         <SafeAreaView>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <Text style={{ textAlign: 'center', fontSize: 28, paddingBottom: 10 }}>Xin Chào!</Text>
-                <HeaderUser />
-                <View style={styles.container}>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'cog'} color="black" size={25} />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Lịch Sử Sữa Chữa</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
-                    </View>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'comments'} color="black" size={25} />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Đóng góp tính năng Golden Sand</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
-                    </View>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'phone-alt'} color="black" size={25} />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Liên Hệ với Golden Sand</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
+                <View style={styles.header}></View>
+                <Image style={styles.avatar} source={{ uri: 'https://bootdey.com/img/Content/avatar/avatar6.png' }} />
+                <View style={styles.body}>
+                    <View style={styles.bodyContent}>
+                        <Text style={styles.name}>John Doe</Text>
+                        <Text style={styles.info}>UX Designer / Mobile developer</Text>
+                        <Text style={styles.description}>Lorem ipsum dolor sit amet, saepe sapientem eu nam. Qui ne assum electram expetendis, omittam deseruisse consequuntur ius an,</Text>
+
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text>Opcion 1</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text>Opcion 2</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.footer}>

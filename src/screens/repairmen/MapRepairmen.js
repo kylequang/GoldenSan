@@ -1,16 +1,19 @@
 import { View, Dimensions, LogBox } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react';
 import MapView, { Marker } from "react-native-maps"
-import { getLocationRepairmen } from '../../service/getData';
+import {getRealTimeLocationRepairmen } from '../../service/getData';
 export default function MapRepairmen() {
 
     const [data, setData] = useState([]);
-    useEffect(async () => {
-        const data = await getLocationRepairmen()
-        setData(data)
+    useEffect( () => {
         LogBox.ignoreLogs(['Setting a timer']);
+        const location =  getRealTimeLocationRepairmen(setDataLocation)
+        setData(location)
     }, [])
 
+    function setDataLocation(location){
+        setData(location)
+    }
     const mapRef = useRef()
     return (
         <View>
@@ -29,7 +32,6 @@ export default function MapRepairmen() {
             >
                 {
                     data && data.map((item, id) => (
-
                         <Marker key={id} coordinate={item.detailLocation} image={require('../../../assets/logo/icon_map_repairmen.png')} />
                     ))
                 }
