@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity,LogBox } from 'react-native';
+import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox, ScrollView } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FontAwesome } from '@expo/vector-icons';
-
 import { getDetailRepairmen } from '../../service/getData';
+import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
+
+import { scanLocation } from '../../service/getData';
+
 const Tab = createMaterialTopTabNavigator();
 
 
 function NearAddress(props) {
-
+    const [loading, setLoading] = useState(true);
     const [listRepairmen, setListRepairmen] = useState([]);
 
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer'])
-        setListRepairmen(await getDetailRepairmen(props.role))
-    },[])
+        // setListRepairmen(await getDetailRepairmen(props.role))
+    
+        const data = await scanLocation(props.job);
+        setListRepairmen(data);
+        setLoading(false)
+    }, [])
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -24,34 +31,46 @@ function NearAddress(props) {
         >
             <Image
                 style={styles.img}
-                source={{ uri:item.avatarURL}}
+                source={{ uri: item.photoURL }}
             />
             <View style={styles.profile}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}</Text>
-                <Text >{item.address}</Text>
-                <Text style={{ marginTop: 5 }}>Khoảng cách: {item.distance} Km</Text>
+                <Text >{item.phoneNumber}</Text>
+                <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
             </View>
             <View style={styles.profile}>
                 <View style={styles.row}>
-                    <Text style={{ fontSize: 20 }}>{item.totalScoreAVG} </Text>
+                    <Text style={{ fontSize: 20 }}>{item.totalAVGComment} </Text>
                     <FontAwesome name="star" size={20} color={"#ffcc00"} />
+                    <Text>  ({item.totalCount})</Text>
                 </View>
                 <Text style={{ marginTop: 30 }}>{item.sex}</Text>
             </View>
         </TouchableOpacity>
     )
-
+    if (loading) return <ScanLoadingLocation />
     return (
         <View style={styles.container}>
-            <FlatList
-                data={listRepairmen}
-                numColumns={1}
-                renderItem={renderItem}
-                keyExtractor={item => item.uid}
-            />
+            {
+                listRepairmen && <FlatList
+                    data={listRepairmen}
+                    numColumns={1}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.uid}
+                />
+            }
         </View>
     );
 }
+
+
+
+
+
+
+
+
+
 
 function Favorite() {
     return (
@@ -60,7 +79,9 @@ function Favorite() {
         </View>
     );
 }
-export default function ListRepairmen({navigation,route}) {
+
+
+export default function ListRepairmen({ navigation, route }) {
     return (
         <Tab.Navigator
             screenOptions={{
@@ -69,7 +90,7 @@ export default function ListRepairmen({navigation,route}) {
             }}>
             <Tab.Screen name="Gần Bạn"
                 initialRouteName="Gần Bạn"
-                children={() =>  <NearAddress role={route.params.role} navigation={navigation} />}
+                children={() => <NearAddress job={route.params.job} navigation={navigation} />}
             />
             <Tab.Screen name="Ưa Chuộng" component={Favorite} />
         </Tab.Navigator>

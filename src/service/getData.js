@@ -59,6 +59,7 @@ export const getLocationRepairmen = async () => {
 }
 
 
+//get current location
 export const getCurrentLocation = async () => {
   let { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') {
@@ -76,14 +77,15 @@ const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
 };
 
 // scan location near you
-export const scanLocation = async () => {
+export const scanLocation = async (job) => {
+  console.log(job);
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
   const dataRepairmen = [];
   listRepairmen && listRepairmen.map(item => {
     if (calculatePreciseDistance(
       { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }
-      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <=1) {
+      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <=1 && item.job===job) {
       dataRepairmen.push(item);
     }
   })
