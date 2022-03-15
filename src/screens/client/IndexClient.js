@@ -10,11 +10,8 @@ export default function Index({ navigation }) {
 
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer']);
-
-        setTimeout(() => {
-            setShowLoading(false)
-        }, 4000);
         setCategory(await getData('category'));
+        setShowLoading(false)
         console.log('Category');
     }, [])
 
@@ -22,7 +19,7 @@ export default function Index({ navigation }) {
         return (
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('listRepairmen', { name: item.name, role: item.role })}
+                onPress={() => navigation.navigate('listRepairmen', { name: item.name, job: item.job })}
             >
                 <Image
                     style={styles.img}
@@ -32,7 +29,6 @@ export default function Index({ navigation }) {
             </TouchableOpacity>
         );
     };
-    // if (showLoading) return <RepairmenLoading />
     return (
         <SafeAreaView style={styles.container}>
             {

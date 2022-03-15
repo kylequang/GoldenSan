@@ -1,7 +1,7 @@
 import { View, Image,StyleSheet } from 'react-native';
 import React from 'react'
 
-export default function RepainerLoading() {
+export default function RepairmenLoading() {
     return (
         <View style={styles.container}>
             <Image

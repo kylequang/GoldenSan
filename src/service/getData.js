@@ -18,6 +18,19 @@ export const getData = async (nameCollection) => {
 }
 
 
+//get current user
+export const getCurrentUser=()=>{
+  var user = auth.currentUser;
+
+  if(user){
+    console.log(auth.currentUser?.email);
+  }else{
+    console.log("Không tìm thấy user");
+  }
+}
+
+
+
 export const getDetailRepairmen = async (role) => {
   const data = [];
   const queryJobRepairmen = query(collection(db, 'repairmen'), where('role', "==", role));
@@ -28,14 +41,16 @@ export const getDetailRepairmen = async (role) => {
   return data;
 }
 
-
-export const phoneCheckAccountSurvive = async (phoneNumber) => {
-  const { docs } = await db
-    .collection('client')
-    .where('phoneNumber', '==', phoneNumber)
-    .get()
-  return docs.map((doc) => doc.data());
+//get an document
+export const getAnDocument = async (nameCollection, idDocument) => {
+  const docRef = doc(db, nameCollection, idDocument);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
 }
+
+
+
+
 
 export const checkAccountSurvive = async (nameCollection, uid) => {
   const docRef = doc(db, nameCollection, uid);
@@ -48,6 +63,8 @@ export const getRoleUserAsyncStorage = async () => {
   return jsonValue != null ? JSON.parse(jsonValue) : null
 }
 
+
+
 export const getLocationRepairmen = async () => {
   const data = [];
   const location = collection(db, "repairmen");
@@ -59,6 +76,10 @@ export const getLocationRepairmen = async () => {
 }
 
 
+
+
+
+//get current location
 export const getCurrentLocation = async () => {
   let { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') {
@@ -68,29 +89,26 @@ export const getCurrentLocation = async () => {
   const location = await Location.getCurrentPositionAsync({});
   return location;
 }
-
 //calculator distance
 const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
   var distance = getPreciseDistance(currentLocation, repairmenLocation);
   return distance / 1000
 };
-
 // scan location near you
-export const scanLocation = async () => {
+export const scanLocation = async (job,distance,score) => {
+  console.log(job);
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
   const dataRepairmen = [];
   listRepairmen && listRepairmen.map(item => {
     if (calculatePreciseDistance(
       { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }
-      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <=1) {
+      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <= distance && item.job === job && item.totalAVG >= score ) {
       dataRepairmen.push(item);
     }
   })
   return dataRepairmen;
 }
-
-
 
 
 
@@ -122,3 +140,5 @@ export const getRealTimeLocationRepairmen = (callback) => {
   });
 
 }
+
+
