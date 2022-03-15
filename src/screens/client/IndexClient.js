@@ -10,9 +10,6 @@ export default function Index({ navigation }) {
 
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer']);
-        // setTimeout(() => {
-        //     setShowLoading(false)
-        // }, 4000);
         setCategory(await getData('category'));
         setShowLoading(false)
         console.log('Category');

@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox, ScrollView } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FontAwesome } from '@expo/vector-icons';
-import { getDetailRepairmen } from '../../service/getData';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
-
 import { scanLocation } from '../../service/getData';
+
+import { db } from '../../database/firebase';
+import SadFaceStatus from '../../components/animation/SadFaceStatus';
+
+
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -17,47 +20,50 @@ function NearAddress(props) {
         LogBox.ignoreLogs(['Setting a timer'])
         // setListRepairmen(await getDetailRepairmen(props.role))
         console.log('Tìm kiếm thợ xung quanh bạn');
-        const data = await scanLocation(props.job);
-        setListRepairmen(data);
-        setLoading(false)
+        setListRepairmen(await scanLocation(props.job, 2, 3));
+        setLoading(false);
     }, [])
 
     const renderItem = ({ item }) => (
-        
-            <TouchableOpacity
-                style={styles.button}
-                key={item.uid}
-                onPress={() => props.navigation.navigate('detailRepairmen', { item, name: item.name })}
-            >
-                <Image
-                    style={styles.img}
-                    source={{ uri: item.photoURL }}
-                />
-                <View style={styles.profile}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}</Text>
-                    <Text >{item.phoneNumber}</Text>
-                    <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
+        <TouchableOpacity
+            style={styles.button}
+            key={item.uid}
+            onPress={() => props.navigation.navigate('detailRepairmen', { item, name: item.name })}
+        >
+            <Image
+                style={styles.img}
+                source={{ uri: item.photoURL }}
+            />
+            <View style={styles.profileLeft}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}  <Text>{item.age}</Text></Text>
+                <Text >{item.phoneNumber}</Text>
+                <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
+            </View>
+
+            <View style={styles.profileRight}>
+                <View style={styles.row}>
+                    <Text style={{ fontSize: 20 }}>{item.totalAVG} </Text>
+                    <FontAwesome name="star" size={20} color={"#ffcc00"} />
+                    <Text>  ({item.totalCount})</Text>
                 </View>
-                <View style={styles.profile}>
-                    <View style={styles.row}>
-                        <Text style={{ fontSize: 20 }}>{item.totalAVGComment} </Text>
-                        <FontAwesome name="star" size={20} color={"#ffcc00"} />
-                        <Text>  ({item.totalCount})</Text>
-                    </View>
-                    <Text style={{ marginTop: 30 }}>{item.sex}</Text>
-                </View>
-            </TouchableOpacity>
+
+                <Text style={{ marginTop: 30 }}>{item.sex}</Text>
+
+            </View>
+        </TouchableOpacity>
     )
+
     if (loading) return <ScanLoadingLocation />
     return (
         <View style={styles.container}>
             {
-                listRepairmen && <FlatList
-                    data={listRepairmen}
-                    numColumns={1}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.uid}
-                />
+                listRepairmen.length == 0 ? <SadFaceStatus job={props.job} title="gần"/> :
+                    listRepairmen && <FlatList
+                        data={listRepairmen}
+                        numColumns={1}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.uid}
+                    />
             }
         </View>
     );
@@ -72,10 +78,55 @@ function NearAddress(props) {
 
 
 
-function Favorite() {
+function Favorite(props) {
+    const [loading, setLoading] = useState(true);
+    const [goodRepairmen, setGoodRepairmen] = useState([]);
+    useEffect(async () => {
+        LogBox.ignoreLogs(['Setting a timer'])
+        // setListRepairmen(await getDetailRepairmen(props.role))
+        console.log('Tìm kiếm thợ xung quanh bạn');
+        setGoodRepairmen(await scanLocation(props.job, 10, 4.5))
+        setLoading(false);
+    }, [])
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.button}
+            key={item.uid}
+            onPress={() => props.navigation.navigate('detailRepairmen', { item, name: item.name })}
+        >
+            <Image
+                style={styles.img}
+                source={{ uri: item.photoURL }}
+            />
+            <View style={styles.profileLeft}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}  <Text>{item.age}</Text></Text>
+                <Text >{item.phoneNumber}</Text>
+                <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
+            </View>
+            <View style={styles.profileRight}>
+                <View style={styles.row}>
+                    <Text style={{ fontSize: 20 }}>{item.totalAVG} </Text>
+                    <FontAwesome name="star" size={20} color={"#ffcc00"} />
+                    <Text>  ({item.totalCount})</Text>
+                </View>
+                <Text style={{ marginTop: 30 }}>{item.sex}</Text>
+            </View>
+        </TouchableOpacity>
+    )
+
+    if (loading) return <ScanLoadingLocation />
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Ưa chuộng!</Text>
+        <View style={styles.container}>
+            {
+                goodRepairmen.length == 0 ? <SadFaceStatus job={props.job} title=""/> :
+                    goodRepairmen && <FlatList
+                        data={goodRepairmen}
+                        numColumns={1}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.uid}
+                    />
+            }
         </View>
     );
 }
@@ -92,7 +143,8 @@ export default function ListRepairmen({ navigation, route }) {
                 initialRouteName="Gần Bạn"
                 children={() => <NearAddress job={route.params.job} navigation={navigation} />}
             />
-            <Tab.Screen name="Ưa Chuộng" component={Favorite} />
+            <Tab.Screen name="Ưa Chuộng"
+                children={() => <Favorite job={route.params.job} navigation={navigation} />} />
         </Tab.Navigator>
     );
 }
@@ -104,27 +156,29 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         alignItems: 'center'
     },
     img: {
         width: 90,
         height: 90,
-        // resizeMode: 'contain',
     },
     button: {
         alignItems: 'center',
-        marginBottom: 8,
+        marginVertical: 8,
         padding: 5,
         flexDirection: 'row',
         backgroundColor: 'white',
         borderRadius: 15,
     },
-    profile: {
-        marginLeft: '6%',
 
+    profileLeft: {
+        width: '40%',
+        marginLeft: 10
     },
-    text: {
-        marginBottom: 2
+    profileRight: {
+        paddingLeft: 10,
+        marginLeft: 10,
+        width: '30%',
     }
 })

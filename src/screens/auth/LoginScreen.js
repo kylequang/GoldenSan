@@ -24,10 +24,10 @@ import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { getApp } from 'firebase/app';
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { checkAccountOfClient, checkAccountSurvive, phoneCheckAccountSurvive } from '../../../src/service/getData';
+import { checkAccountSurvive, } from '../../../src/service/getData';
 import * as ImagePicker from 'expo-image-picker';
-import { getDownloadURL, ref, uploadBytesResumable, uploadBytes, } from 'firebase/storage';
-import { NativeModules } from "react-native"
+import { getDownloadURL, ref, uploadBytes, } from 'firebase/storage';
+
 
 // Firebase references
 const app = getApp();

@@ -3,6 +3,8 @@ import { Checkbox } from 'react-native-paper';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useEffect } from 'react';
+import { getCurrentUser } from '../../service/getData';
 
 
 
@@ -82,6 +84,9 @@ export default function BookOrder() {
     const [show, setShow] = useState(false);
 
 
+    useEffect(()=>{
+        getCurrentUser()
+    },[])
 
     const onChange = (event, selectedValue) => {
         setShow(Platform.OS === 'ios');

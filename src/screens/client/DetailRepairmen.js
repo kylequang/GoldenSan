@@ -1,33 +1,27 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
-import Loading from '../../components/animation/Loading';
 import { FontAwesome } from '@expo/vector-icons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { DataTable } from 'react-native-paper';
-import { getCurrentLocation, getDetailDocument } from '../../service/getData';
+import { getCurrentLocation, getAnDocument } from '../../service/getData';
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
 const GOOGLE_MAPS_APIKEY = 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0';
 
 import { formatPrice, formatNameService } from '../../service/formatCode';
-
+import RepairmenLoading from '../../components/animation/RepairmenLoading';
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
-var distance
+var distance=0;
 const OnGoogleMap = (props) => {
-
-    console.log(props.repairmenLocation);
-    console.log('Vị trí của client', props.clientLocation);
     const mapRef = useRef()
-
     return (
-
         <MapView initialRegion={{
             latitude: props.clientLocation.coords.latitude,
             longitude: props.clientLocation.coords.longitude,
-            latitudeDelta: 0.0042,
+            latitudeDelta: 0.009,
             longitudeDelta: 0.0421
         }} ref={mapRef} style={{
             width: Dimensions.get("window").width,
@@ -68,6 +62,7 @@ const OnGoogleMap = (props) => {
                 }}
                 onReady={result => {
                     distance = result.distance
+                    console.log(distance);
                     console.log(`Distance: ${result.distance} km`)
                     console.log(`Duration: ${result.duration} min.`)
                     mapRef.current.fitToCoordinates(result.coordinate, {
@@ -86,9 +81,9 @@ const OnGoogleMap = (props) => {
 }
 
 function ServiceTable(props) {
-    const renderListWork = ({ item, id }) => (
+    const renderListWork = ({ item }) => (
         <DataTable.Row key={item}>
-            <Text>{formatNameService(item.nameService)}</Text>
+            <DataTable.Cell><Text>{formatNameService(item.nameService)}</Text></DataTable.Cell>
             <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
             <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
         </DataTable.Row>
@@ -97,8 +92,8 @@ function ServiceTable(props) {
         <DataTable>
             <DataTable.Row>
                 <DataTable.Cell>Dịch Vụ</DataTable.Cell>
-                <DataTable.Cell numeric>Bảo Hành</DataTable.Cell>
                 <DataTable.Cell numeric>Chi Phí</DataTable.Cell>
+                <DataTable.Cell numeric>Bảo Hành</DataTable.Cell>
             </DataTable.Row>
             <FlatList
                 data={props.listWork.listWork}
@@ -118,16 +113,14 @@ export default function DetailRepairmen({ navigation, route }) {
     useEffect(async () => {
         setRepairman(route.params.item);
         const location = await getCurrentLocation();
-        const listWork = await getDetailDocument('listWork', route.params.item.uid)
+        const listWork = await getAnDocument('listWork', route.params.item.uid)
         setListWork(listWork)
         setCurrentLocationOfClient(location);
         setLoading(false)
-
     }, [])
 
+    if (loading) return <RepairmenLoading />
 
-
-    if (loading) return <Loading />
     return (
         <>
             <View style={styles.row}>
@@ -144,6 +137,7 @@ export default function DetailRepairmen({ navigation, route }) {
                         <Text style={styles.textInfo}>Giới tính:  {repairman.sex}</Text>
                         <Text style={styles.textInfo}>Đánh Giá:  {repairman.totalCount}</Text>
                         <Text style={styles.textInfo}>SDT:  {repairman.phoneNumber}</Text>
+                        {distance!=0&&<Text>{distance}</Text>}
                     </View>
                 </View>
             </View>
@@ -160,6 +154,7 @@ export default function DetailRepairmen({ navigation, route }) {
                 </TouchableOpacity>
             </View>
             <TabDetailRepairmen.Navigator
+                initialRouteName='Bảng Giá'
                 screenOptions={{
                     tabBarLabelStyle: { fontSize: 15, fontWeight: 'bold' },
                     tabBarStyle: { backgroundColor: 'white' },
