@@ -4,11 +4,14 @@ import Loading from '../../components/animation/Loading';
 import { FontAwesome } from '@expo/vector-icons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { DataTable } from 'react-native-paper';
-import { getCurrentLocation } from '../../service/getData';
+import { getCurrentLocation, getDetailDocument } from '../../service/getData';
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
 const GOOGLE_MAPS_APIKEY = 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0';
+
+import { formatPrice, formatNameService } from '../../service/formatCode';
+
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
@@ -44,7 +47,7 @@ const OnGoogleMap = (props) => {
                     <Text>Bạn</Text>
                 </Callout>
             </Marker>
-            <Marker coordinate={props.repairmenLocation} image={require('../../../assets/logo/icon_map_repairmen.png')}/>
+            <Marker coordinate={props.repairmenLocation} image={require('../../../assets/logo/icon_map_repairmen.png')} />
             <MapViewDirections
                 mode="DRIVING"
                 origin={{
@@ -82,101 +85,27 @@ const OnGoogleMap = (props) => {
     )
 }
 
-const listWork = [
-    {
-        id: 1,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    },
-    {
-        id: 2,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 3,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 4,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 5,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 6,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 7,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 8,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 9,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 10,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }
-]
-function ServiceTable() {
-
-    const renderListWork = ({ item }) => (
-        <DataTable.Row key={item.id}>
-            <DataTable.Cell>{item.service}</DataTable.Cell>
-            <DataTable.Cell numeric>{item.price}</DataTable.Cell>
-            <DataTable.Cell numeric>{item.insurance}</DataTable.Cell>
+function ServiceTable(props) {
+    const renderListWork = ({ item, id }) => (
+        <DataTable.Row key={item}>
+            <Text>{formatNameService(item.nameService)}</Text>
+            <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
+            <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
         </DataTable.Row>
     )
     return (
         <DataTable>
-            <DataTable.Header >
-                <DataTable.Title >
-                    <Text style={styles.titleTable} >Dịch vụ</Text>
-                </DataTable.Title>
-                <DataTable.Title numeric>
-                    <Text style={styles.titleTable}>
-                        Chi phí/h
-                    </Text>
-                </DataTable.Title>
-                <DataTable.Title numeric>
-                    <Text style={styles.titleTable} >Bảo hành</Text>
-                </DataTable.Title>
-            </DataTable.Header>
+            <DataTable.Row>
+                <DataTable.Cell>Dịch Vụ</DataTable.Cell>
+                <DataTable.Cell numeric>Bảo Hành</DataTable.Cell>
+                <DataTable.Cell numeric>Chi Phí</DataTable.Cell>
+            </DataTable.Row>
             <FlatList
-                data={listWork}
+                data={props.listWork.listWork}
                 renderItem={renderListWork}
                 keyExtractor={item => item.id}
             />
         </DataTable>
-
 
     )
 }
@@ -184,24 +113,21 @@ function ServiceTable() {
 export default function DetailRepairmen({ navigation, route }) {
     const [repairman, setRepairman] = useState({});
     const [loading, setLoading] = useState(true);
+    const [listWork, setListWork] = useState({});
     const [currentLocationOfClient, setCurrentLocationOfClient] = useState(null);
-    useEffect(() => {
+    useEffect(async () => {
         setRepairman(route.params.item);
-        setTimeout(async () => {
-            const location = await getCurrentLocation();
-            setCurrentLocationOfClient(location);
-            setLoading(false)
-        }, 1000)
+        const location = await getCurrentLocation();
+        const listWork = await getDetailDocument('listWork', route.params.item.uid)
+        setListWork(listWork)
+        setCurrentLocationOfClient(location);
+        setLoading(false)
 
     }, [])
 
 
 
     if (loading) return <Loading />
-
-
-
-
     return (
         <>
             <View style={styles.row}>
@@ -233,19 +159,17 @@ export default function DetailRepairmen({ navigation, route }) {
                     <Text style={{ fontSize: 18 }}>Đặt Lịch</Text>
                 </TouchableOpacity>
             </View>
-
-
-
             <TabDetailRepairmen.Navigator
                 screenOptions={{
                     tabBarLabelStyle: { fontSize: 15, fontWeight: 'bold' },
                     tabBarStyle: { backgroundColor: 'white' },
                 }}>
-                <TabDetailRepairmen.Screen name="Bảng giá" component={ServiceTable} />
+                <TabDetailRepairmen.Screen name="Bảng giá"
+                    children={() => <ServiceTable listWork={listWork} />}
+                />
                 <TabDetailRepairmen.Screen name="Xem Bản Đồ"
                     children={() => <OnGoogleMap repairmenLocation={repairman.detailLocation} clientLocation={currentLocationOfClient} />}
                 />
-
             </TabDetailRepairmen.Navigator>
         </>
     )

@@ -13,40 +13,40 @@ const Tab = createMaterialTopTabNavigator();
 function NearAddress(props) {
     const [loading, setLoading] = useState(true);
     const [listRepairmen, setListRepairmen] = useState([]);
-
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer'])
         // setListRepairmen(await getDetailRepairmen(props.role))
-    
+        console.log('Tìm kiếm thợ xung quanh bạn');
         const data = await scanLocation(props.job);
         setListRepairmen(data);
         setLoading(false)
     }, [])
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.button}
-            key={item.uid}
-            onPress={() => props.navigation.navigate('detailRepairmen', { item, name: item.name })}
-        >
-            <Image
-                style={styles.img}
-                source={{ uri: item.photoURL }}
-            />
-            <View style={styles.profile}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}</Text>
-                <Text >{item.phoneNumber}</Text>
-                <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
-            </View>
-            <View style={styles.profile}>
-                <View style={styles.row}>
-                    <Text style={{ fontSize: 20 }}>{item.totalAVGComment} </Text>
-                    <FontAwesome name="star" size={20} color={"#ffcc00"} />
-                    <Text>  ({item.totalCount})</Text>
+        
+            <TouchableOpacity
+                style={styles.button}
+                key={item.uid}
+                onPress={() => props.navigation.navigate('detailRepairmen', { item, name: item.name })}
+            >
+                <Image
+                    style={styles.img}
+                    source={{ uri: item.photoURL }}
+                />
+                <View style={styles.profile}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>{item.name}</Text>
+                    <Text >{item.phoneNumber}</Text>
+                    <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
                 </View>
-                <Text style={{ marginTop: 30 }}>{item.sex}</Text>
-            </View>
-        </TouchableOpacity>
+                <View style={styles.profile}>
+                    <View style={styles.row}>
+                        <Text style={{ fontSize: 20 }}>{item.totalAVGComment} </Text>
+                        <FontAwesome name="star" size={20} color={"#ffcc00"} />
+                        <Text>  ({item.totalCount})</Text>
+                    </View>
+                    <Text style={{ marginTop: 30 }}>{item.sex}</Text>
+                </View>
+            </TouchableOpacity>
     )
     if (loading) return <ScanLoadingLocation />
     return (
