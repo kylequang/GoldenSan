@@ -7,6 +7,7 @@ import { getPreciseDistance } from 'geolib';
 
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getData = async (nameCollection) => {
   const data = []
@@ -18,16 +19,6 @@ export const getData = async (nameCollection) => {
 }
 
 
-//get current user
-export const getCurrentUser=()=>{
-  var user = auth.currentUser;
-
-  if(user){
-    console.log(auth.currentUser?.email);
-  }else{
-    console.log("Không tìm thấy user");
-  }
-}
 
 
 
@@ -48,6 +39,13 @@ export const getAnDocument = async (nameCollection, idDocument) => {
   return docSnap.data();
 }
 
+//get current user 
+export const getCurrentUser = async()=>{
+
+  const data = await AsyncStorage.getItem('dataUser');
+  const uid = data!=null ? JSON.parse(data):'null'
+
+}
 
 
 
@@ -89,11 +87,13 @@ export const getCurrentLocation = async () => {
   const location = await Location.getCurrentPositionAsync({});
   return location;
 }
+
 //calculator distance
 const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
   var distance = getPreciseDistance(currentLocation, repairmenLocation);
   return distance / 1000
 };
+
 // scan location near you
 export const scanLocation = async (job,distance,score) => {
   console.log(job);
@@ -138,7 +138,6 @@ export const getRealTimeLocationRepairmen = (callback) => {
     });
     callback(location)
   });
-
 }
 
 

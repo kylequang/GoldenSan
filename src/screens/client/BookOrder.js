@@ -5,88 +5,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect } from 'react';
 import { getCurrentUser } from '../../service/getData';
+import { formatPrice, formatDate } from '../../service/formatCode';
+import { DataTable } from 'react-native-paper';
 
 
 
-
-
-
-const listWork = [
-    {
-        id: 1,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    },
-    {
-        id: 2,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 3,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 4,
-        service: 'Thay Bóng Đèn',   
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 5,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 6,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 7,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 8,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    }, {
-        id: 9,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    },
-    {
-        id: 10,
-        service: 'Thay Bóng Đèn',
-        price: 150000,
-        insurance: 1,
-        isChecked: false
-    },
-]
-
-export default function BookOrder() {
+export default function BookOrder({ navigation, route }) {
+    const [totalPrice, setTotalPrice] = useState(0);
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
 
 
-    useEffect(()=>{
-        getCurrentUser()
-    },[])
+    const [selectWork, setSelectWork] = useState(route.params.listWork.listWork.map(obj => ({ ...obj, isChecked: false })))
+
+    const [bookService, setBookService] = useState([]);
+
+    useEffect(() => {
+        getCurrentUser();
+        selectWork.map(obj => ({ ...obj, isChecked: false }))
+    }, [])
+
 
     const onChange = (event, selectedValue) => {
         setShow(Platform.OS === 'ios');
@@ -109,27 +49,19 @@ export default function BookOrder() {
     const showDatePicker = () => {
         showMode('date');
     };
-    const formatDate = (date, time) => {
-        return `${date.getDate()}/${date.getMonth() +
-            1}/${date.getFullYear()} ${time.getHours()}:${time.getMinutes()}`;
-    };
-
-
-
-    const [selectWork, setSelectWork] = useState(listWork)
-
-    const [bookService, setBookService] = useState([]);
-
     const handleChange = (id) => {
         let temp = selectWork.map((work) => {
             if (id === work.id) {
                 if (work.isChecked == false) {
+                    setTotalPrice(totalPrice + work.price)
                     setBookService([...bookService, work])
                 }
                 else {
                     bookService.map((temp) => {
                         if (temp.id === work.id) {
-                            setBookService((bookService) => bookService.filter(item => item.id !== work.id))
+                            setTotalPrice(totalPrice - temp.price)
+                            setBookService((bookService) => bookService.filter(item => item.id !== work.id));
+
                         }
                     }
                     )
@@ -141,75 +73,70 @@ export default function BookOrder() {
         setSelectWork(temp);
     }
 
-    const formatPrice = (price) => {
-        return price.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-    }
 
     const renderListWork = ({ item }) => (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <DataTable.Row key={id} style={{  flexDirection: 'row', alignItems: 'center' }}>
             <Checkbox
                 status={item.isChecked ? 'checked' : 'unchecked'}
                 onPress={() => {
                     handleChange(item.id);
                 }}
             />
-            <Text>{item.service}</Text>
-            <Text style={{ marginLeft: 30 }}> {formatPrice(item.price)}</Text>
-            <Text style={{ marginLeft: 30 }}>{item.insurance} tuần</Text>
-        </View>
+            <DataTable.Cell style={{flex:2}}><Text>{item.nameService}</Text></DataTable.Cell>
+            <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
+        </DataTable.Row>
     )
 
     return (
-        <>
-            <View style={styles.container}>
-                <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ</Text>
-                <View style={styles.contact}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={{ marginBottom: 5 }}>Họ Tên: Lê Quang Kỳ</Text>
-                        <Text>Thay đổi</Text>
-                    </View>
-                    <Text style={{ marginBottom: 5 }}>SDT: 0374448052</Text>
-                    <Text style={{ marginBottom: 5 }}>Địa Chỉ: 101B Lê Hữu Trác, Phước Mỹ, Sơn Trà</Text>
+        <ScrollView style={styles.container}>
+            <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ</Text>
+            <View style={styles.contact}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ marginBottom: 5 }}>{route.params.repairmen.name}</Text>
+                    <Text>Thay đổi</Text>
                 </View>
+                <Text style={{ marginBottom: 5 }}>SDT: {route.params.repairmen.phoneNumber}</Text>
+                <Text style={{ marginBottom: 5 }}>Địa Chỉ: 101B Lê Hữu Trác, Phước Mỹ, Sơn Trà</Text>
+            </View>
 
-                <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 5 }}>
-                        CHỌN THỜI GIAN:</Text>
-                    <TouchableOpacity onPress={showDatePicker} style={styles.button}>
-                        <Text style={{ fontSize: 18 }}>
-                            {formatDate(date, time)}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                {show && (
-                    <DateTimePicker
-                        value={date}
-                        minimumDate={Date.parse(new Date())}
-                        display='default'
-                        mode={mode}
-                        onChange={onChange}
-                    />
-                )}
-                <View style={styles.listWork}>
-                    <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN CÔNG VIỆC</Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Dịch Vụ</Text>
-                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Giờ</Text>
-                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15 }}>Bảo Hành</Text>
-                    </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 5 }}>CHỌN THỜI GIAN:</Text>
+                <TouchableOpacity onPress={showDatePicker} style={styles.button}>
+                    <Text style={{ fontSize: 18 }}>
+                        {formatDate(date, time)}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+            {show && (
+                <DateTimePicker
+                    value={date}
+                    minimumDate={Date.parse(new Date())}
+                    display='default'
+                    mode={mode}
+                    onChange={onChange}
+                />
+            )}
+            <View style={styles.listWork}>
+                <Text style={{ fontSize: 18, marginBottom: 10 }}>LỰA CHỌN DỊCH VỤ</Text>
+                <DataTable>
+                    <DataTable.Row>
+                        <DataTable.Cell>Dịch Vụ</DataTable.Cell>
+                        <DataTable.Cell numeric>Chi Phí</DataTable.Cell>
+
+                    </DataTable.Row>
                     <FlatList
                         data={selectWork}
                         renderItem={renderListWork}
                         keyExtractor={item => item.id} />
-                        {console.log(listWork)}
-                </View>
+                </DataTable>
+                <Text>Phương thức thanh toán: Tiền Mặt</Text>
             </View>
             <View style={{
                 width: '80%',
                 height: 40,
                 marginLeft: '10%',
                 marginRight: '10%',
-                marginBottom: 7,
+
             }}>
                 <TouchableOpacity style={{
                     backgroundColor: '#ff8000',
@@ -217,22 +144,22 @@ export default function BookOrder() {
                     height: 40,
                     justifyContent: 'center',
                     alignItems: 'center',
-                    borderRadius: 10
+                    borderRadius: 10,
+
                 }}
-                    disabled={bookService.length == 0}
+                    disabled={totalPrice == 0}
                     onPress={() => {
-                        console.log('hi')
+                        alert("Đặt Hàng")
                     }}
                 >
                     <Text style={{
                         fontSize: 18,
                         color: 'white', fontWeight: 'bold'
-                    }}>XÁC NHẬN VÀ TIẾP TỤC</Text>
-                    {console.log(bookService)}
+                    }}>{formatPrice(totalPrice)} XÁC NHẬN</Text>
+                    {console.log('Danh sách lựa chọn dịch vụ: ', bookService)}
                 </TouchableOpacity>
             </View>
-
-        </>
+        </ScrollView>
     );
 }
 
@@ -241,7 +168,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingLeft: 20,
-        paddingRight: 20
+        paddingRight: 20,
+        backgroundColor: 'yellow'
     },
     contact: {
         padding: 15,
@@ -251,7 +179,7 @@ const styles = StyleSheet.create({
         borderColor: '#33cc33',
     },
     button: {
-        width: '40%',
+        width: '50%',
         marginLeft: 10,
         borderRadius: 8,
         justifyContent: 'center',
