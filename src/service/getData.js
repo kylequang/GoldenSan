@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// get collection
 export const getData = async (nameCollection) => {
   const data = []
   const querySnapshot = await getDocs(collection(db, nameCollection))
@@ -18,7 +19,36 @@ export const getData = async (nameCollection) => {
   return data;
 }
 
+//get an document by uid
+export const getAnDocument = async (nameCollection, idDocument) => {
+  const docRef = doc(db, nameCollection, idDocument);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+}
 
+
+// get uid of current user 
+
+export const getUidUser = async () => {
+  const dataUser = await AsyncStorage.getItem('dataUser');
+  const currentUser = dataUser != null ? JSON.parse(dataUser) : 'null';
+  return currentUser.user.uid;
+}
+
+
+
+
+// get and query order
+export const getQueryCollection = async (nameCollection,uid_client) => {
+  console.log(uid_client);
+  const data = [];
+  const queryOrder = query(collection(db, nameCollection), where('uid_client', "==", uid_client));
+  const querySnapshot = await getDocs(queryOrder)
+  querySnapshot.forEach((doc) => {
+    data.push(doc.data())
+  })
+  return data;
+}
 
 
 
@@ -32,19 +62,14 @@ export const getDetailRepairmen = async (role) => {
   return data;
 }
 
-//get an document
-export const getAnDocument = async (nameCollection, idDocument) => {
-  const docRef = doc(db, nameCollection, idDocument);
-  const docSnap = await getDoc(docRef);
-  return docSnap.data();
-}
+
 
 //get current user 
-export const getCurrentUser = async()=>{
-
+export const getCurrentUser = async () => {
   const data = await AsyncStorage.getItem('dataUser');
-  const uid = data!=null ? JSON.parse(data):'null'
-
+  const currentUser = data != null ? JSON.parse(data) : 'null';
+  const dataUser = await getAnDocument('client', currentUser.user.uid);
+  return dataUser;
 }
 
 
@@ -95,7 +120,7 @@ const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
 };
 
 // scan location near you
-export const scanLocation = async (job,distance,score) => {
+export const scanLocation = async (job, distance, score) => {
   console.log(job);
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
@@ -103,7 +128,7 @@ export const scanLocation = async (job,distance,score) => {
   listRepairmen && listRepairmen.map(item => {
     if (calculatePreciseDistance(
       { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }
-      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <= distance && item.job === job && item.totalAVG >= score ) {
+      , { latitude: item.detailLocation.latitude, longitude: item.detailLocation.longitude }) <= distance && item.job === job && item.totalAVG >= score) {
       dataRepairmen.push(item);
     }
   })

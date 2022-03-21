@@ -14,7 +14,14 @@ export const formatNameService = (string) => {
     }
 }
 
-export const formatDate = (date, time) => {
+export const formatDateTime = (date, time) => {
     return `${date.getDate()}/${date.getMonth() +
         1}/${date.getFullYear()} ${time.getHours()}:${time.getMinutes()}`;
 };
+
+export const formatTime = (time) => {
+    return `${time.getHours()}:${time.getMinutes()}`;
+}
+export const formatDate = (date) => {
+    return `${date.getDate()}/${date.getMonth() +1}/${date.getFullYear()}`
+}

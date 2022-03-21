@@ -4,8 +4,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { FontAwesome } from '@expo/vector-icons';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
 import { scanLocation } from '../../service/getData';
-
-import { db } from '../../database/firebase';
 import SadFaceStatus from '../../components/animation/SadFaceStatus';
 
 

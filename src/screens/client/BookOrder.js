@@ -1,32 +1,49 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { Checkbox } from 'react-native-paper';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect } from 'react';
 import { getCurrentUser } from '../../service/getData';
-import { formatPrice, formatDate } from '../../service/formatCode';
+import { formatPrice, formatDate, formatTime, formatDateTime } from '../../service/formatCode';
 import { DataTable } from 'react-native-paper';
-
+import { putOrder } from '../../service/pushData';
 
 
 export default function BookOrder({ navigation, route }) {
     const [totalPrice, setTotalPrice] = useState(0);
+    const [shipPrice, setShipPrice] = useState(0);
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
-
-
     const [selectWork, setSelectWork] = useState(route.params.listWork.listWork.map(obj => ({ ...obj, isChecked: false })))
-
     const [bookService, setBookService] = useState([]);
 
-    useEffect(() => {
-        getCurrentUser();
-        selectWork.map(obj => ({ ...obj, isChecked: false }))
-    }, [])
 
+    const handleBookOrder = async () => {
+        const data = {
+            uid_client: route.params.dataUser.uid,
+            uid_repairmen: route.params.repairmen.uid,
+            informationClient: {
+                name: route.params.dataUser.name,
+                sdt: route.params.dataUser.phoneNumber,
+                age: route.params.dataUser.age,
+                sex: route.params.dataUser.sex,
+                photoURL: route.params.dataUser.photoURL
+            },
+            distance: route.params.distance,
+            date: formatDate(date),
+            time: formatTime(time),
+            createDay: new Date(),
+            totalPrice: totalPrice,
+            bookService: bookService,
+            status: 'Đang chờ'
+        }
+
+        await putOrder(data);
+        alert("Đặt Lịch Thành Công !")
+        navigation.navigate('ActivityOrder');
+    }
 
     const onChange = (event, selectedValue) => {
         setShow(Platform.OS === 'ios');
@@ -61,7 +78,6 @@ export default function BookOrder({ navigation, route }) {
                         if (temp.id === work.id) {
                             setTotalPrice(totalPrice - temp.price)
                             setBookService((bookService) => bookService.filter(item => item.id !== work.id));
-
                         }
                     }
                     )
@@ -75,20 +91,24 @@ export default function BookOrder({ navigation, route }) {
 
 
     const renderListWork = ({ item }) => (
-        <DataTable.Row key={id} style={{  flexDirection: 'row', alignItems: 'center' }}>
+        <DataTable.Row key={item.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Checkbox
                 status={item.isChecked ? 'checked' : 'unchecked'}
                 onPress={() => {
                     handleChange(item.id);
                 }}
             />
-            <DataTable.Cell style={{flex:2}}><Text>{item.nameService}</Text></DataTable.Cell>
+            <DataTable.Cell style={{ flex: 2 }}><Text>{item.nameService}</Text></DataTable.Cell>
             <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
         </DataTable.Row>
     )
+    if (route.params.distance > 2) {
+        setShipPrice(5000 * (route.params.distance - 2));
+        setTotalPrice(totalPrice + shipPrice)
+    }
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ</Text>
             <View style={styles.contact}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -103,7 +123,7 @@ export default function BookOrder({ navigation, route }) {
                 <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 5 }}>CHỌN THỜI GIAN:</Text>
                 <TouchableOpacity onPress={showDatePicker} style={styles.button}>
                     <Text style={{ fontSize: 18 }}>
-                        {formatDate(date, time)}
+                        {formatDateTime(date, time)}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -122,14 +142,17 @@ export default function BookOrder({ navigation, route }) {
                     <DataTable.Row>
                         <DataTable.Cell>Dịch Vụ</DataTable.Cell>
                         <DataTable.Cell numeric>Chi Phí</DataTable.Cell>
-
                     </DataTable.Row>
                     <FlatList
                         data={selectWork}
                         renderItem={renderListWork}
                         keyExtractor={item => item.id} />
                 </DataTable>
-                <Text>Phương thức thanh toán: Tiền Mặt</Text>
+                {
+                    route.params.distance > 2 ?
+                        <Text>Phí dịch vụ({route.params.distance}):{formatPrice(5000 * (route.params.distance - 2))} đ</Text> : <Text>Phí dịch vụ: 0đ</Text>
+                }
+                <Text style={{ marginBottom: 30, marginTop: 10 }}>Phương thức thanh toán: Tiền Mặt</Text>
             </View>
             <View style={{
                 width: '80%',
@@ -148,18 +171,16 @@ export default function BookOrder({ navigation, route }) {
 
                 }}
                     disabled={totalPrice == 0}
-                    onPress={() => {
-                        alert("Đặt Hàng")
-                    }}
+                    onPress={handleBookOrder}
                 >
                     <Text style={{
                         fontSize: 18,
                         color: 'white', fontWeight: 'bold'
                     }}>{formatPrice(totalPrice)} XÁC NHẬN</Text>
-                    {console.log('Danh sách lựa chọn dịch vụ: ', bookService)}
+
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+        </View>
     );
 }
 
@@ -187,9 +208,4 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderWidth: 1
     },
-    listWork: {
-        marginTop: 10,
-        marginBottom: 20,
-        height: 380
-    }
 })

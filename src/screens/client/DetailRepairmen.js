@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { FontAwesome } from '@expo/vector-icons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { DataTable } from 'react-native-paper';
-import { getCurrentLocation, getAnDocument } from '../../service/getData';
+import { getCurrentLocation, getAnDocument, getCurrentUser } from '../../service/getData';
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
@@ -15,7 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
-var distance = 0;
+var distance = 1;
 var time = 0;
 const OnGoogleMap = (props) => {
     const mapRef = useRef()
@@ -84,14 +84,14 @@ const OnGoogleMap = (props) => {
         //         }
         //     />
         // </MapView>
-        <Text>Map</Text>
+        <Text>hi</Text>
     )
 }
 
 function ServiceTable(props) {
     const renderListWork = ({ item, id }) => (
         <DataTable.Row key={id}>
-            <DataTable.Cell><Text>{formatNameService(item.nameService)}</Text></DataTable.Cell>
+            <DataTable.Cell>{item.nameService}</DataTable.Cell>
             <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
             <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
         </DataTable.Row>
@@ -119,12 +119,15 @@ export default function DetailRepairmen({ navigation, route }) {
     const [loading, setLoading] = useState(true);
     const [listWork, setListWork] = useState({});
     const [currentLocationOfClient, setCurrentLocationOfClient] = useState(null);
+    const [currentUser, setCurrentUser] = useState({});
     useEffect(async () => {
         setRepairman(route.params.item);
         const location = await getCurrentLocation();
-        const listWork = await getAnDocument('listWork', route.params.item.uid)
-        setListWork(listWork)
+        const listWork = await getAnDocument('listWork', route.params.item.uid);
+        const dataUser = await getCurrentUser();
+        setListWork(listWork);
         setCurrentLocationOfClient(location);
+        setCurrentUser(dataUser);
         setLoading(false)
     }, [])
 
@@ -133,7 +136,6 @@ export default function DetailRepairmen({ navigation, route }) {
     return (
         <>
             <View style={styles.row}>
-
                 <View style={styles.header}>
                     <View style={styles.avatar}>
                         <Image style={styles.img} source={{ uri: repairman.photoURL }} />
@@ -160,7 +162,14 @@ export default function DetailRepairmen({ navigation, route }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        navigation.navigate('bookOrder', { name: "Đặt Lịch Sữa Chữa", repairmen: route.params.item, distance: distance,listWork:listWork })
+                        navigation.navigate('bookOrder',
+                            {
+                                name: "Đặt Lịch Sữa Chữa",
+                                repairmen: route.params.item,
+                                distance: distance,
+                                listWork: listWork,
+                                dataUser: currentUser
+                            })
                     }}
                 >
                     <Text style={{ fontSize: 18 }}>Đặt Lịch</Text>
