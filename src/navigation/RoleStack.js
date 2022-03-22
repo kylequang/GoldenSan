@@ -7,6 +7,7 @@ import ListRepairmen from '../screens/client/ListRepairmen';
 import DetailRepairmen from '../screens/client/DetailRepairmen';
 import BookOrder from '../screens/client/BookOrder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Activity_Order from '../screens/client/Activity_Order';
 
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
@@ -43,18 +44,23 @@ export default function AppStack() {
           title: truncate(route.params.name, 25),
           headerTitleAlign: 'center',
         })} />
-        <RoleStacks.Screen name="detailRepairmen"
+      <RoleStacks.Screen name="detailRepairmen"
         component={DetailRepairmen}
         options={({ route }) => ({
           title: truncate(route.params.name, 25),
           headerTitleAlign: 'center',
         })} />
-         <RoleStacks.Screen name="bookOrder"
+      <RoleStacks.Screen name="bookOrder"
         component={BookOrder}
         options={({ route }) => ({
           title: truncate(route.params.name, 25),
           headerTitleAlign: 'center',
         })} />
+
+      <RoleStacks.Screen name="ActivityOrder"
+        component={Activity_Order}
+        options={{ headerShown: false }}
+      />
     </RoleStacks.Navigator>
   )
 }

@@ -1,7 +1,7 @@
 import { View, Text, Dimensions, FlatList } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import ListOrder from './ListOrder';
+import ListOrder from './order/ListOrder';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
@@ -198,11 +198,11 @@ export default function Activity_Order() {
         initialRouteName='Đơn Hàng'
         screenOptions={{
           tabBarScrollEnabled: true,
-          tabBarLabelStyle: { fontSize: 13 },
-          tabBarItemStyle: { width: 100 },
+          tabBarLabelStyle: { fontSize: 15, fontWeight: 'bold' },
+          tabBarStyle: { backgroundColor: '#ff944d' },
         }}
       >
-        <activeTab.Screen name='Đơn Hàng' component={ListOrder} />
+        <activeTab.Screen name='Cho bạn' component={ListOrder} />
         <activeTab.Screen name='Đang Sữa' component={FixingOrder} />
         <activeTab.Screen name='Đã Hủy' component={Cancel} />
         <activeTab.Screen name='Lịch Sử' component={HistoryOrder} />

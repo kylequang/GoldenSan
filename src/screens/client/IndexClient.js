@@ -1,9 +1,9 @@
 import { Text, StyleSheet, Image, LogBox, TouchableOpacity, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getData } from '../../service/getData';
+import { getCurrentUser, getData } from '../../service/getData';
 import RepairmenLoading from '../../components/animation/RepairmenLoading';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Index({ navigation }) {
     const [category, setCategory] = useState([]);
     const [showLoading, setShowLoading] = useState(true);

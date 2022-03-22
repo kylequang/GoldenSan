@@ -4,8 +4,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { FontAwesome } from '@expo/vector-icons';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
 import { scanLocation } from '../../service/getData';
-
-import { db } from '../../database/firebase';
 import SadFaceStatus from '../../components/animation/SadFaceStatus';
 
 
@@ -21,6 +19,7 @@ function NearAddress(props) {
         // setListRepairmen(await getDetailRepairmen(props.role))
         console.log('Tìm kiếm thợ xung quanh bạn');
         setListRepairmen(await scanLocation(props.job, 2, 3));
+
         setLoading(false);
     }, [])
 
@@ -57,7 +56,7 @@ function NearAddress(props) {
     return (
         <View style={styles.container}>
             {
-                listRepairmen.length == 0 ? <SadFaceStatus job={props.job} title="gần"/> :
+                listRepairmen.length == 0 ? <SadFaceStatus job={props.job} title="gần" /> :
                     listRepairmen && <FlatList
                         data={listRepairmen}
                         numColumns={1}
@@ -68,15 +67,6 @@ function NearAddress(props) {
         </View>
     );
 }
-
-
-
-
-
-
-
-
-
 
 function Favorite(props) {
     const [loading, setLoading] = useState(true);
@@ -119,7 +109,7 @@ function Favorite(props) {
     return (
         <View style={styles.container}>
             {
-                goodRepairmen.length == 0 ? <SadFaceStatus job={props.job} title=""/> :
+                goodRepairmen.length == 0 ? <SadFaceStatus job={props.job} title="" /> :
                     goodRepairmen && <FlatList
                         data={goodRepairmen}
                         numColumns={1}
