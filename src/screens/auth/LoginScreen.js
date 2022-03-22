@@ -1,15 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-    StyleSheet,
-    LogBox,
-    View,
-    TouchableOpacity,
-    Text,
-    TextInput,
-    Button,
-    Image,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, LogBox, View, TouchableOpacity, Text, TextInput, Button, Image } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import PhoneInput from "react-native-phone-number-input";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -18,13 +9,13 @@ import { RadioButton } from 'react-native-paper';
 import RepairmenLoading from "../../components/animation/RepairmenLoading";
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import * as Facebook from 'expo-facebook';
-import { FacebookAuthProvider, PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+
+import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { getApp } from 'firebase/app';
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { checkAccountSurvive, } from '../../../src/service/getData';
+import { checkAccountSurvive, getCurrentLocation, } from '../../../src/service/getData';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytes, } from 'firebase/storage';
 
@@ -52,7 +43,9 @@ const PhoneNumber = ({ navigation }) => {
     const [checkRole, setCheckRole] = useState('client');
     const [showLoading, setShowLoading] = useState(true);
     const [uid, setUid] = useState(null);
-    const [checkSex, setCheckSex] = useState('nam');
+    const [checkSex, setCheckSex] = useState('Nam');
+    const [jobRepairmen, setJobRepairmen] = useState('Điện');
+    const [currentLocation, setCurrentLocation] = useState();
 
     useEffect(() => {
         setTimeout(() => {
@@ -89,7 +82,12 @@ const PhoneNumber = ({ navigation }) => {
                 verificationCode
             );
             const client = await signInWithCredential(auth, credential);
+
+            console.log("DataUser: ", client);
+            await AsyncStorage.setItem('dataUser', JSON.stringify(client));
+
             setUid(client.user.uid);
+
             showMessage({ text: ' Xác Minh Số Điện Thoại Thành Công ! 👍' });
 
             const checkAccountOfRepairmen = await checkAccountSurvive('repairmen', client.user.uid);
@@ -101,84 +99,28 @@ const PhoneNumber = ({ navigation }) => {
             } else if (checkAccountOfRepairmen != null) {
                 console.log('Tồn tại tài khoản trong thợ sữa chữa')
                 await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
                 await AsyncStorage.setItem('rememberLogin', 'yes')
-                // NativeModules.DevSettings.reload();
                 navigation.navigate('checkRole')
 
             } else if (checkAccountOfClient != null) {
                 console.log('Tồn tại tài khoản trong Hộ Gia Đình')
                 await AsyncStorage.setItem('role', checkAccountOfClient.role);
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client));
                 await AsyncStorage.setItem('rememberLogin', 'yes')
                 navigation.navigate('checkRole')
             }
+
         } catch (err) {
             showMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
     }
-    async function logInFB() {
-        try {
-            await Facebook.initializeAsync({
-                appId: '470392018091052',
-            });
-            const { type, token } =
-                await Facebook.logInWithReadPermissionsAsync({
-                    permissions: ['public_profile'],
-                });
-            if (type === 'success') {
-                console.log(123)
-                const facebookCredential = FacebookAuthProvider.credential(token);
-                const client = await signInWithCredential(auth, facebookCredential);
-                setUid(client.user.uid);
-                await AsyncStorage.setItem('dataUser', JSON.stringify(client)); // Lưu data của người dùng 
-                const docRef = doc(db, 'client', client.user.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    console.log(docSnap.data());
-                    await AsyncStorage.setItem('role', docSnap.data().role); // Lưu vai trò của người dùng
-                    await AsyncStorage.setItem('rememberLogin', 'yes');
-                    navigation.navigate('checkRole'); // Sau khi login thì tiến hành kiểm tra vai trò của người dùng
-                } else {
-                    setStep('VERIFY_SUCCESS_BY_FB'); //
-                }
-            } else {
-                alert('Đăng nhập thất bại')
-            }
-        } catch ({ message }) {
+
+    const verifyRole = async () => {
+        setCurrentLocation(await getCurrentLocation())
+        if (checkRole === 'repairmen') {
+            setStep('Enter_Repairmen');
+        } else {
+            setStep('Enter_Client')
         }
-    }
-
-    const addUserByFB = async () => {
-        const value = await getDataUser();
-        console.log(value.user);
-
-        await setDoc(doc(db, checkRole, uid), {
-            name: value.user.displayName,
-            email: '',
-            phoneNumber: '',
-            role: checkRole,
-            sex: checkSex,
-            photoURL: value.user.photoURL,
-            uid: uid
-        });
-        await AsyncStorage.setItem('role', checkRole);
-        await AsyncStorage.setItem('rememberLogin', 'yes');
-        // NativeModules.DevSettings.reload();
-        navigation.navigate('checkRole')
-    }
-
-    const getDataUser = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('dataUser')
-            return jsonValue != null ? JSON.parse(jsonValue) : null
-        } catch (e) {
-        }
-    }
-
-    const verifyRole = () => {
-        //Process User enter information personal
-        setStep('Enter_Info');
     }
 
     const [image, setImage] = useState(null);
@@ -215,35 +157,6 @@ const PhoneNumber = ({ navigation }) => {
             console.log('Upload success');
             setPhotoURL(url);
         }
-
-        console.log('hi', photoURL);
-
-        // console.log('uri: ', result.uri)
-        // if (!result.cancelled) {
-        //     setImage(result.uri)
-        // }
-
-
-        // const filename = result.uri.substring(result.uri.lastIndexOf('/') + 1);
-
-        // console.log('fileName: '+filename);
-        // const filename = image.substring(image.lastIndexOf('/') + 1);
-
-        // const avatarRef = ref(storage, filename);
-        // const img = await fetch(image);
-        // const bytes = await img.blob();
-        // let url = '';
-        // uploadBytes(avatarRef, bytes).then(async (e) => {
-        //     url = await getDownloadURL(avatarRef)
-        //     if (url !== '') {
-        //         setPhotoURL(url)
-        //     }
-        // });
-        // await uploadBytes(avatarRef, bytes)
-        // const url = await getDownloadURL(avatarRef)
-        // setPhotoURL(url)
-        //await uploadImage(filename);
-        console.log(url);
     }
     //Loading UI
     if (showLoading) return <RepairmenLoading />
@@ -286,26 +199,9 @@ const PhoneNumber = ({ navigation }) => {
                             style={phoneNumber.length <= 11 ? styles.button0 : styles.button}
                             disabled={verifyButton}
                             onPress={sendOTP}
-
                         >
                             <Text style={styles.buttonText}>Gửi mã OTP</Text>
                         </TouchableOpacity>
-                        <Text style={{ marginTop: 30, fontSize: 20 }}>Hoặc</Text>
-                        <TouchableOpacity
-                            style={[styles.buttonSocial, { backgroundColor: '#3333ff' }]}
-                            onPress={logInFB}
-                        >
-                            <Ionicons name="logo-facebook" size={19} color={"white"} />
-                            <Text style={styles.buttonText}>Đăng nhập với Facebook</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.buttonSocial, { backgroundColor: '#e63900' }]}
-
-                        >
-                            <Ionicons name="logo-google" size={22} color={"white"} />
-                            <Text style={styles.buttonText}>Đăng nhập với Google</Text>
-                        </TouchableOpacity>
-
                     </SafeAreaView>
                 </View>
             }
@@ -324,10 +220,6 @@ const PhoneNumber = ({ navigation }) => {
                             placeholder="Nhập mã xác minh"
                             onChangeText={(otp) => {
                                 setVerificationCode(otp)
-                                if (verificationCode.length == 5) {
-                                    setVerifyButton(false)
-                                    console.log('change status of button')
-                                }
                             }}
                         />
                         <TouchableOpacity
@@ -367,7 +259,7 @@ const PhoneNumber = ({ navigation }) => {
                                     style={styles.imageRole}
                                     source={require('../../../assets/image/repairmen.png')}
                                 />
-                                <Text>Thợ Sữa Chữa</Text>
+                                <Text>Thợ Sửa Chữa</Text>
                                 <RadioButton
                                     value="repairmen"
                                     status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
@@ -385,51 +277,7 @@ const PhoneNumber = ({ navigation }) => {
                 </View>
             }
             {
-                step === 'VERIFY_SUCCESS_BY_FB' &&
-                <View style={styles.container}>
-                    <SafeAreaView style={styles.wrapper_Role}>
-                        <Image
-                            style={{ width: 200, height: 200 }}
-                            source={require('../../../assets/logo/logo.png')}
-                        />
-                        <Text style={{ fontSize: 25 }}>Bạn là ai ?</Text>
-                        <View style={styles.row}>
-                            <View style={styles.column}>
-                                <Image
-                                    style={styles.imageRole}
-                                    source={require('../../../assets/image/house.png')}
-                                />
-                                <Text>Hộ Gia Đình</Text>
-                                <RadioButton
-                                    value="client"
-                                    status={checkRole === 'client' ? 'checked' : 'unchecked'}
-                                    onPress={() => setCheckRole('client')}
-                                />
-                            </View>
-                            <View style={styles.column}>
-                                <Image
-                                    style={styles.imageRole}
-                                    source={require('../../../assets/image/repairmen.png')}
-                                />
-                                <Text>Thợ Sữa Chữa</Text>
-                                <RadioButton
-                                    value="repairmen"
-                                    status={checkRole === 'repairmen' ? 'checked' : 'unchecked'}
-                                    onPress={() => setCheckRole('repairmen')}
-                                />
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={addUserByFB}
-                        >
-                            <Text style={styles.buttonText}>Xác Nhận Vai Trò</Text>
-                        </TouchableOpacity>
-                    </SafeAreaView>
-                </View>
-            }
-            {
-                step === 'Enter_Info' &&
+                step === 'Enter_Client' &&
                 <SafeAreaView style={styles.loginContainer}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân</Text>
                     <View style={{ alignItems: 'center' }}>
@@ -441,8 +289,6 @@ const PhoneNumber = ({ navigation }) => {
                             name: '',
                             email: '',
                             age: '',
-                            password: '',
-
                         }}
                         onSubmit={async (values) => {
                             await AsyncStorage.setItem('role', checkRole);
@@ -452,11 +298,12 @@ const PhoneNumber = ({ navigation }) => {
                                 email: values.email,
                                 phoneNumber: tempPhone,
                                 role: checkRole,
+                                age:values.age,
                                 sex: checkSex,
                                 photoURL: photoURL,
                                 uid: uid,
-                                status: 'active'
-
+                                status: 'active',
+                                active:true
                             });
                             navigation.navigate('checkRole');
                         }
@@ -474,11 +321,6 @@ const PhoneNumber = ({ navigation }) => {
                                 .min(10)
                                 .max(70)
                                 .required('Trường này là bắt buộc'),
-                            password: yup
-                                .string()
-                                .min(4, 'Mật khẩu không được dưới 4 kí tự.')
-                                .max(11, 'Mật khẩu không được vượt quá 12 kí tự.')
-                                .required('Trường này bắt buộc'),
                         })}
                     >
                         {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
@@ -513,32 +355,21 @@ const PhoneNumber = ({ navigation }) => {
                                 {touched.age && errors.age &&
                                     <Text style={styles.errorsText}>{errors.age}</Text>
                                 }
-                                <TextInput
-                                    value={values.password}
-                                    style={styles.textInput}
-                                    placeholder="Mật khẩu"
-                                    onBlur={() => setFieldTouched('password')}
-                                    onChangeText={handleChange('password')}
-                                    secureTextEntry={true}
-                                />
-                                {touched.password && errors.password &&
-                                    <Text style={styles.errorsText}>{errors.password}</Text>
-                                }
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
                                         <Text>Nam</Text>
                                         <RadioButton
-                                            value="nam"
-                                            status={checkSex === 'nam' ? 'checked' : 'unchecked'}
-                                            onPress={() => setCheckSex('nam')}
+                                            value="Nam"
+                                            status={checkSex === 'Nam' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('Nam')}
                                         />
                                     </View>
                                     <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
                                         <Text>Nữ</Text>
                                         <RadioButton
-                                            value="nu"
-                                            status={checkSex === 'nu' ? 'checked' : 'unchecked'}
-                                            onPress={() => setCheckSex('nu')}
+                                            value="Nữ"
+                                            status={checkSex === 'Nữ' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('Nữ')}
                                         />
                                     </View>
                                 </View>
@@ -554,6 +385,147 @@ const PhoneNumber = ({ navigation }) => {
                     </Formik>
                 </SafeAreaView>
             }
+
+            {
+                step === 'Enter_Repairmen' &&
+                <SafeAreaView style={styles.loginContainer}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Thông tin cá nhân </Text>
+                    <View style={{ alignItems: 'center' }}>
+                        <Button title="Chọn Ảnh Đại Diện" onPress={openImagePickerAsync} />
+                        {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 5 }} />}
+                    </View>
+                    <Formik
+                        initialValues={{
+                            name: '',
+                            email: '',
+                            age: '',
+                        }}
+
+                        onSubmit={async (values) => {
+                            await AsyncStorage.setItem('role', checkRole);
+                            await AsyncStorage.setItem('rememberLogin', 'yes');
+
+
+                            await setDoc(doc(db, checkRole, uid), {
+                                name: values.name,
+                                age: values.age,
+                                email: values.email,
+                                phoneNumber: tempPhone,
+                                role: checkRole,
+                                sex: checkSex,
+                                photoURL: photoURL,
+                                job: jobRepairmen,
+                                uid: uid,
+                                totalAVG: 0,
+                                totalCount: 0,
+                                totalScore: 0,
+                                status: 'active',
+                                detailLocation: {
+                                    latitude: currentLocation.coords.latitude,
+                                    longitude: currentLocation.coords.longitude,
+                                    latitudeDelta: 0.08,
+                                    longitudeDelta: 0.042
+                                },
+                                active: true
+                            });
+                            navigation.navigate('checkRole');
+                        }
+                        }
+                        validationSchema={yup.object().shape({
+                            name: yup
+                                .string()
+                                .required('Trường này là bắt buộc.'),
+                            email: yup
+                                .string()
+                                .email()
+                                .required('Trường này là bắt buộc.'),
+                            age: yup
+                                .number()
+                                .min(10)
+                                .max(70)
+                                .required('Trường này là bắt buộc'),
+
+                        })}
+                    >
+                        {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
+                            <>
+                                <TextInput
+                                    value={values.name}
+                                    style={styles.textInput}
+                                    onBlur={() => setFieldTouched('name')}
+                                    onChangeText={handleChange('name')}
+                                    placeholder="Họ tên của bạn"
+                                />
+                                {touched.name && errors.name &&
+                                    <Text style={styles.errorsText}>{errors.name}</Text>
+                                }
+                                <TextInput
+                                    value={values.email}
+                                    style={styles.textInput}
+                                    onBlur={() => setFieldTouched('email')}
+                                    onChangeText={handleChange('email')}
+                                    placeholder="Email của bạn"
+                                />
+                                {touched.email && errors.email &&
+                                    <Text style={styles.errorsText}>{errors.email}</Text>
+                                }
+                                <TextInput
+                                    value={values.age}
+                                    style={styles.textInput}
+                                    placeholder="10 < Tuổi <70"
+                                    onBlur={() => setFieldTouched('age')}
+                                    onChangeText={handleChange('age')}
+                                />
+                                {touched.age && errors.age &&
+                                    <Text style={styles.errorsText}>{errors.age}</Text>
+                                }
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
+                                        <Text>Nam</Text>
+                                        <RadioButton
+                                            value="Nam"
+                                            status={checkSex === 'Nam' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('Nam')}
+                                        />
+                                    </View>
+                                    <View style={{ flexDirection: "column", margin: 10, alignItems: 'center' }}>
+                                        <Text>Nữ</Text>
+                                        <RadioButton
+                                            value="Nữ"
+                                            status={checkSex === 'Nữ' ? 'checked' : 'unchecked'}
+                                            onPress={() => setCheckSex('Nữ')}
+                                        />
+                                    </View>
+                                </View>
+                                <Picker
+                                    selectedValue={jobRepairmen}
+                                    style={{ height: 50, width: 150 }}
+                                    onValueChange={(itemValue, itemIndex) => setJobRepairmen(itemValue)}
+                                >
+                                    <Picker.Item label="Thợ Điện" value="Điện" />
+                                    <Picker.Item label="Thợ Nước" value="Nước" />
+                                    <Picker.Item label="Thợ Máy Tính" value="Máy Tính" />
+                                    <Picker.Item label="Thợ Xây Dựng" value="Xây Dựng" />
+                                    <Picker.Item label="Thợ WC" value="WC" />
+                                    <Picker.Item label="Thợ Khóa" value="Khóa" />
+                                    <Picker.Item label="Thợ Máy" value="Máy Lạnh" />
+                                    <Picker.Item label="Thợ Xe" value="Xe" />
+                                </Picker>
+                                <Button
+                                    color="blue"
+                                    style={styles.btnButton}
+                                    title='Tiếp tục'
+                                    disabled={!isValid}
+                                    onPress={handleSubmit}
+                                />
+                            </>
+                        )}
+                    </Formik>
+                </SafeAreaView>
+            }
+
+
+
             {message ? (
                 <TouchableOpacity
                     style={[
@@ -574,6 +546,9 @@ const PhoneNumber = ({ navigation }) => {
             ) : (
                 undefined
             )}
+
+
+
             {attemptInvisibleVerification &&
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <FirebaseRecaptchaBanner />
@@ -649,7 +624,7 @@ const styles = StyleSheet.create({
     },
     buttonSocial: {
         marginTop: 30,
-        height: 45,
+        height: 50,
         width: '80%',
         padding: 10,
         alignItems: "center",

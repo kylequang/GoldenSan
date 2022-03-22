@@ -6,20 +6,15 @@ import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLo
 import { scanLocation } from '../../service/getData';
 import SadFaceStatus from '../../components/animation/SadFaceStatus';
 
-
-
 const Tab = createMaterialTopTabNavigator();
-
 
 function NearAddress(props) {
     const [loading, setLoading] = useState(true);
     const [listRepairmen, setListRepairmen] = useState([]);
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer'])
-        // setListRepairmen(await getDetailRepairmen(props.role))
         console.log('Tìm kiếm thợ xung quanh bạn');
         setListRepairmen(await scanLocation(props.job, 2, 3));
-
         setLoading(false);
     }, [])
 

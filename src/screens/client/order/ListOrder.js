@@ -1,47 +1,82 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView} from 'react-native'
-import React, { useState,  useEffect } from 'react'
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {  getQueryCollection, getUidUser } from '../../../service/getData';
+import { getQueryCollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
+import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
+import { deleteDocument } from '../../../service/deleteData';
+import { pushData } from '../../../service/pushData';
+
 
 export default function ListOrder() {
 
+    const [loading, setLoading] = useState(true);
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
     useEffect(async () => {
-        const uid_client = await getUidUser();
-        const dataOrder = await getQueryCollection('order', uid_client);
+        console.log("Danh sách đơn hàng đang chờ xác nhận");
+        const uid = await getUidUser();
+        const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang chờ', uid);
         setListOrder(dataOrder)
+        dataOrder ? setLoading(false) : setLoading(true);
     }, [])
+
+
+    const CancelOrder = async (item) => {
+        const uid = await getUidUser();
+        await pushData('orderCancel', item);
+        await deleteDocument('order', item.id)
+        const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang chờ', uid);
+        setListOrder(dataOrder)
+    }
+
     const renderItem = ({ item }) => {
-        const expanded = item.time == selectedId ? true : false;
+        const expanded = item.id == selectedId ? true : false;
         return (
             <List.Accordion
-                key={item.time}
-                title={item.informationClient.name}
+                key={item.id}
+                title={item.order.informationClient.name}
                 description={
-                    item.informationClient.sdt + '    ' + item.status
+                    item.order.informationClient.sdt + '    ' + item.order.status
                 }
                 titleNumberOfLines={15}
                 left={() =>
                     <Image style={styles.avatar}
-                        source={{ uri: item.informationClient.photoURL }} />}
+                        source={{ uri: item.order.informationClient.photoURL }} />}
                 expanded={expanded}
-                onPress={() => { selectedId ? setSelectedId(null) : setSelectedId(item.time) }}>
+                onPress={() => { selectedId ? setSelectedId(null) : setSelectedId(item.id) }}>
                 <View style={{ paddingVertical: 10 }}>
                     <Text style={{ fontSize: 18 }}>Thời Gian Sửa Chữa</Text>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.time + ' ' + item.date}  <Text>Tổng: {formatPrice(item.totalPrice)} vnđ</Text></Text>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}> {item.order.time + ' ' + item.order.date}</Text>
+                    <Text>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
                 </View>
                 <View>
                     <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
                         <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
                         <View style={{ marginLeft: 5 }}>
-                            <Text style={{ fontSize: 18 }}>Thông tin cơ bản </Text>
-                            <Text style={styles.textOrder}>Tuổi: {item.informationClient.age}             <Text>Giới tính: {item.informationClient.sex}</Text></Text>
-                            <Text style={styles.textOrder}>SDT: {item.informationClient.sdt}</Text>
-                            <Text style={styles.textOrder}>Địa chỉ: 101B Lê Hữu Trác,Phước Mỹ</Text>
-                            <Text style={styles.textOrder}>Khoảng cách: {item.distance} km</Text>
+                            <Text style={{ fontSize: 18 }}>Thông tin cá nhân </Text>
+                            <Text style={styles.textOrder}>Tuổi: {item.order.informationClient.age}</Text>
+                            <Text>Giới tính: {item.order.informationClient.sex}</Text>
+                            <Text style={styles.textOrder}>SDT: {item.order.informationClient.sdt}</Text>
+                            <Text style={styles.textOrder}>Địa chỉ: {item.order.address}</Text>
+                            <Text style={styles.textOrder}>Khoảng cách: {item.order.distance} km</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
+                        <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
+                        <View style={{ marginLeft: 5 }}>
+                            <Text style={{ fontSize: 18 }}>Thông tin Thợ </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image style={styles.avatar}
+                                    source={{ uri: item.order.informationRepairmen.photoURL }} />
+                                <View style={{ marginLeft: 5 }}>
+                                    <Text>{item.order.informationRepairmen.name}</Text>
+                                    <Text style={styles.textOrder}>{item.order.informationRepairmen.age} tuổi</Text>
+                                    <Text>Giới tính: {item.order.informationRepairmen.sex}</Text>
+                                    <Text style={styles.textOrder}>SDT: {item.order.informationRepairmen.sdt}</Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', marginVertical: 5 }}>
@@ -49,27 +84,33 @@ export default function ListOrder() {
                         <View style={{ marginLeft: 5 }}>
                             <Text style={{ fontSize: 18 }}>Danh sách công việc</Text>
                             {
-                                item.bookService.map((item, index) => (
-                                    <Text key={index} style={styles.textOrder}>{item.nameService}</Text>
+                                item.order.bookService.map((item, index) => (
+                                    <View style={{ flexDirection: 'row' }} key={index}>
+                                        <Text style={styles.textOrder}>{item.nameService}</Text>
+                                        <Text style={styles.textOrder}>---</Text>
+                                        <Text style={styles.textOrder}>{formatPrice(item.price)}đ</Text>
+                                    </View>
                                 ))
                             }
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.button} onPress={() => {
-                        alert("Hủy đơn")
-                    }}>
+                    {console.log(item.order.createDay)}
+                    <Text>Ngày đặt: {item.order.createDay[Date]}</Text>
+                    <TouchableOpacity style={styles.button} onPress={() => CancelOrder(item)} >
                         <Text style={{ color: 'white' }}>Hủy Đơn</Text>
                     </TouchableOpacity>
                 </View>
             </List.Accordion>
         )
     }
+    if (loading) return <ActivityIndicatorLoading color="Blue" />
     return (
         <ScrollView>
-            <List.Section title="Lịch Đặt của Bạn ! Đơn Hàng Đang Chờ Tiếp Nhận">
+            <List.Section>
                 {
-                    listOrder && <FlatList data={listOrder} renderItem={renderItem}
-                        keyExtractor={item => item.time} />
+                    listOrder.length != 0 ?
+                        <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+                        : <Text>Không Có Đơn Hàng</Text>
                 }
             </List.Section>
         </ScrollView>
@@ -77,26 +118,24 @@ export default function ListOrder() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-  
-    },
+
     button: {
-      marginVertical: 10,
-      marginLeft: 170,
-      height: 45,
-      width: '30%',
-      padding: 10,
-      alignItems: "center",
-      justifyContent: 'center',
-      borderRadius: 15,
-      backgroundColor: 'red',
+        marginVertical: 10,
+        marginLeft: 170,
+        height: 45,
+        width: '30%',
+        padding: 10,
+        alignItems: "center",
+        justifyContent: 'center',
+        borderRadius: 15,
+        backgroundColor: 'red',
     },
     avatar: {
-      height: 80,
-      width: 70,
-      resizeMode: 'contain'
+        height: 80,
+        width: 70,
+        resizeMode: 'contain'
     },
     textOrder: {
-      marginVertical: 5
+        marginVertical: 5
     }
-  })
+})

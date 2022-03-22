@@ -14,6 +14,7 @@ export default function MapRepairmen() {
     function setDataLocation(location){
         setData(location)
     }
+    
     const mapRef = useRef()
     return (
         <View>

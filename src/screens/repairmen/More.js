@@ -8,9 +8,9 @@ import {
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5,MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
-import HeaderUser from "../../components/HeaderUser";
+
 import { auth } from '../../database/firebase';
 import { NativeModules } from "react-native"
 
@@ -19,7 +19,7 @@ export default function More({ navigation }) {
         <SafeAreaView>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <Text style={{ textAlign: 'center', fontSize: 28, paddingBottom: 10 }}>Xin Chào!</Text>
-                <HeaderUser />
+
                 <View style={styles.container}>
                     <View style={styles.row}>
                         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
@@ -41,7 +41,7 @@ export default function More({ navigation }) {
                     </View>
                     <View style={styles.row}>
                         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name='phone-classic' size={30} color='#0D0A03' />
+                            <MaterialCommunityIcons name='phone-classic' size={30} color='#0D0A03' />
                             <Text style={{ marginLeft: 15, fontSize: 18 }}>Liên Hệ với Golden Sand</Text>
                         </View>
                         <View>
@@ -55,8 +55,8 @@ export default function More({ navigation }) {
                             () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 AsyncStorage.clear().then(() => console.log('Cleared'))
-                              
-                                NativeModules.DevSettings.reload();
+
+                                navigation.navigate('Auth')
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>

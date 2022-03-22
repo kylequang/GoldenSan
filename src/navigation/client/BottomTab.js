@@ -5,6 +5,7 @@ import Index from '../../screens/client/IndexClient';
 import Manage from '../../screens/client/Manage';
 import Activity_Order from '../../screens/client/Activity_Order';
 import Notification from '../../screens/client/Notification';
+import Contact from '../../screens/Contact';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,22 +25,26 @@ export default function BottomTab() {
                         iconName = focused ? 'account' : 'account';
                     else if (route.name === 'Thông Báo')
                         iconName = focused ? 'bell' : 'bell';
+
+                    else if (route.name === 'Liên Hệ')
+                        iconName = focused ? 'phone-classic' : 'phone-classic'
                     return (
-                        <MaterialCommunityIcons name={iconName} size={30} color={color} />
+                        <MaterialCommunityIcons name={iconName} size={25} color={color} />
                     );
                 },
                 tabBarActiveTintColor: '#ff6600',
                 tabBarInactiveTintColor: 'gray',
                 headerTitleAlign: 'center',
                 tabBarLabelStyle: {
-                    fontSize: 15,
+                    fontSize: 13,
                 },
             })}
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
-            <Tab.Screen name="Hoạt Động" component={Activity_Order}/>
+            <Tab.Screen name="Hoạt Động" component={Activity_Order} />
             <Tab.Screen name="Thông Báo" component={Notification} />
-            <Tab.Screen name="Hồ Sơ" component={Manage}/>
+            <Tab.Screen name="Liên Hệ" component={Contact} />
+            <Tab.Screen name="Hồ Sơ" component={Manage} />
         </Tab.Navigator>
     );
 }

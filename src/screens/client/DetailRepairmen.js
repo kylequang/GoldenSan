@@ -140,7 +140,7 @@ export default function DetailRepairmen({ navigation, route }) {
                     <View style={styles.avatar}>
                         <Image style={styles.img} source={{ uri: repairman.photoURL }} />
                         <View style={[styles.row, { position: 'absolute', bottom: 0, left: 30 }]}>
-                            <Text style={{ fontSize: 25 }}>{repairman.totalAVGComment}</Text>
+                            <Text style={{ fontSize: 25 }}>{repairman.totalAVG}</Text>
                             <FontAwesome name="star" size={20} color={"#ffcc00"} />
                         </View>
                     </View>
@@ -153,9 +153,6 @@ export default function DetailRepairmen({ navigation, route }) {
                     </View>
                 </View>
             </View>
-
-
-
             <View style={styles.sliderTag}>
             </View>
             <View style={{ alignItems: 'center', marginBottom: 5 }}>
@@ -166,6 +163,7 @@ export default function DetailRepairmen({ navigation, route }) {
                             {
                                 name: "Đặt Lịch Sữa Chữa",
                                 repairmen: route.params.item,
+                                location:currentLocationOfClient,
                                 distance: distance,
                                 listWork: listWork,
                                 dataUser: currentUser

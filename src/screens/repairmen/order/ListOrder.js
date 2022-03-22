@@ -4,7 +4,6 @@ import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getQueryCollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import Nodata from '../../../components/Nodata';
 
 export default function ListOrder() {
 
@@ -76,7 +75,7 @@ export default function ListOrder() {
                 {
                     listOrder.length != 0 ?
                         <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
-                        : <Nodata content="Đơn Hàng" />
+                        : <Text>Không có đơn hàng</Text>
                 }
             </List.Section>
         </ScrollView>
