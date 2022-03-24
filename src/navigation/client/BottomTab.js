@@ -6,6 +6,7 @@ import Manage from '../../screens/client/Manage';
 import Activity_Order from '../../screens/client/Activity_Order';
 import Notification from '../../screens/client/Notification';
 import Contact from '../../screens/Contact';
+import NotificationApp from '../../screens/client/NotificationApp';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,7 +43,7 @@ export default function BottomTab() {
         >
             <Tab.Screen name="Trang Chủ" component={Index} />
             <Tab.Screen name="Hoạt Động" component={Activity_Order} />
-            <Tab.Screen name="Thông Báo" component={Notification} />
+            <Tab.Screen name="Thông Báo" component={NotificationApp} />
             <Tab.Screen name="Liên Hệ" component={Contact} />
             <Tab.Screen name="Hồ Sơ" component={Manage} />
         </Tab.Navigator>

@@ -14,10 +14,12 @@ import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { getApp } from 'firebase/app';
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { checkAccountSurvive, getCurrentLocation, } from '../../../src/service/getData';
+import { doc, setDoc } from "firebase/firestore";
+import { checkAccountSurvive, getCurrentLocation, getAnDocument } from '../../../src/service/getData';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytes, } from 'firebase/storage';
+import { schedulePushNotification, setDocument } from '../../service/pushData'
+import { updateNotification } from '../../service/updateData';
 
 
 // Firebase references
@@ -83,7 +85,7 @@ const PhoneNumber = ({ navigation }) => {
             );
             const client = await signInWithCredential(auth, credential);
 
-            console.log("DataUser: ", client);
+
             await AsyncStorage.setItem('dataUser', JSON.stringify(client));
 
             setUid(client.user.uid);
@@ -96,16 +98,36 @@ const PhoneNumber = ({ navigation }) => {
             if (checkAccountOfRepairmen == null && checkAccountOfClient == null) { // không tồn tại tài khoản trong firebase
                 console.log('ko tồn tại')
                 setStep('VERIFY_SUCCESS');
-            } else if (checkAccountOfRepairmen != null) {
-                console.log('Tồn tại tài khoản trong thợ sữa chữa')
-                await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
-                await AsyncStorage.setItem('rememberLogin', 'yes')
-                navigation.navigate('checkRole')
-
-            } else if (checkAccountOfClient != null) {
-                console.log('Tồn tại tài khoản trong Hộ Gia Đình')
-                await AsyncStorage.setItem('role', checkAccountOfClient.role);
-                await AsyncStorage.setItem('rememberLogin', 'yes')
+            } else {
+                if (checkAccountOfRepairmen != null) {
+                    console.log(checkAccountOfRepairmen);
+                    console.log('Tồn tại tài khoản trong thợ sữa chữa')
+                    await AsyncStorage.setItem('role', checkAccountOfRepairmen.role);
+                    await AsyncStorage.setItem('rememberLogin', 'yes');
+                    await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách quay lại HelpHouse!');
+                    const notificationOfUser = await getAnDocument('notification', checkAccountOfRepairmen.uid);
+                    const notificationArray = notificationOfUser.notification;
+                    notificationArray.unshift({
+                        title: 'HelpHouse thông báo',
+                        body: 'Chào mừng quý khách quay lại HelpHouse!',
+                        time: new Date()
+                    })
+                    await updateNotification('notification', checkAccountOfRepairmen.uid, notificationArray)
+                }
+                else if (checkAccountOfClient != null) {
+                    console.log('Tồn tại tài khoản trong Hộ Gia Đình')
+                    await AsyncStorage.setItem('role', checkAccountOfClient.role);
+                    await AsyncStorage.setItem('rememberLogin', 'yes');
+                    await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách quay lại HelpHouse!');
+                    const notificationOfUser = await getAnDocument('notification', checkAccountOfClient.uid);
+                    const notificationArray = notificationOfUser.notification;
+                    notificationArray.unshift({
+                        title: 'HelpHouse thông báo',
+                        body: 'Chào mừng quý khách quay lại HelpHouse!',
+                        time: new Date()
+                    })
+                    await updateNotification('notification', checkAccountOfRepairmen.uid, notificationArray)
+                }
                 navigation.navigate('checkRole')
             }
 
@@ -298,13 +320,23 @@ const PhoneNumber = ({ navigation }) => {
                                 email: values.email,
                                 phoneNumber: tempPhone,
                                 role: checkRole,
-                                age:values.age,
+                                age: values.age,
                                 sex: checkSex,
                                 photoURL: photoURL,
                                 uid: uid,
                                 status: 'active',
-                                active:true
+                                active: true
                             });
+                            await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
+                            const addNotification = {
+                                title: 'HelpHouse thông báo',
+                                body: 'Chào mừng quý khách đến với HelpHouse!',
+                                time: new Date()
+                            }
+                            const data = [];
+                            data.push({ id: uid, notification: [addNotification] })
+
+                            await setDocument('notification', uid, data)
                             navigation.navigate('checkRole');
                         }
                         }
@@ -428,7 +460,18 @@ const PhoneNumber = ({ navigation }) => {
                                 },
                                 active: true
                             });
+                            await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
+
+                            const addNotification = {
+                                title: 'HelpHouse thông báo',
+                                body: 'Chào mừng quý khách đến với HelpHouse!',
+                                time: new Date()
+                            }
+                            const data = [];
+                            data.push({ id: uid, notification: [addNotification] })
+                            await setDocument('notification', uid, data)
                             navigation.navigate('checkRole');
+
                         }
                         }
                         validationSchema={yup.object().shape({

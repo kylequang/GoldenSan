@@ -7,7 +7,9 @@ import { getCurrentUser } from '../../service/getData';
 import { FontAwesome } from '@expo/vector-icons';
 import { formatPrice, formatDate, formatTime, formatDateTime } from '../../service/formatCode';
 import { DataTable } from 'react-native-paper';
-import { putOrder } from '../../service/pushData';
+import { putOrder, schedulePushNotification, pushData } from '../../service/pushData';
+import { getUidUser, getAnDocument } from '../../service/getData';
+import { updateNotification } from '../../service/updateData';
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
 
 export default function BookOrder({ navigation, route }) {
@@ -63,15 +65,29 @@ export default function BookOrder({ navigation, route }) {
             distance: route.params.distance,
             date: formatDate(date),
             time: formatTime(time),
-            createDay: formatDateTime(new Date(),new Date()),
+            createDay: formatDateTime(new Date(), new Date()),
             totalPrice: totalPrice,
             bookService: bookService,
             status: 'Đang chờ'
         }
-
-        console.log(data);
         await putOrder(data);
-        alert("Đặt Lịch Thành Công !")
+
+        await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã đặt lịch thành công ! Xin vui lòng kiểm tra trong đơn hàng của bạn')
+
+
+        const uid = await getUidUser();
+        const notificationOfUser = await getAnDocument('notification', uid);
+
+        const notificationArray = notificationOfUser.notifi;
+        console.log(notificationArray);
+
+        notificationArray.unshift({
+            title: 'HelpHouse thông báo',
+            body: 'Quý khách đã đặt lịch thành công ! Xin vui lòng kiểm tra trong đơn hàng của bạn!',
+            time: new Date()
+        })
+        await updateNotification('notification', uid, notificationArray)
+
         navigation.navigate('Trang Chủ');
     }
 

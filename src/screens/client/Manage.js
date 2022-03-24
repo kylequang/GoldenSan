@@ -39,7 +39,6 @@ export default function Manage({ navigation }) {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 await AsyncStorage.clear().then(() => console.log('Cleared'))
                                 navigation.navigate('Auth')
-                                //NativeModules.DevSettings.reload();
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>

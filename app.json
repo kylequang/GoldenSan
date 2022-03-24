@@ -24,10 +24,24 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "Help.House"
+      "package": "Help.House",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo/logoapp.png",
+          "color": "red",
+          "sounds": [
+            "",
+            ""
+          ]
+        }
+      ]
+    ]
   }
 }

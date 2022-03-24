@@ -115,6 +115,10 @@ function ServiceTable(props) {
 
 export default function DetailRepairmen({ navigation, route }) {
 
+    const t=()=>{
+        setLoading(true);
+        navigation.navigate('con')
+    }
     const [repairman, setRepairman] = useState({});
     const [loading, setLoading] = useState(true);
     const [listWork, setListWork] = useState({});

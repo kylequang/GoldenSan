@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "956746569611",
+    "firebase_url": "https://graduationproject-b2c00-default-rtdb.firebaseio.com",
+    "project_id": "graduationproject-b2c00",
+    "storage_bucket": "graduationproject-b2c00.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956746569611:android:66f95d1db206608d03818e",
+        "android_client_info": {
+          "package_name": "Help.House"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956746569611-27flv83793bcrupu8728ft48otmjdj2n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfR1UVbgSd83EEekCOPRh919ZRUOmnjAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956746569611-27flv83793bcrupu8728ft48otmjdj2n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

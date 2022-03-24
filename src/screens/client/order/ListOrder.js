@@ -2,34 +2,52 @@ import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView, 
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getQueryCollection, getUidUser } from '../../../service/getData';
+import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
 import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
 import { deleteDocument } from '../../../service/deleteData';
-import { pushData } from '../../../service/pushData';
+import { pushData, schedulePushNotification } from '../../../service/pushData';
+import {  updateNotification } from '../../../service/updateData';
+import Nodata from '../../../components/Nodata/Nodata';
 
+import Moment from 'moment';
 
 export default function ListOrder() {
-
+    
+        console.log(Moment('2022/3/24 10:23').fromNow())
+        console.log(new Date().getDate());
     const [loading, setLoading] = useState(true);
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
+
     useEffect(async () => {
-        console.log("Danh sách đơn hàng đang chờ xác nhận");
         const uid = await getUidUser();
-        const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang chờ', uid);
-        setListOrder(dataOrder)
-        dataOrder ? setLoading(false) : setLoading(true);
+        getRealtimeQueryACollection(setData, 'order', 'uid_client', uid);
+        setLoading(false)
     }, [])
+    function setData(data) {
+        setListOrder(data);
+    }
 
 
     const CancelOrder = async (item) => {
         const uid = await getUidUser();
-        await pushData('orderCancel', item);
-        await deleteDocument('order', item.id)
-        const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang chờ', uid);
-        setListOrder(dataOrder)
+        await pushData('orderCancel', item); // push to cancel order
+        await deleteDocument('order', item.id);// delete from list order;
+        getRealtimeQueryACollection(setData, 'order', 'uid_client', uid);
+        await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
+        const notificationOfUser = await getAnDocument('notification', uid);
+        const notificationArray = notificationOfUser.notifi;
+        notificationArray.unshift({
+            title: 'HelpHouse thông báo',
+            body: 'Quý khách đã hủy đơn hàng thành công!'
+        })
+        await updateNotification('notification', uid, notificationArray)
     }
+
+
+
+
 
     const renderItem = ({ item }) => {
         const expanded = item.id == selectedId ? true : false;
@@ -49,6 +67,7 @@ export default function ListOrder() {
                 <View style={{ paddingVertical: 10 }}>
                     <Text style={{ fontSize: 18 }}>Thời Gian Sửa Chữa</Text>
                     <Text style={{ fontSize: 16, fontWeight: 'bold' }}> {item.order.time + ' ' + item.order.date}</Text>
+                    
                     <Text>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
                 </View>
                 <View>
@@ -94,8 +113,7 @@ export default function ListOrder() {
                             }
                         </View>
                     </View>
-                    {console.log(item.order.createDay)}
-                    <Text>Ngày đặt: {item.order.createDay[Date]}</Text>
+                    <Text>Ngày đặt: {item.order.createDay}</Text>
                     <TouchableOpacity style={styles.button} onPress={() => CancelOrder(item)} >
                         <Text style={{ color: 'white' }}>Hủy Đơn</Text>
                     </TouchableOpacity>
@@ -110,7 +128,7 @@ export default function ListOrder() {
                 {
                     listOrder.length != 0 ?
                         <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
-                        : <Text>Không Có Đơn Hàng</Text>
+                        : <Nodata content="Không có đơn hàng" />
                 }
             </List.Section>
         </ScrollView>
