@@ -11,6 +11,6 @@ export const updateData = async (nameCollection, id, changStatus) => {
 
 export const updateNotification = async(nameCollection,uid,data)=>{
   await updateDoc(doc(db,nameCollection,uid),{
-    notifi: data
+    notification: data
   })
 }

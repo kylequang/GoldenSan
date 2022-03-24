@@ -23,7 +23,7 @@ export default function NotificationApp() {
     return (
         <SafeAreaView style={styles.container}>
             {
-                listNotification && <FlatList data={listNotification.notifi} renderItem={renderItem} />
+                listNotification && <FlatList data={listNotification.notification} renderItem={renderItem} keyExtractor={item => item.id} />
             }
         </SafeAreaView>
     )

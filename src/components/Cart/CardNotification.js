@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function CardNotification(props) {
   return (
-    <View style={styles.notification}>
+    <View style={styles.notification} key={props.time}>
       <View style={{ flexDirection: 'row' }}>
         <Image style={{ height: 25, width: 25 }} source={require('../../../assets/logo/logoapp.png')} />
         <Text style={{ fontSize: 16, marginLeft: 5 }}>HelpHouse</Text>

@@ -15,7 +15,7 @@ import Moment from 'moment';
 export default function ListOrder() {
     
         console.log(Moment('2022/3/24 10:23').fromNow())
-        console.log(new Date().getDate());
+        
     const [loading, setLoading] = useState(true);
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
@@ -37,7 +37,7 @@ export default function ListOrder() {
         getRealtimeQueryACollection(setData, 'order', 'uid_client', uid);
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
         const notificationOfUser = await getAnDocument('notification', uid);
-        const notificationArray = notificationOfUser.notifi;
+        const notificationArray = notificationOfUser.notification;
         notificationArray.unshift({
             title: 'HelpHouse thông báo',
             body: 'Quý khách đã hủy đơn hàng thành công!'

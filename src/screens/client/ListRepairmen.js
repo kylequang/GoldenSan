@@ -5,7 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
 import { scanLocation } from '../../service/getData';
 import SadFaceStatus from '../../components/animation/SadFaceStatus';
-
+import * as Speech from 'expo-speech';
 const Tab = createMaterialTopTabNavigator();
 
 function NearAddress(props) {
@@ -13,9 +13,15 @@ function NearAddress(props) {
     const [listRepairmen, setListRepairmen] = useState([]);
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer'])
-        console.log('Tìm kiếm thợ xung quanh bạn');
+        console.log("Tìm kiếm thợ");
+        Speech.speak("Chúng tôi đang tìm kiếm thợ sửa" +  props.job  + "với phạm vi 2 km gần bạn. Vui lòng đợi ");
         setListRepairmen(await scanLocation(props.job, 2, 3));
-        setLoading(false);
+        setTimeout(() => {
+            if (listRepairmen) {
+                setLoading(false);
+            }
+        }, 5000);
+
     }, [])
 
     const renderItem = ({ item }) => (
@@ -33,20 +39,16 @@ function NearAddress(props) {
                 <Text >{item.phoneNumber}</Text>
                 <Text style={{ marginTop: 5 }}>Thợ {item.job}</Text>
             </View>
-
             <View style={styles.profileRight}>
                 <View style={styles.row}>
                     <Text style={{ fontSize: 20 }}>{item.totalAVG} </Text>
                     <FontAwesome name="star" size={20} color={"#ffcc00"} />
                     <Text>  ({item.totalCount})</Text>
                 </View>
-
                 <Text style={{ marginTop: 30 }}>{item.sex}</Text>
-
             </View>
         </TouchableOpacity>
     )
-
     if (loading) return <ScanLoadingLocation />
     return (
         <View style={styles.container}>
@@ -68,7 +70,6 @@ function Favorite(props) {
     const [goodRepairmen, setGoodRepairmen] = useState([]);
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer'])
-        // setListRepairmen(await getDetailRepairmen(props.role))
         console.log('Tìm kiếm thợ xung quanh bạn');
         setGoodRepairmen(await scanLocation(props.job, 10, 4.5))
         setLoading(false);

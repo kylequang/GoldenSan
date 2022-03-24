@@ -333,8 +333,10 @@ const PhoneNumber = ({ navigation }) => {
                                 body: 'Chào mừng quý khách đến với HelpHouse!',
                                 time: new Date()
                             }
-                            const data = [];
-                            data.push({ id: uid, notification: [addNotification] })
+                            const array=[];
+                            array.push(addNotification)
+                            const data = { id: uid, notification: array }
+
 
                             await setDocument('notification', uid, data)
                             navigation.navigate('checkRole');
@@ -437,7 +439,6 @@ const PhoneNumber = ({ navigation }) => {
                             await AsyncStorage.setItem('role', checkRole);
                             await AsyncStorage.setItem('rememberLogin', 'yes');
 
-
                             await setDoc(doc(db, checkRole, uid), {
                                 name: values.name,
                                 age: values.age,
@@ -467,8 +468,10 @@ const PhoneNumber = ({ navigation }) => {
                                 body: 'Chào mừng quý khách đến với HelpHouse!',
                                 time: new Date()
                             }
-                            const data = [];
-                            data.push({ id: uid, notification: [addNotification] })
+                            const array=[];
+                            array.push(addNotification)
+                            const data = { id: uid, notification: array }
+
                             await setDocument('notification', uid, data)
                             navigation.navigate('checkRole');
 

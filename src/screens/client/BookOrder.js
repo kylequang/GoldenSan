@@ -1,13 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView, Image } from 'react-native';
 import { Checkbox } from 'react-native-paper';
-import React, { useState } from 'react';
+import React, { useState,useEffect  } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useEffect } from 'react';
-import { getCurrentUser } from '../../service/getData';
 import { FontAwesome } from '@expo/vector-icons';
 import { formatPrice, formatDate, formatTime, formatDateTime } from '../../service/formatCode';
 import { DataTable } from 'react-native-paper';
-import { putOrder, schedulePushNotification, pushData } from '../../service/pushData';
+import {  schedulePushNotification, pushData } from '../../service/pushData';
 import { getUidUser, getAnDocument } from '../../service/getData';
 import { updateNotification } from '../../service/updateData';
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
@@ -70,7 +68,7 @@ export default function BookOrder({ navigation, route }) {
             bookService: bookService,
             status: 'Đang chờ'
         }
-        await putOrder(data);
+        await pushData('order',data);
 
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã đặt lịch thành công ! Xin vui lòng kiểm tra trong đơn hàng của bạn')
 
@@ -78,7 +76,7 @@ export default function BookOrder({ navigation, route }) {
         const uid = await getUidUser();
         const notificationOfUser = await getAnDocument('notification', uid);
 
-        const notificationArray = notificationOfUser.notifi;
+        const notificationArray = notificationOfUser.notification;
         console.log(notificationArray);
 
         notificationArray.unshift({
