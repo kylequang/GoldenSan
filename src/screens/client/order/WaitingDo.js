@@ -8,15 +8,14 @@ import ActivityIndicatorLoading from '../../../components/animation/ActivityIndi
 import Nodata from '../../../components/Nodata/Nodata';
 
 
-
-export default function DoingOrder() {
+export default function WaitingDo() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client
   useEffect(async () => {
-    console.log("Danh sách đơn hàng đang Sửa Chữa");
+    console.log("Danh sách đơn hàng đang chờ sửa");
     const uid = await getUidUser();
-    const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang Sửa', uid);
+    const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Chờ Sửa', uid);
     setListOrder(dataOrder)
     dataOrder ? setLoading(false) : setLoading(true);
   }, [])
@@ -95,7 +94,7 @@ export default function DoingOrder() {
         {
           listOrder.length != 0 ?
             <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
-            : <Nodata content="Không có đơn hàng đang sửa chữa nào"/>
+            : <Nodata content="Không có đơn hàng nào đang chờ sửa chữa"/>
         }
       </List.Section>
     </ScrollView>

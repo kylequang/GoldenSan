@@ -7,84 +7,83 @@ import { getCurrentLocation, getAnDocument, getCurrentUser } from '../../service
 
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
-const GOOGLE_MAPS_APIKEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
 
-import { formatPrice, formatNameService } from '../../service/formatCode';
+//const GOOGLE_MAPS_APIKEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
+
+const GOOGLE_MAPS_APIKEY = 'AIzaSyB22KxpEKa7qGMvGAuNu5XsfaINrcMlHvA';
+
+import { formatPrice, } from '../../service/formatCode';
 import RepairmenLoading from '../../components/animation/RepairmenLoading';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
 var distance = 1;
 var time = 0;
 const OnGoogleMap = (props) => {
+    console.log('Địa chỉ khách hàng: ', props.clientLocation);
     const mapRef = useRef()
     return (
-        // <MapView initialRegion={{
-        //     latitude: props.clientLocation.coords.latitude,
-        //     longitude: props.clientLocation.coords.longitude,
-        //     latitudeDelta: 0.009,
-        //     longitudeDelta: 0.0421
-        // }} ref={mapRef} style={{
-        //     width: Dimensions.get("window").width,
-        //     height: 500
-        // }}
-        //     showsUserLocation={true}
-        //     showsTraffic={true}
-        //     userLocationUpdateInterval={5000}
-        // >
+        <MapView initialRegion={{
+            latitude: props.clientLocation.coords.latitude,
+            longitude: props.clientLocation.coords.longitude,
+            latitudeDelta: 0.009,
+            longitudeDelta: 0.0421
+        }} ref={mapRef} style={{
+            width: Dimensions.get("window").width,
+            height: 500
+        }}
+            showsUserLocation={true}
+            showsTraffic={true}
+            userLocationUpdateInterval={5000}
+        >
+            <Marker coordinate={{
+                latitude: props.clientLocation.coords.latitude,
+                longitude: props.clientLocation.coords.longitude,
+                latitudeDelta: 0.0042,
+                longitudeDelta: 0.0421
+            }} pinColor="green" draggable={true} >
+                <Callout>
+                    <Text>Bạn</Text>
+                </Callout>
+            </Marker>
 
-        //     <Text>Khoảng cách:{distance} km</Text>
-        //     <Text>Thời gian:{time} phút</Text>
+            <Marker coordinate={props.repairmenLocation} image={require('../../../assets/logo/icon_map_repairmen.png')} />
+            <MapViewDirections
+                mode="DRIVING"
+                origin={{
+                    latitude: props.clientLocation.coords.latitude,
+                    longitude: props.clientLocation.coords.longitude,
+                    latitudeDelta: 0.0042,
+                    longitudeDelta: 0.0421
+                }}
+                precision='high'
+                destination={props.repairmenLocation}
+                apikey={GOOGLE_MAPS_APIKEY}
+                strokeWidth={7}
+                strokeColor="blue"
+              
 
-        //     <Marker coordinate={{
-        //         latitude: props.clientLocation.coords.latitude,
-        //         longitude: props.clientLocation.coords.longitude,
-        //         latitudeDelta: 0.0042,
-        //         longitudeDelta: 0.0421
-        //     }} pinColor="green" draggable={true} >
-        //         <Callout>
-        //             <Text>Bạn</Text>
-        //         </Callout>
-        //     </Marker>
-        //     <Marker coordinate={props.repairmenLocation} image={require('../../../assets/logo/icon_map_repairmen.png')} />
-        //     <MapViewDirections
-        //         mode="DRIVING"
-        //         origin={{
-        //             latitude: props.clientLocation.coords.latitude,
-        //             longitude: props.clientLocation.coords.longitude,
-        //             latitudeDelta: 0.0042,
-        //             longitudeDelta: 0.0421
-        //         }}
-        //         precision='high'
-        //         destination={props.repairmenLocation}
-        //         apikey={GOOGLE_MAPS_APIKEY}
-        //         strokeWidth={7}
-        //         strokeColor="blue"
-        //         optimizeWaypoints={true}
-
-        //         onStart={(params) => {
-        //             console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
-        //         }}
-        //         onReady={result => {
-        //             distance = result.distance
-        //             time = result.duration
-        //             console.log(distance);
-        //             console.log(`Distance: ${result.distance} km`)
-        //             console.log(`Duration: ${result.duration} min.`)
-        //             mapRef.current.fitToCoordinates(result.coordinate, {
-        //                 edgePadding: {
-        //                     right: 5,
-        //                     left: 5,
-        //                     bottom: 10,
-        //                     top: 10
-        //                 }
-        //             })
-        //         }
-        //         }
-        //     />
-        // </MapView>
-        <Text>hi</Text>
+                onStart={(params) => {
+                    console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
+                }}
+                onReady={result => {
+                    distance = result.distance
+                    time = result.duration
+                    console.log(distance);
+                    console.log(`Distance: ${result.distance} km`)
+                    console.log(`Duration: ${result.duration} min.`)
+                    mapRef.current.fitToCoordinates(result.coordinate, {
+                        edgePadding: {
+                            right: 5,
+                            left: 5,
+                            bottom: 10,
+                            top: 10
+                        }
+                    })
+                }
+                }
+            />
+        </MapView>
     )
 }
 
@@ -92,7 +91,7 @@ function ServiceTable(props) {
     const renderListWork = ({ item, id }) => (
         <DataTable.Row key={id}>
             <DataTable.Cell>{item.nameService}</DataTable.Cell>
-            <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
+            <DataTable.Cell numeric>{formatPrice(item.price)}đ</DataTable.Cell>
             <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
         </DataTable.Row>
     )
@@ -140,7 +139,7 @@ export default function DetailRepairmen({ navigation, route }) {
                     <View style={styles.avatar}>
                         <Image style={styles.img} source={{ uri: repairman.photoURL }} />
                         <View style={[styles.row, { position: 'absolute', bottom: 0, left: 30 }]}>
-                            <Text style={{ fontSize: 25 }}>{repairman.totalAVGComment}</Text>
+                            <Text style={{ fontSize: 25 }}>{repairman.totalAVG}</Text>
                             <FontAwesome name="star" size={20} color={"#ffcc00"} />
                         </View>
                     </View>
@@ -149,13 +148,10 @@ export default function DetailRepairmen({ navigation, route }) {
                         <Text style={styles.textInfo}>SDT:  {repairman.phoneNumber}</Text>
                         <Text style={styles.textInfo}>Giới tính:  {repairman.sex}</Text>
                         <Text style={styles.textInfo}>Đánh Giá:  {repairman.totalCount}</Text>
-                        {distance != 0 && <Text>Khoảng cách: {distance} km</Text>}
+                        {distance != 1 && <Text>Khoảng cách: {distance} km</Text>}
                     </View>
                 </View>
             </View>
-
-
-
             <View style={styles.sliderTag}>
             </View>
             <View style={{ alignItems: 'center', marginBottom: 5 }}>
@@ -166,6 +162,7 @@ export default function DetailRepairmen({ navigation, route }) {
                             {
                                 name: "Đặt Lịch Sữa Chữa",
                                 repairmen: route.params.item,
+                                location: currentLocationOfClient,
                                 distance: distance,
                                 listWork: listWork,
                                 dataUser: currentUser
@@ -252,7 +249,7 @@ const styles = StyleSheet.create({
         height: 130,
         width: '100%',
         resizeMode: 'contain',
-        borderRadius: 200
+     
     },
     titleTable: {
         fontSize: 16,

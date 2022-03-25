@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import LoginScreen from '../screens/auth/LoginScreen';
 import RepairmenLoading from '../components/animation/RepairmenLoading';
 import BottomRepairmen from './repairmen/BottomRepairmen';
 import BottomTab from './client/BottomTab';
@@ -59,6 +60,10 @@ export default function AppStack() {
 
       <RoleStacks.Screen name="ActivityOrder"
         component={Activity_Order}
+        options={{ headerShown: false }}
+      />
+      <RoleStacks.Screen name="Auth"
+        component={LoginScreen}
         options={{ headerShown: false }}
       />
     </RoleStacks.Navigator>

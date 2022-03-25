@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 // get collection
 export const getData = async (nameCollection) => {
   const data = []
@@ -28,7 +29,6 @@ export const getAnDocument = async (nameCollection, idDocument) => {
 
 
 // get uid of current user 
-
 export const getUidUser = async () => {
   const dataUser = await AsyncStorage.getItem('dataUser');
   const currentUser = dataUser != null ? JSON.parse(dataUser) : 'null';
@@ -36,16 +36,25 @@ export const getUidUser = async () => {
 }
 
 
-
+//get current user 
+export const getCurrentUser = async () => {
+  const data = await AsyncStorage.getItem('dataUser');
+  const currentUser = data != null ? JSON.parse(data) : 'null';
+  const dataUser = await getAnDocument('client', currentUser.user.uid);
+  return dataUser;
+}
 
 // get and query order
-export const getQueryCollection = async (nameCollection,uid_client) => {
-  console.log(uid_client);
+export const getQueryCollection = async (nameCollection, role, status, condition, uid) => {
   const data = [];
-  const queryOrder = query(collection(db, nameCollection), where('uid_client', "==", uid_client));
+  const queryOrder = query(collection(db, nameCollection), where(role, "==", uid), where(status, "==", condition));
   const querySnapshot = await getDocs(queryOrder)
   querySnapshot.forEach((doc) => {
-    data.push(doc.data())
+    const object = {
+      order: doc.data(),
+      id: doc.id
+    }
+    data.push(object)
   })
   return data;
 }
@@ -57,20 +66,13 @@ export const getDetailRepairmen = async (role) => {
   const queryJobRepairmen = query(collection(db, 'repairmen'), where('role', "==", role));
   const querySnapshot = await getDocs(queryJobRepairmen)
   querySnapshot.forEach((doc) => {
+
     data.push(doc.data())
   })
   return data;
 }
 
 
-
-//get current user 
-export const getCurrentUser = async () => {
-  const data = await AsyncStorage.getItem('dataUser');
-  const currentUser = data != null ? JSON.parse(data) : 'null';
-  const dataUser = await getAnDocument('client', currentUser.user.uid);
-  return dataUser;
-}
 
 
 
@@ -121,7 +123,6 @@ const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
 
 // scan location near you
 export const scanLocation = async (job, distance, score) => {
-  console.log(job);
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
   const dataRepairmen = [];
@@ -154,6 +155,9 @@ export const getAllRealTimeRepairmen = (callback) => {
 }
 
 
+
+
+
 export const getRealTimeLocationRepairmen = (callback) => {
   const location = [];
   const q = collection(db, "repairmen");
@@ -166,3 +170,30 @@ export const getRealTimeLocationRepairmen = (callback) => {
 }
 
 
+
+
+
+// REAL TIME
+
+//get realtime a collection 
+export const getRealtimeQueryACollection = (callback, nameCollection, conditionField, uidUser) => {
+  const data = [];
+  const queryCollection = query(collection(db, nameCollection), where(conditionField, "==", uidUser));
+  onSnapshot(queryCollection, (querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      const object = {
+        order: doc.data(),
+        id: doc.id
+      }
+      data.push(object);
+    });
+    callback(data);
+  });
+}
+// get realtime an document
+export const getRealtimeAnDocument = (callback, nameCollection, ui) => {
+  const dataRef = doc(db, nameCollection, ui);
+  onSnapshot(dataRef, (doc) => {
+    callback(doc.data());
+  })
+}

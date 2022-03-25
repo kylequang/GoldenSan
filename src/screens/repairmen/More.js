@@ -8,55 +8,29 @@ import {
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5,MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
-import HeaderUser from "../../components/HeaderUser";
+
 import { auth } from '../../database/firebase';
-import { NativeModules } from "react-native"
+
 
 export default function More({ navigation }) {
     return (
         <SafeAreaView>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <Text style={{ textAlign: 'center', fontSize: 28, paddingBottom: 10 }}>Xin Chào!</Text>
-                <HeaderUser />
-                <View style={styles.container}>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'cog'} color="black" size={25} />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Lịch Sử Sữa Chữa</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
-                    </View>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                            <FontAwesome5 name={'comments'} color="black" size={25} />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Đóng góp tính năng Golden Sand</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
-                    </View>
-                    <View style={styles.row}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name='phone-classic' size={30} color='#0D0A03' />
-                            <Text style={{ marginLeft: 15, fontSize: 18 }}>Liên Hệ với Golden Sand</Text>
-                        </View>
-                        <View>
-                            <Ionicons name="arrow-forward" size={19} color={"#0D0A03"} />
-                        </View>
-                    </View>
-                </View>
+                <Text>Quản lí tài khoản</Text>
+                <Text>Quản lí tài khoản</Text>
+                <Text>Quản lí tài khoản</Text>
+                <Text>Quản lí tài khoản</Text>
+                <Text>Quản lí tài khoản</Text>
+                <Text>Quản lí tài khoản</Text>
                 <View style={styles.footer}>
                     <TouchableOpacity style={styles.BtnItem}
                         onPress={
                             () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 AsyncStorage.clear().then(() => console.log('Cleared'))
-                              
-                                NativeModules.DevSettings.reload();
+                                navigation.navigate('Auth')
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>
