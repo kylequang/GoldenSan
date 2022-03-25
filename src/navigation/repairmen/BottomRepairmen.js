@@ -25,8 +25,6 @@ export default function BottomRepairmen() {
                         iconName = focused ? 'account' : 'account';
                     else if (route.name === 'Hoạt Động')
                         iconName = focused ? 'clock' : 'clock';
-                    else if (route.name === 'Báo Cáo')
-                        iconName = focused ? 'chart-bar' : 'chart-bar';
                     else if (route.name === 'Bản Đồ')
                         iconName = focused ? 'map-marker' : 'map-marker';
                     else if (route.name === 'Thông Báo')
@@ -46,7 +44,6 @@ export default function BottomRepairmen() {
         >
             <Tab.Screen name="Trang Chủ" component={IndexRepairmen} />
             <Tab.Screen name="Hoạt Động" component={Activity_Order} />
-            <Tab.Screen name="Báo Cáo" component={Report} />
             <Tab.Screen name='Thông Báo' component={NotificationApp} />
             <Tab.Screen name='Bản Đồ' component={MapRepairmen} />
             <Tab.Screen name="Hồ Sơ" component={More} />

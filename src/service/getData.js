@@ -178,7 +178,6 @@ export const getRealTimeLocationRepairmen = (callback) => {
 //get realtime a collection 
 export const getRealtimeQueryACollection = (callback, nameCollection, conditionField, uidUser) => {
   const data = [];
-  console.log("Get list order");
   const queryCollection = query(collection(db, nameCollection), where(conditionField, "==", uidUser));
   onSnapshot(queryCollection, (querySnapshot) => {
     querySnapshot.forEach((doc) => {
@@ -186,19 +185,15 @@ export const getRealtimeQueryACollection = (callback, nameCollection, conditionF
         order: doc.data(),
         id: doc.id
       }
-      data.push(object)
+      data.push(object);
     });
     callback(data);
   });
 }
-
-
-
 // get realtime an document
 export const getRealtimeAnDocument = (callback, nameCollection, ui) => {
   const dataRef = doc(db, nameCollection, ui);
   onSnapshot(dataRef, (doc) => {
-    console.log("Current data: ", doc.data());
     callback(doc.data());
   })
 }

@@ -23,5 +23,9 @@ export const formatTime = (time) => {
     return `${time.getHours()}:${time.getMinutes()}`;
 }
 export const formatDate = (date) => {
-    return `${date.getDate()}/${date.getMonth() +1}/${date.getFullYear()}`
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+}
+
+export const formatTimeMoment = (date) => {
+    return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
 }

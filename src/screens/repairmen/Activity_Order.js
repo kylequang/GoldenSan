@@ -3,22 +3,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import ListOrder from './order/ListOrder';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import MapView, { Callout, Circle, Marker } from "react-native-maps"
 import MapViewDirections from 'react-native-maps-directions';
+import WaitingDo from './order/WaitingDo';
+import OrderSuccess from './order/OrderSuccess';
+import CancelOrder from './order/CancelOrder';
+import DoingOrder from './order/DoingOrder';
 
-
-const activeTab = createMaterialTopTabNavigator();
+const OrderTab = createMaterialTopTabNavigator();
 const GOOGLE_MAPS_APIKEY = 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0';
 
-function HistoryOrder() {
-  return (
-    <View>
-      <Text>Lịch Sử Đơn Hàng</Text>
-
-    </View>
-  )
-}
 function FixingOrder() {
 
   const [location, setLocation] = useState({
@@ -191,26 +185,24 @@ function Cancel() {
     </View>
   )
 }
+
 export default function Activity_Order() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <activeTab.Navigator style={{ marginTop: 20 }}
-        initialRouteName='Đơn Hàng'
+        <OrderTab.Navigator style={{ marginTop: 20 }}
+        initialRouteName='Chờ Xác Nhận'
         screenOptions={{
           tabBarScrollEnabled: true,
           tabBarLabelStyle: { fontSize: 15, fontWeight: 'bold' },
           tabBarStyle: { backgroundColor: '#ff944d' },
         }}
       >
-        <activeTab.Screen name='Cho bạn' component={ListOrder} />
-        <activeTab.Screen name='Đang Sữa' component={FixingOrder} />
-        <activeTab.Screen name='Đã Hủy' component={Cancel} />
-        <activeTab.Screen name='Lịch Sử' component={HistoryOrder} />
-        <activeTab.Screen name='Lịch Sử1' component={HistoryOrder} />
-        <activeTab.Screen name='Lịch Sử2' component={HistoryOrder} />
-        <activeTab.Screen name='Lịch Sử3' component={HistoryOrder} />
-        <activeTab.Screen name='Lịch Sử4' component={HistoryOrder} />
-      </activeTab.Navigator>
+        <OrderTab.Screen name='Chờ Xác Nhận' component={ListOrder} />
+        <OrderTab.Screen name='Chờ Sửa' component={WaitingDo} />
+        <OrderTab.Screen name='Đang Sửa' component={DoingOrder} />
+        <OrderTab.Screen name='Thành công' component={OrderSuccess} />
+        <OrderTab.Screen name='Bị hủy' component={CancelOrder} />
+      </OrderTab.Navigator>
     </SafeAreaView>
   )
 }

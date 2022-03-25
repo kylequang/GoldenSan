@@ -12,9 +12,8 @@ import MapViewDirections from 'react-native-maps-directions';
 
 const GOOGLE_MAPS_APIKEY = 'AIzaSyB22KxpEKa7qGMvGAuNu5XsfaINrcMlHvA';
 
-import { formatPrice, formatNameService } from '../../service/formatCode';
+import { formatPrice, } from '../../service/formatCode';
 import RepairmenLoading from '../../components/animation/RepairmenLoading';
-
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
@@ -22,8 +21,6 @@ var distance = 1;
 var time = 0;
 const OnGoogleMap = (props) => {
     console.log('Địa chỉ khách hàng: ', props.clientLocation);
-
-
     const mapRef = useRef()
     return (
         <MapView initialRegion={{
@@ -64,7 +61,7 @@ const OnGoogleMap = (props) => {
                 apikey={GOOGLE_MAPS_APIKEY}
                 strokeWidth={7}
                 strokeColor="blue"
-                optimizeWaypoints={true}
+              
 
                 onStart={(params) => {
                     console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
@@ -94,7 +91,7 @@ function ServiceTable(props) {
     const renderListWork = ({ item, id }) => (
         <DataTable.Row key={id}>
             <DataTable.Cell>{item.nameService}</DataTable.Cell>
-            <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
+            <DataTable.Cell numeric>{formatPrice(item.price)}đ</DataTable.Cell>
             <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
         </DataTable.Row>
     )
@@ -117,10 +114,6 @@ function ServiceTable(props) {
 
 export default function DetailRepairmen({ navigation, route }) {
 
-    const t = () => {
-        setLoading(true);
-        navigation.navigate('con')
-    }
     const [repairman, setRepairman] = useState({});
     const [loading, setLoading] = useState(true);
     const [listWork, setListWork] = useState({});
@@ -256,7 +249,7 @@ const styles = StyleSheet.create({
         height: 130,
         width: '100%',
         resizeMode: 'contain',
-        borderRadius: 200
+     
     },
     titleTable: {
         fontSize: 16,

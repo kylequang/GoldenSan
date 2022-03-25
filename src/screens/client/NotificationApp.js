@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import CardNotification from '../../components/Cart/CardNotification';
 import {  getRealtimeAnDocument, getUidUser } from '../../service/getData';
 
+
 export default function NotificationApp() {
     const [listNotification, setListNotification] = useState([]);
 

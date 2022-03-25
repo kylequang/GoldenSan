@@ -126,7 +126,7 @@ const PhoneNumber = ({ navigation }) => {
                         body: 'Chào mừng quý khách quay lại HelpHouse!',
                         time: new Date()
                     })
-                    await updateNotification('notification', checkAccountOfRepairmen.uid, notificationArray)
+                    await updateNotification('notification', checkAccountOfClient.uid, notificationArray)
                 }
                 navigation.navigate('checkRole')
             }

@@ -1,18 +1,17 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView, Image } from 'react-native';
 import { Checkbox } from 'react-native-paper';
-import React, { useState,useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FontAwesome } from '@expo/vector-icons';
 import { formatPrice, formatDate, formatTime, formatDateTime } from '../../service/formatCode';
 import { DataTable } from 'react-native-paper';
-import {  schedulePushNotification, pushData } from '../../service/pushData';
+import { schedulePushNotification, pushData } from '../../service/pushData';
 import { getUidUser, getAnDocument } from '../../service/getData';
 import { updateNotification } from '../../service/updateData';
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
 
 export default function BookOrder({ navigation, route }) {
-    const [totalPrice, setTotalPrice] = useState(0);
-    const [shipPrice, setShipPrice] = useState(0);
+    const [totalPrice, setTotalPrice] = useState(route.params.distance > 2 ? (5000 * (route.params.distance - 2)) : 0);
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
     const [mode, setMode] = useState('date');
@@ -27,10 +26,9 @@ export default function BookOrder({ navigation, route }) {
                 response.json()
             )
             .then((responseJson) => {
-                console.log('ADDRESS GEOCODE is BACK!! => ' + JSON.stringify(responseJson));
                 console.log(responseJson.results[0].formatted_address);
                 setDetailLocation(responseJson.results[0].formatted_address)
-            })
+            });
     }, [])
 
     const handleBookOrder = async () => {
@@ -58,7 +56,7 @@ export default function BookOrder({ navigation, route }) {
                 latitudeDelta: 0.09,
                 longitudeDelta: 0.042
             },
-            shipPrice: shipPrice,
+            shipPrice: route.params.distance > 2 ? (5000 * (route.params.distance - 2)) : 0,
             address: detailLocation,
             distance: route.params.distance,
             date: formatDate(date),
@@ -68,24 +66,17 @@ export default function BookOrder({ navigation, route }) {
             bookService: bookService,
             status: 'Đang chờ'
         }
-        await pushData('order',data);
-
+        await pushData('order', data);
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã đặt lịch thành công ! Xin vui lòng kiểm tra trong đơn hàng của bạn')
-
-
         const uid = await getUidUser();
         const notificationOfUser = await getAnDocument('notification', uid);
-
         const notificationArray = notificationOfUser.notification;
-        console.log(notificationArray);
-
         notificationArray.unshift({
             title: 'HelpHouse thông báo',
             body: 'Quý khách đã đặt lịch thành công ! Xin vui lòng kiểm tra trong đơn hàng của bạn!',
             time: new Date()
         })
         await updateNotification('notification', uid, notificationArray)
-
         navigation.navigate('Trang Chủ');
     }
 
@@ -132,8 +123,6 @@ export default function BookOrder({ navigation, route }) {
         });
         setSelectWork(temp);
     }
-
-
     const renderListWork = ({ item }) => (
         <DataTable.Row key={item.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Checkbox
@@ -143,14 +132,9 @@ export default function BookOrder({ navigation, route }) {
                 }}
             />
             <DataTable.Cell style={{ flex: 2 }}><Text>{item.nameService}</Text></DataTable.Cell>
-            <DataTable.Cell numeric>{formatPrice(item.price)}/h</DataTable.Cell>
+            <DataTable.Cell numeric>{formatPrice(item.price)}đ</DataTable.Cell>
         </DataTable.Row>
     )
-    if (route.params.distance > 2) {
-        setShipPrice(5000 * (route.params.distance - 2));
-        setTotalPrice(totalPrice + shipPrice)
-    }
-
     return (
         <ScrollView style={styles.container}>
             <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ CỦA BẠN</Text>
@@ -193,12 +177,11 @@ export default function BookOrder({ navigation, route }) {
                 </DataTable>
                 {
                     route.params.distance > 2 ?
-                        <Text>Phí dịch vụ({route.params.distance}):{formatPrice(5000 * (route.params.distance - 2))} đ</Text> : <Text>Phí dịch vụ: 0đ</Text>
+                        (<Text style={{ fontSize: 15, fontWeight: '900' }}>Phí dịch vụ ({route.params.distance}km): {formatPrice(5000 * (route.params.distance - 2))} đ</Text>)
+                        : (<Text>Phí dịch vụ ({route.params.distance}km): 0đ</Text>)
                 }
                 <Text style={{ marginBottom: 30, marginTop: 10 }}>Phương thức thanh toán: Tiền Mặt</Text>
             </View>
-
-
             <View style={{
                 flex: 1, backgroundColor: 'red', flexDirection: 'row', marginVertical: 30, alignItems: 'center',
                 marginVertical: 8,
@@ -243,8 +226,9 @@ export default function BookOrder({ navigation, route }) {
                 height: 40,
                 marginLeft: '10%',
                 marginRight: '10%',
-
+                marginBottom: '10%'
             }}>
+
                 <TouchableOpacity style={{
                     backgroundColor: '#ff8000',
                     width: '100%',
@@ -252,16 +236,14 @@ export default function BookOrder({ navigation, route }) {
                     justifyContent: 'center',
                     alignItems: 'center',
                     borderRadius: 10,
-
                 }}
-                    disabled={totalPrice == 0}
+                    disabled={bookService.length == 0}
                     onPress={handleBookOrder}
                 >
                     <Text style={{
                         fontSize: 18,
                         color: 'white', fontWeight: 'bold'
                     }}>{formatPrice(totalPrice)} XÁC NHẬN</Text>
-
                 </TouchableOpacity>
             </View>
         </ScrollView>
