@@ -1,9 +1,16 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+import call from 'react-native-phone-call';
 export default function Contact() {
+  const triggerCall = () => {
+    const args = {
+      number: '0123456789',
+      prompt: true,
+    };
+    call(args).catch(console.error);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ alignItems: 'center', margin: 10 }}>
@@ -23,7 +30,10 @@ export default function Contact() {
           <Text style={styles.text}>helphouse@gmail.com</Text>
         </View>
         <View style={styles.row}>
-          <MaterialCommunityIcons name='phone' size={30} color='#ff6600' />
+          <TouchableOpacity
+            onPress={triggerCall}>
+            <MaterialCommunityIcons name='phone' size={30} color='#ff6600' />
+          </TouchableOpacity>
           <Text style={styles.text}>+84 0123 456 789</Text>
         </View>
         <View style={styles.row}>
@@ -36,10 +46,10 @@ export default function Contact() {
         <Text style={{ marginHorizontal: 15 }}>OR</Text>
         <View style={{ height: 2, backgroundColor: '#ff6600', width: '40%' }}></View>
       </View>
-      <View style={[styles.row,{justifyContent:'center'}]}>
-          <MaterialCommunityIcons name='facebook' size={30} color='#ff6600' style={{marginHorizontal:15}}/>
-          <MaterialCommunityIcons name='google' size={30} color='#ff6600'  style={{marginHorizontal:15}}/>
-          <MaterialCommunityIcons name='youtube' size={35} color='#ff6600'  style={{marginHorizontal:15}}/>
+      <View style={[styles.row, { justifyContent: 'center' }]}>
+        <MaterialCommunityIcons name='facebook' size={30} color='#ff6600' style={{ marginHorizontal: 15 }} />
+        <MaterialCommunityIcons name='google' size={30} color='#ff6600' style={{ marginHorizontal: 15 }} />
+        <MaterialCommunityIcons name='youtube' size={35} color='#ff6600' style={{ marginHorizontal: 15 }} />
       </View>
     </SafeAreaView>
   )
@@ -48,16 +58,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent:'center'
+    justifyContent: 'center'
   },
   info: {
-    marginVertical:15
+    marginVertical: 15
   },
   row: {
     flexDirection: 'row',
     marginBottom: 10,
     padding: 15,
-    alignItems:'center'
+    alignItems: 'center'
   },
   text: {
     fontSize: 16,

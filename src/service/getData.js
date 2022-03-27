@@ -123,6 +123,7 @@ const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
 
 // scan location near you
 export const scanLocation = async (job, distance, score) => {
+  console.log("Quét vị trí");
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
   const dataRepairmen = [];

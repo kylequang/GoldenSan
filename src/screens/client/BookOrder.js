@@ -56,6 +56,12 @@ export default function BookOrder({ navigation, route }) {
                 latitudeDelta: 0.09,
                 longitudeDelta: 0.042
             },
+            locationRepairmen: {
+                latitude: route.params.repairmen.detailLocation.latitude,
+                longitude: route.params.repairmen.detailLocation.longitude,
+                latitudeDelta: 0.09,
+                longitudeDelta: 0.042
+            },
             shipPrice: route.params.distance > 2 ? (5000 * (route.params.distance - 2)) : 0,
             address: detailLocation,
             distance: route.params.distance,

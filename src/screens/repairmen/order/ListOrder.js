@@ -20,25 +20,24 @@ export default function ListOrder({ navigation }) {
         console.log("Render list order getAgain");
         const id = await getUidUser();
         setUid(id)
-        const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
+        const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
         setListOrder(data);
         setLoading(false)
 
         const unsubscribe = navigation.addListener('focus', () => {
-            console.log("render again",getAgain);
-            const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
+            console.log("render again", getAgain);
+            const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
             setListOrder(data);
             setLoading(false)
         });
         return unsubscribe;
-    }, [navigation,getAgain]);
+    }, [navigation, getAgain]);
 
     function setData(data) {
         setListOrder(data);
     }
 
     const CancelOrder = async (item, uid) => {
-
         item.order.status = "Bị hủy";
         await pushData('orderCancel', item.order); // push to cancel order
         await deleteDocument('order', item.id);// delete from list order;
@@ -53,6 +52,25 @@ export default function ListOrder({ navigation }) {
         await updateNotification('notification', uid, notificationArray);
         setGetAgain(true);
         navigation.navigate('Bị hủy')
+    }
+
+
+
+    const Confirm = async (item, uid) => {
+        item.order.status = "Đã xác nhận";
+        await pushData('orderWaiting', item.order); // push to cancel order
+        await deleteDocument('order', item.id);// delete from list order;
+        await schedulePushNotification('HelpHouse thông báo', 'Bạn đã nhận đơn hàng thành công!');
+        const notificationOfUser = await getAnDocument('notification', uid);
+        const notificationArray = notificationOfUser.notification;
+        notificationArray.unshift({
+            title: 'HelpHouse thông báo',
+            body: 'Bạn đã nhận đơn hàng thành công!',
+            time: new Date()
+        })
+        await updateNotification('notification', uid, notificationArray);
+        setGetAgain(true);
+        navigation.navigate('Chờ Sửa')
     }
 
     const renderItem = ({ item }) => {
@@ -113,8 +131,14 @@ export default function ListOrder({ navigation }) {
                         </View>
                     </View>
                     <Text>Ngày đặt: {item.order.createDay}</Text>
-                    <TouchableOpacity style={styles.button} onPress={() => CancelOrder(item, uid)} >
+
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: 'gray' }]} onPress={() => CancelOrder(item, uid)} >
                         <Text style={{ color: 'white' }}>Hủy Đơn</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: 'green' }]} onPress={() => Confirm(item,uid)} >
+                        <Text style={{ color: 'white' }}>Chấp Nhận</Text>
                     </TouchableOpacity>
                 </View>
             </List.Accordion>
@@ -134,14 +158,13 @@ const styles = StyleSheet.create({
 
     button: {
         marginVertical: 10,
-        marginLeft: 170,
+        marginLeft: 50,
         height: 45,
         width: '30%',
         padding: 10,
         alignItems: "center",
         justifyContent: 'center',
         borderRadius: 15,
-        backgroundColor: 'red',
     },
     avatar: {
         height: 80,

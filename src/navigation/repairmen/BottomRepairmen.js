@@ -30,7 +30,7 @@ export default function BottomRepairmen() {
                     else if (route.name === 'Thông Báo')
                         iconName = focused ? 'bell' : 'bell';
                     return (
-                        <MaterialCommunityIcons name={iconName} size={27} color={color} />
+                        <MaterialCommunityIcons name={iconName} size={25} color={color} />
                     );
                 },
                 tabBarActiveTintColor: '#ff6600',
@@ -38,7 +38,7 @@ export default function BottomRepairmen() {
                 headerTitleAlign: 'center',
                 tabBarLabelStyle: {
                     marginBottom: 2,
-                    fontSize: 12
+                    fontSize: 13
                 }
             })}
         >

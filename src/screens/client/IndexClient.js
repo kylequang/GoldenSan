@@ -1,9 +1,8 @@
 import { Text, StyleSheet, Image, LogBox, TouchableOpacity, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getCurrentUser, getData } from '../../service/getData';
-import RepairmenLoading from '../../components/animation/RepairmenLoading';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getData } from '../../service/getData';
+import Loading from '../../components/animation/Loading';
 export default function Index({ navigation }) {
     const [category, setCategory] = useState([]);
     const [showLoading, setShowLoading] = useState(true);
@@ -11,7 +10,10 @@ export default function Index({ navigation }) {
     useEffect(async () => {
         LogBox.ignoreLogs(['Setting a timer']);
         setCategory(await getData('category'));
-        setShowLoading(false)
+        if(category){
+            setShowLoading(false)
+        }
+       
         console.log('Category');
     }, [])
 
@@ -29,6 +31,7 @@ export default function Index({ navigation }) {
             </TouchableOpacity>
         );
     };
+    if(showLoading) return <Loading />
     return (
         <SafeAreaView style={styles.container}>
             {
