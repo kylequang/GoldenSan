@@ -56,6 +56,12 @@ export default function BookOrder({ navigation, route }) {
                 latitudeDelta: 0.09,
                 longitudeDelta: 0.042
             },
+            locationRepairmen: {
+                latitude: route.params.repairmen.detailLocation.latitude,
+                longitude: route.params.repairmen.detailLocation.longitude,
+                latitudeDelta: 0.09,
+                longitudeDelta: 0.042
+            },
             shipPrice: route.params.distance > 2 ? (5000 * (route.params.distance - 2)) : 0,
             address: detailLocation,
             distance: route.params.distance,
@@ -137,6 +143,7 @@ export default function BookOrder({ navigation, route }) {
     )
     return (
         <ScrollView style={styles.container}>
+
             <Text style={{ fontSize: 18, marginBottom: 10, marginTop: 10 }}>THÔNG TIN LIÊN HỆ CỦA BẠN</Text>
             <View style={styles.contact}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -216,9 +223,7 @@ export default function BookOrder({ navigation, route }) {
                         <FontAwesome name="star" size={20} color={"#ffcc00"} />
                         <Text>  ({route.params.repairmen.totalCount})</Text>
                     </View>
-
                     <Text style={{ marginTop: 30 }}>{route.params.repairmen.sex}</Text>
-
                 </View>
             </View>
             <View style={{
@@ -228,15 +233,8 @@ export default function BookOrder({ navigation, route }) {
                 marginRight: '10%',
                 marginBottom: '10%'
             }}>
+                <TouchableOpacity style={[styles.btnOrder, bookService.length == 0 ? { backgroundColor: 'gray' } : { backgroundColor: '#ff8000' }]}
 
-                <TouchableOpacity style={{
-                    backgroundColor: '#ff8000',
-                    width: '100%',
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: 10,
-                }}
                     disabled={bookService.length == 0}
                     onPress={handleBookOrder}
                 >
@@ -273,4 +271,11 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderWidth: 1
     },
+    btnOrder: {
+        width: '100%',
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+    }
 })

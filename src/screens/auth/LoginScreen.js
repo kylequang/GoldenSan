@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { StyleSheet, LogBox, View, TouchableOpacity, Text, TextInput, Button, Image } from "react-native";
+import { StyleSheet, LogBox, View, TouchableOpacity, Text, TextInput, Button, Image, Modal, FlatList } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import PhoneInput from "react-native-phone-number-input";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,9 +7,9 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RadioButton } from 'react-native-paper';
 import RepairmenLoading from "../../components/animation/RepairmenLoading";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
 import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth, storage, db } from '../../database/firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
@@ -20,7 +20,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytes, } from 'firebase/storage';
 import { schedulePushNotification, setDocument } from '../../service/pushData'
 import { updateNotification } from '../../service/updateData';
-
+import { formatPrice } from '../../service/formatCode';
+import { DataTable } from 'react-native-paper';
 
 // Firebase references
 const app = getApp();
@@ -42,12 +43,19 @@ const PhoneNumber = ({ navigation }) => {
     const attemptInvisibleVerification = false;
     const [verifyButton, setVerifyButton] = useState(true)
     const [step, setStep] = useState('INPUT_PHONE_NUMBER');
+    //const [step, setStep] = useState('CreateListWork');
     const [checkRole, setCheckRole] = useState('client');
     const [showLoading, setShowLoading] = useState(true);
     const [uid, setUid] = useState(null);
     const [checkSex, setCheckSex] = useState('Nam');
     const [jobRepairmen, setJobRepairmen] = useState('Điện');
     const [currentLocation, setCurrentLocation] = useState();
+
+
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [listWorkOfRepairmen, setListWorkOfRepairmen] = useState([])
+
 
     useEffect(() => {
         setTimeout(() => {
@@ -180,6 +188,15 @@ const PhoneNumber = ({ navigation }) => {
             setPhotoURL(url);
         }
     }
+
+
+
+
+
+    const handleAddListWork = (item) => {
+        setListWorkOfRepairmen((listWorkOfRepairmen) => [...listWorkOfRepairmen, item])
+    }
+
     //Loading UI
     if (showLoading) return <RepairmenLoading />
 
@@ -333,11 +350,9 @@ const PhoneNumber = ({ navigation }) => {
                                 body: 'Chào mừng quý khách đến với HelpHouse!',
                                 time: new Date()
                             }
-                            const array=[];
+                            const array = [];
                             array.push(addNotification)
                             const data = { id: uid, notification: array }
-
-
                             await setDocument('notification', uid, data)
                             navigation.navigate('checkRole');
                         }
@@ -434,11 +449,9 @@ const PhoneNumber = ({ navigation }) => {
                             email: '',
                             age: '',
                         }}
-
                         onSubmit={async (values) => {
-                            await AsyncStorage.setItem('role', checkRole);
-                            await AsyncStorage.setItem('rememberLogin', 'yes');
-
+                            // await AsyncStorage.setItem('role', checkRole);
+                            // await AsyncStorage.setItem('rememberLogin', 'yes');
                             await setDoc(doc(db, checkRole, uid), {
                                 name: values.name,
                                 age: values.age,
@@ -461,19 +474,20 @@ const PhoneNumber = ({ navigation }) => {
                                 },
                                 active: true
                             });
-                            await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
+                            // await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
 
-                            const addNotification = {
-                                title: 'HelpHouse thông báo',
-                                body: 'Chào mừng quý khách đến với HelpHouse!',
-                                time: new Date()
-                            }
-                            const array=[];
-                            array.push(addNotification)
-                            const data = { id: uid, notification: array }
+                            // const addNotification = {
+                            //     title: 'HelpHouse thông báo',
+                            //     body: 'Chào mừng quý khách đến với HelpHouse!',
+                            //     time: new Date()
+                            // }
+                            // const array = [];
+                            // array.push(addNotification)
+                            // const data = { id: uid, notification: array }
 
-                            await setDocument('notification', uid, data)
-                            navigation.navigate('checkRole');
+                            // await setDocument('notification', uid, data)
+                            setStep('CreateListWork');
+                            //navigation.navigate('checkRole');
 
                         }
                         }
@@ -570,35 +584,201 @@ const PhoneNumber = ({ navigation }) => {
                 </SafeAreaView>
             }
 
+            {step === 'CreateListWork' &&
+                <SafeAreaView style={styles.listService}>
+                    <View style={[styles.row, { justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ fontSize: 20, marginRight: 5 }}>Kê khai dịch vụ của bạn</Text>
+
+                        <TouchableOpacity onPress={() => setModalVisible(true)}>
+                            <MaterialCommunityIcons name='plus' size={35} color='#ff6600' />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <Text>Ví dụ: Thay bóng đèn - 100.000đ - bảo hành 1 tuần</Text>
+                    </View>
+                    <View style={styles.listWork}>
+                        <DataTable>
+                            <DataTable.Row>
+                                <DataTable.Cell>Dịch Vụ</DataTable.Cell>
+                                <DataTable.Cell numeric>Chi Phí</DataTable.Cell>
+                                <DataTable.Cell numeric>Bảo Hành</DataTable.Cell>
+                            </DataTable.Row>
+                            {
+                                listWorkOfRepairmen && listWorkOfRepairmen.map((item, index) => (
+                                    <DataTable.Row key={index}>
+                                        <DataTable.Cell>{item.nameService}</DataTable.Cell>
+                                        <DataTable.Cell numeric>{item.price} đ</DataTable.Cell>
+                                        <DataTable.Cell numeric>{item.insurance} tuần</DataTable.Cell>
+                                    </DataTable.Row>
+                                ))
+                            }
+                        </DataTable>
+                    </View>
+
+                    <View style={{ alignItems: 'center' }}>
+                        <TouchableOpacity
+                            style={listWorkOfRepairmen && listWorkOfRepairmen.length != 0 ? styles.button : styles.button0}
+                            disabled={listWorkOfRepairmen && listWorkOfRepairmen.length != 0 ? false : true}
+                            onPress={async () => {
+                                await AsyncStorage.setItem('role', checkRole);
+                                await AsyncStorage.setItem('rememberLogin', 'yes');
+                                await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
+                                const addNotification = {
+                                    title: 'HelpHouse thông báo',
+                                    body: 'Chào mừng quý khách đến với HelpHouse!',
+                                    time: new Date()
+                                }
+                                const array = [];
+                                array.push(addNotification)
+                                const data = { id: uid, notification: array }
+                                await setDocument('notification', uid, data)
+                                const listWorkData = { job: jobRepairmen, listWork: listWorkOfRepairmen }
+                                await setDocument('listWork', uid, listWorkData);
+                                navigation.navigate('checkRole');
+                            }}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Hoàn Thành</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                </SafeAreaView>
+            }
+            <Modal
+                animationType="slide"
+                transparent={true}
+                hardwareAccelerated={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Kê Khai Dịch Vụ!</Text>
+                        <Formik
+                            initialValues={{
+                                nameService: '',
+                                price: 0,
+                                insurance: 0,
+                            }}
+                            onSubmit={
+                                (values) => {
+                                    const addListWort = {
+                                        id: listWorkOfRepairmen ? listWorkOfRepairmen.length : 0,
+                                        nameService: values.nameService,
+                                        price: Number(values.price),
+                                        insurance: Number(values.insurance)
+                                    }
+
+                                    handleAddListWork(addListWort);
+                                    setModalVisible(!modalVisible);
+                                }
+                            }
+                            validationSchema={yup.object().shape({
+                                nameService: yup
+                                    .string()
+                                    .required('Trường này là bắt buộc.'),
+                                price: yup
+                                    .number()
+                                    .required('Trường này là bắt buộc'),
+                                insurance: yup
+                                    .number()
+                                    .min(0)
+                                    .max(24)
+                                    .required('Trường này bắt buộc'),
+                            })}
+                        >
+                            {({ values, errors, setFieldTouched, touched, handleChange, isValid, handleSubmit }) => (
+                                <>
+                                    <Text>Tên Dịch Vụ Sửa Chữa</Text>
+                                    <TextInput
+                                        value={values.nameService}
+                                        style={styles.textInput}
+                                        onBlur={() => setFieldTouched('nameService')}
+                                        onChangeText={handleChange('nameService')}
+                                        placeholder="Dịch vụ của bạn"
+                                    />
+                                    {touched.nameService && errors.nameService &&
+                                        <Text style={styles.errorsText}>{errors.nameService}</Text>
+                                    }
+                                    <Text>Chi Phí Sửa Chữa</Text>
+                                    <TextInput
+                                        value={values.price}
+                                        style={styles.textInput}
+                                        onBlur={() => setFieldTouched('price')}
+                                        onChangeText={handleChange('price')}
+                                        placeholder="Chi phí sửa chữa"
+                                    />
+                                    {touched.price && errors.price &&
+                                        <Text style={styles.errorsText}>{errors.price}</Text>
+                                    }
+                                    <Text>Thời Gian Bảo Trì</Text>
+                                    <TextInput
+                                        value={values.insurance}
+                                        style={styles.textInput}
+                                        placeholder="Thời gian bảo trì/tuần"
+                                        onBlur={() => setFieldTouched('insurance')}
+                                        onChangeText={handleChange('insurance')}
+                                    />
+                                    {touched.insurance && errors.insurance &&
+                                        <Text style={styles.errorsText}>{errors.insurance}</Text>
+                                    }
+                                    <TouchableOpacity
+                                        onPress={handleSubmit}
+                                        disabled={!isValid}
+                                        style={{ backgroundColor: '#3366ff', padding: 10, borderRadius: 10, margin: 5 }}
+                                    >
+                                        <Text style={{ fontSize: 22 }}>Thêm dịch vụ</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ backgroundColor: 'gray', padding: 8, borderRadius: 10, margin: 5 }}
+                                        onPress={() => { setModalVisible(!modalVisible) }}
+                                    >
+                                        <Text style={{ fontSize: 18 }}>Hủy dịch vụ</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </Formik>
+                    </View>
+                </View>
+            </Modal>
 
 
-            {message ? (
-                <TouchableOpacity
-                    style={[
-                        StyleSheet.absoluteFill,
-                        { backgroundColor: 0xffffffee, justifyContent: 'center' },
-                    ]}
-                    onPress={() => showMessage(undefined)}>
-                    <Text
-                        style={{
-                            color: message.color || 'blue',
-                            fontSize: 17,
-                            textAlign: 'center',
-                            margin: 20,
-                        }}>
-                        {message.text}
-                    </Text>
-                </TouchableOpacity>
-            ) : (
-                undefined
-            )}
 
 
 
-            {attemptInvisibleVerification &&
+
+            {
+                message ? (
+                    <TouchableOpacity
+                        style={[
+                            StyleSheet.absoluteFill,
+                            { backgroundColor: 0xffffffee, justifyContent: 'center' },
+                        ]}
+                        onPress={() => showMessage(undefined)}>
+                        <Text
+                            style={{
+                                color: message.color || 'blue',
+                                fontSize: 17,
+                                textAlign: 'center',
+                                margin: 20,
+                            }}>
+                            {message.text}
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    undefined
+                )
+            }
+
+
+
+            {
+                attemptInvisibleVerification &&
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <FirebaseRecaptchaBanner />
-                </View>}
+                </View>
+            }
         </>
     );
 };
@@ -720,6 +900,35 @@ const styles = StyleSheet.create({
     errorsText: {
         fontSize: 15,
         color: 'red'
+    },
+
+
+    //Enter List Work
+    listService: {
+        flex: 1,
+        borderRadius: 10,
+        justifyContent: 'center'
+    }
+    ,
+    listWork: {
+        marginTop: 10,
+        marginBottom: 10,
+        height: 250
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
     },
 });
 

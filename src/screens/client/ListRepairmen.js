@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox, ScrollView } from 'react-native';
+import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox, } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FontAwesome } from '@expo/vector-icons';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
@@ -12,9 +12,9 @@ const Tab = createMaterialTopTabNavigator();
 function NearAddress(props) {
     const [loading, setLoading] = useState(true);
     const [listRepairmen, setListRepairmen] = useState([]);
-   
+
     useEffect(async () => {
-        Speech.speak("Chúng tôi đang tìm kiếm thợ sửa" +  props.job  + "với phạm vi 2 km gần bạn. Vui lòng đợi ");
+        Speech.speak("Chúng tôi đang tìm kiếm thợ sửa " + props.job + " với phạm vi 2 km gần bạn. Vui lòng đợi ");
         LogBox.ignoreLogs(['Setting a timer'])
         console.log("Tìm kiếm thợ");
         setListRepairmen(await scanLocation(props.job, 2, 0));
@@ -22,8 +22,7 @@ function NearAddress(props) {
             if (listRepairmen) {
                 setLoading(false);
             }
-        }, 5000);
-
+        }, 7000);
     }, [])
 
     const renderItem = ({ item }) => (
@@ -81,8 +80,8 @@ export default function ListRepairmen({ navigation, route }) {
             <Tab.Screen name="Ưa Chuộng"
                 // children={() => <FavoriteRepairmen job={route.params.job} navigation={navigation} />} 
                 component={FavoriteRepairmen}
-                initialParams={{ job:route.params.job }}
-                />
+                initialParams={{ job: route.params.job }}
+            />
         </Tab.Navigator>
     );
 }

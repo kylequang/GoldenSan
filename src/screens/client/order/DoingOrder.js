@@ -94,7 +94,7 @@ export default function DoingOrder() {
       <List.Section>
         {
           listOrder.length != 0 ?
-            <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+            <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
             : <Nodata content="Không có đơn hàng đang sửa chữa nào"/>
         }
       </List.Section>

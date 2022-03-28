@@ -9,6 +9,7 @@ import DetailRepairmen from '../screens/client/DetailRepairmen';
 import BookOrder from '../screens/client/BookOrder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Activity_Order from '../screens/client/Activity_Order';
+import AuthScreen from './AuthScreen';
 
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
@@ -33,12 +34,13 @@ export default function AppStack() {
 
 
   return (
-    <RoleStacks.Navigator >
+    <RoleStacks.Navigator initialRouteName={role === 'client' ? 'home_user' : 'home_repairmen'}>
       {loading ?
         (<RoleStacks.Screen name='loading' component={RepairmenLoading} options={{ headerShown: false }} />)
         : (role === 'client') ?
           (<RoleStacks.Screen name='home_user' component={BottomTab} options={{ headerShown: false }} />) :
           (<RoleStacks.Screen name='home_repairmen' component={BottomRepairmen} options={{ headerShown: false }} />)}
+
       <RoleStacks.Screen name="listRepairmen"
         component={ListRepairmen}
         options={({ route }) => ({
@@ -62,10 +64,12 @@ export default function AppStack() {
         component={Activity_Order}
         options={{ headerShown: false }}
       />
-      <RoleStacks.Screen name="Auth"
-        component={LoginScreen}
+
+      <RoleStacks.Screen name="LoginAgain"
+        component={AuthScreen}
         options={{ headerShown: false }}
       />
+
     </RoleStacks.Navigator>
   )
 }

@@ -18,7 +18,7 @@ export const pushData = async (nameCollection, object) => {
 
 
 export const setDocument =async (nameCollection, uid, data) => {
-    // Add a new document in collection "cities"
+    // Add a new document in collection 
     await setDoc(doc(db, nameCollection, uid), data);
 }
 

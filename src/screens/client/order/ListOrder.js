@@ -12,47 +12,50 @@ import Nodata from '../../../components/Nodata/Nodata';
 
 export default function ListOrder({ navigation }) {
 
-    const [loading, setLoading] = useState(true);
+
     const [selectedId, setSelectedId] = useState(null);
-    const [listOrder, setListOrder] = useState([]); // list order of client
-    const [getAgain, setGetAgain] = useState(false);
+    const [listOrder, setListOrder] = useState([]); // list order of client;
     const [uid, setUid] = useState();
     useEffect(async () => {
-        console.log("Render list order getAgain");
-        const id = await getUidUser();
-        setUid(id)
-        const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
-        setListOrder(data);
-        setLoading(false)
-        const unsubscribe = navigation.addListener('focus', () => {
-            console.log("render again",getAgain);
+        // console.log("Render list order getAgain");
+        // const id = await getUidUser();
+        // setUid(id)
+        // const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
+        // setListOrder(data);
+
+        console.log("render list order");
+        const unsubscribe = navigation.addListener('focus', async () => {
+            console.log("render again list order by focus navigation");
+            const id = await getUidUser();
             const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
             setListOrder(data);
-            setLoading(false)
+
         });
         return unsubscribe;
-    }, [navigation,getAgain]);
+    }, [navigation]);
 
     function setData(data) {
         setListOrder(data);
     }
 
     const CancelOrder = async (item, uid) => {
-
         item.order.status = "Bị hủy";
+        item.order.cancelDay = new Date();
+
+        console.log('Đơn hàng: ', item.order);
+
         await pushData('orderCancel', item.order); // push to cancel order
         await deleteDocument('order', item.id);// delete from list order;
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
         const notificationOfUser = await getAnDocument('notification', uid);
         const notificationArray = notificationOfUser.notification;
-        
         notificationArray.unshift({
             title: 'HelpHouse thông báo',
             body: 'Quý khách đã hủy đơn hàng thành công!',
             time: new Date()
         })
+        setListOrder([]);
         await updateNotification('notification', uid, notificationArray);
-        setGetAgain(true);
         navigation.navigate('Bị hủy')
     }
 
@@ -121,12 +124,13 @@ export default function ListOrder({ navigation }) {
             </List.Accordion>
         )
     }
-    if (loading) return <ActivityIndicatorLoading color="Blue" />
+
     return (
         <List.Section>
             {
-                listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+                listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
             }
+
         </List.Section>
     )
 }

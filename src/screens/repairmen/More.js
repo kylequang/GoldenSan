@@ -30,7 +30,7 @@ export default function More({ navigation }) {
                             () => {
                                 auth.signOut().then(() => { console.log("Sign out") })
                                 AsyncStorage.clear().then(() => console.log('Cleared'))
-                                navigation.navigate('Auth')
+                                navigation.navigate('LoginAgain')
                             }}>
                         <Text style={styles.leftContent}>Logout</Text>
                         <View style={styles.rightContent}>

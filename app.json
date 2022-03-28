@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "graduate",
-    "slug": "graduate",
+    "name": "HelpHouse",
+    "slug": "HelpHouse",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo/logo_app.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo/logo_app.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "Help.House",
@@ -34,7 +34,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo/logoapp.png",
+          "icon": "./assets/logo/logo_app.png",
           "color": "red",
           "sounds": [
             "",

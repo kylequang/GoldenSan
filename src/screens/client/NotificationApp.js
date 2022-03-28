@@ -19,12 +19,12 @@ export default function NotificationApp() {
     }
 
     const renderItem = ({ item }) => (
-        <CardNotification item={item} />
+        <CardNotification item={item} key={item.time} />
     )
     return (
         <SafeAreaView style={styles.container}>
             {
-                listNotification && <FlatList data={listNotification.notification} renderItem={renderItem} keyExtractor={item => item.id} />
+                listNotification && <FlatList data={listNotification.notification} renderItem={renderItem} keyExtractor={item => item.time} />
             }
         </SafeAreaView>
     )

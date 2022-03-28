@@ -15,7 +15,7 @@ export default function WaitingDo() {
   useEffect(async () => {
     console.log("Danh sách đơn hàng đang chờ sửa");
     const uid = await getUidUser();
-    const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Chờ Sửa', uid);
+    const dataOrder = await getQueryCollection('orderWaiting', 'uid_client', 'status', 'Chờ Sửa', uid);
     setListOrder(dataOrder)
     dataOrder ? setLoading(false) : setLoading(true);
   }, [])
@@ -93,7 +93,7 @@ export default function WaitingDo() {
       <List.Section>
         {
           listOrder.length != 0 ?
-            <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+            <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
             : <Nodata content="Không có đơn hàng nào đang chờ sửa chữa"/>
         }
       </List.Section>

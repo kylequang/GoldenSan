@@ -1,5 +1,3 @@
-import { async } from '@firebase/util'
-import { onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs, getDoc, query, where, doc, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../../src/database/firebase'
 import { getPreciseDistance } from 'geolib';
@@ -9,6 +7,8 @@ import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
+const GOOGLE_MAPS_API_KEY = 'AIzaSyBJFNgQI0m6N6_R0azIqc0UBeEld9zS634';
 
 // get collection
 export const getData = async (nameCollection) => {
@@ -34,13 +34,11 @@ export const getUidUser = async () => {
   const currentUser = dataUser != null ? JSON.parse(dataUser) : 'null';
   return currentUser.user.uid;
 }
-
-
 //get current user 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (nameCollection) => {
   const data = await AsyncStorage.getItem('dataUser');
   const currentUser = data != null ? JSON.parse(data) : 'null';
-  const dataUser = await getAnDocument('client', currentUser.user.uid);
+  const dataUser = await getAnDocument(nameCollection, currentUser.user.uid);
   return dataUser;
 }
 
@@ -58,6 +56,20 @@ export const getQueryCollection = async (nameCollection, role, status, condition
   })
   return data;
 }
+
+//count order 
+export const countDocument = async (nameCollection, fieldCondition) => {
+  let count = 0;
+  const uid_user = await getUidUser();
+  const dataQuery = query(collection(db, nameCollection), where(fieldCondition, '==', uid_user));
+  const querySnapshot = await getDocs(dataQuery);
+  querySnapshot.forEach((doc) => {
+    ++count;
+  })
+  return count;
+}
+
+
 
 
 
@@ -123,6 +135,7 @@ const calculatePreciseDistance = (currentLocation, repairmenLocation) => {
 
 // scan location near you
 export const scanLocation = async (job, distance, score) => {
+  console.log("Quét vị trí");
   const currentLocation = await getCurrentLocation();
   const listRepairmen = await getData('repairmen');
   const dataRepairmen = [];
