@@ -5,7 +5,7 @@ import "moment/min/locales";
 
 export default function CardNotification(props) {
   return (
-    <View style={styles.notification} key={props.time}>
+    <View style={styles.notification} key={props.item.time}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row' }}>
           <Image style={{ height: 25, width: 25 }} source={require('../../../assets/logo/logo_app.png')} />

@@ -9,6 +9,7 @@ import Report from '../../screens/repairmen/Report';
 import MapRepairmen from '../../screens/repairmen/MapRepairmen';
 import ScanLocation from '../../screens/repairmen/ScanLocation';
 import NotificationApp from '../../screens/repairmen/NotificationApp';
+import Profile from '../../screens/repairmen/Profile';
 const Tab = createBottomTabNavigator();
 
 export default function BottomRepairmen() {
@@ -46,7 +47,7 @@ export default function BottomRepairmen() {
             <Tab.Screen name="Hoạt Động" component={Activity_Order} />
             <Tab.Screen name='Thông Báo' component={NotificationApp} />
             <Tab.Screen name='Bản Đồ' component={MapRepairmen} />
-            <Tab.Screen name="Hồ Sơ" component={More} />
+            <Tab.Screen name="Hồ Sơ" component={Profile} />
         </Tab.Navigator>
     );
 }

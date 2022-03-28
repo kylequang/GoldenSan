@@ -10,8 +10,6 @@ import { pushData, schedulePushNotification } from '../../../service/pushData';
 import { updateNotification } from '../../../service/updateData';
 
 export default function ListOrder({ navigation }) {
-
-    const [loading, setLoading] = useState(true);
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
     const [getAgain, setGetAgain] = useState(false);
@@ -19,19 +17,13 @@ export default function ListOrder({ navigation }) {
     useEffect(async () => {
         console.log("Render list order getAgain");
         const id = await getUidUser();
-        setUid(id)
-        const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
-        setListOrder(data);
-        setLoading(false)
-
         const unsubscribe = navigation.addListener('focus', () => {
-            console.log("render again", getAgain);
+            console.log("render by focus");
             const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
             setListOrder(data);
-            setLoading(false)
         });
         return unsubscribe;
-    }, [navigation, getAgain]);
+    }, [navigation]);
 
     function setData(data) {
         setListOrder(data);
@@ -69,7 +61,6 @@ export default function ListOrder({ navigation }) {
             time: new Date()
         })
         await updateNotification('notification', uid, notificationArray);
-        setGetAgain(true);
         navigation.navigate('Chờ Sửa')
     }
 
@@ -144,11 +135,10 @@ export default function ListOrder({ navigation }) {
             </List.Accordion>
         )
     }
-    if (loading) return <ActivityIndicatorLoading color="Blue" />
     return (
         <List.Section>
             {
-                listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+                listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
             }
         </List.Section>
     )

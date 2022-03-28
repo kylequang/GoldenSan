@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox,} from 'react-native';
+import { Text, View, FlatList, StyleSheet, Image, TouchableOpacity, LogBox, } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FontAwesome } from '@expo/vector-icons';
 import ScanLoadingLocation from '../../../src/components/animation/ScanLoadingLocation';
@@ -22,8 +22,7 @@ function NearAddress(props) {
             if (listRepairmen) {
                 setLoading(false);
             }
-        }, 6000);
-
+        }, 7000);
     }, [])
 
     const renderItem = ({ item }) => (

@@ -1,71 +1,157 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     Text,
     View,
     Image,
+    ScrollView,
+    TouchableOpacity,
+    Switch
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons, FontAwesome, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { countDocument, getCurrentUser } from '../../service/getData';
+import { auth } from '../../database/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loading from '../../components/animation/Loading';
+export default function Profile({ navigation }) {
+    const [isEnabled, setIsEnabled] = useState(true);
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const [dataUser, setDataUser] = useState({});
+    const [countOrder, setCountOrder] = useState(0);
+    const [countOrderDoing, setCountOrderDoing] = useState(0);
+    const [countOrderSuccess, setCountOrderSuccess] = useState(0);
+    const [countOrderCancel, setCountOrderCancel] = useState(0);
 
-export default function Profile() {
+    const [loading, setLoading] = useState(true);
+    useEffect(async () => {
+        const data = await getCurrentUser('repairmen');
+        setDataUser(data);
+        setCountOrder(await countDocument('order', 'uid_repairmen'));
+        setCountOrderCancel(await countDocument('orderCancel', 'uid_repairmen'));
+        setCountOrderDoing(await countDocument('orderDoing', 'uid_repairmen'));
+        setCountOrderSuccess(await countDocument('orderSuccess', 'uid_repairmen'));
+        setLoading(false)
+        const unsubscribe = navigation.addListener('focus', async () => {
+            console.log("Render again profile by focus navigation");
+            setCountOrder(await countDocument('order', 'uid_repairmen'));
+            setCountOrderCancel(await countDocument('orderCancel', 'uid_repairmen'));
+            setCountOrderDoing(await countDocument('orderDoing', 'uid_repairmen'));
+            setCountOrderSuccess(await countDocument('orderSuccess', 'uid_repairmen'));
+        });
+        return unsubscribe;
+    }, [navigation])
+    if (loading) return <Loading />
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.headerContent}>
-                    <Image style={styles.avatar}
-                        source={{ uri: 'https://bootdey.com/img/Content/avatar/avatar6.png' }} />
+        <SafeAreaView style={styles.container}>
+            {
+                dataUser && <ScrollView>
+                    <View style={styles.header}>
+                        <TouchableOpacity style={{ position: 'absolute', right: 0, margin: 15 }}>
+                            <Text style={{ color: 'blue' }}>Chỉnh sửa</Text>
+                        </TouchableOpacity>
+                        <View style={styles.headerContent}>
+                            <Image style={styles.avatar}
+                                source={{ uri: dataUser.photoURL }} />
+                            <Text style={styles.name}>{dataUser.name}</Text>
+                            <Text style={styles.userInfo}>Hộ Gia Đình</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginHorizontal: 10, marginVertical: 5, justifyContent: 'space-between' }}>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <Ionicons name="list-circle-outline" size={35} color={'#ff6600'} />
+                            <Text>{countOrder}</Text>
+                            <Text>Đơn đặt</Text>
+                        </View>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name='circle-edit-outline' size={35} color={'#ff6600'} />
+                            <Text>{countOrderDoing}</Text>
+                            <Text>Đang sửa</Text>
+                        </View>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <FontAwesome5 name="check-circle" size={35} color={'#ff6600'} />
+                            <Text>{countOrderSuccess}</Text>
+                            <Text>Đã Xong</Text>
+                        </View>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name='cancel' size={35} color={'#ff6600'} />
+                            <Text>{countOrderCancel}</Text>
+                            <Text>Hủy</Text>
+                        </View>
+                    </View>
+                    <View style={{ marginVertical: 15 }}>
+                        <View style={styles.row}>
+                            <FontAwesome name="intersex" size={26} color={'#ff6600'} />
+                            <Text style={styles.info}>Giới tính: {dataUser.sex}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <MaterialCommunityIcons name='account-circle-outline' size={26} color={'#ff6600'} />
+                            <Text style={styles.info}>Độ Tuổi: {dataUser.age}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <MaterialCommunityIcons name='phone-forward' size={26} color={'#ff6600'} />
+                            <Text style={styles.info}>SĐT: {dataUser.phoneNumber}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <MaterialCommunityIcons name='email-box' size={26} color={'#ff6600'} />
+                            <Text style={styles.info}>Email: {dataUser.email}</Text>
+                        </View>
 
-                    <Text style={styles.name}>John Doe </Text>
-                    <Text style={styles.userInfo}>jhonnydoe@mail.com </Text>
-                    <Text style={styles.userInfo}>Florida </Text>
-                </View>
-            </View>
 
-            <View style={styles.body}>
-                <View style={styles.item}>
-                    <View style={styles.iconContent}>
-                        <Image style={styles.icon} source={{ uri: 'https://img.icons8.com/color/70/000000/cottage.png' }} />
                     </View>
-                    <View style={styles.infoContent}>
-                        <Text style={styles.info}>Home</Text>
+                    <View style={styles.viewButton}>
+                        <Text style={{ fontSize: 16 }}>Hoạt động</Text>
+                        <Switch
+                            trackColor={{ false: "#767577", true: "green" }}
+                            thumbColor={isEnabled ? "#ff6600" : "#f4f3f4"}
+                            onValueChange={toggleSwitch}
+                            value={isEnabled} />
                     </View>
-                </View>
-
-                <View style={styles.item}>
-                    <View style={styles.iconContent}>
-                        <Image style={styles.icon} source={{ uri: 'https://img.icons8.com/color/70/000000/administrator-male.png' }} />
-                    </View>
-                    <View style={styles.infoContent}>
-                        <Text style={styles.info}>Settings</Text>
-                    </View>
-                </View>
-
-                <View style={styles.item}>
-                    <View style={styles.iconContent}>
-                        <Image style={styles.icon} source={{ uri: 'https://img.icons8.com/color/70/000000/filled-like.png' }} />
-                    </View>
-                    <View style={styles.infoContent}>
-                        <Text style={styles.info}>News</Text>
-                    </View>
-                </View>
-
-                <View style={styles.item}>
-                    <View style={styles.iconContent}>
-                        <Image style={styles.icon} source={{ uri: 'https://img.icons8.com/color/70/000000/facebook-like.png' }} />
-                    </View>
-                    <View style={styles.infoContent}>
-                        <Text style={styles.info}>Shop</Text>
-                    </View>
-                </View>
-
-            </View>
-        </View>
+                    <TouchableOpacity
+                        onPress={
+                            () => {
+                                auth.signOut().then(() => { console.log("Sign out") })
+                                AsyncStorage.clear().then(() => console.log('Cleared'))
+                                navigation.navigate('LoginAgain')
+                            }}>
+                        <View style={styles.viewButton}>
+                            <Text style={{ fontSize: 16 }} >Đăng Xuất</Text>
+                            <View >
+                                <MaterialCommunityIcons name="logout-variant" size={25} color={"black"} />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </ScrollView>
+            }
+            <TouchableOpacity
+                        onPress={
+                            () => {
+                                auth.signOut().then(() => { console.log("Sign out") })
+                                AsyncStorage.clear().then(() => console.log('Cleared'))
+                                navigation.navigate('LoginAgain')
+                            }}>
+                        <View style={styles.viewButton}>
+                            <Text style={{ fontSize: 16 }} >Đăng Xuất</Text>
+                            <View >
+                                <MaterialCommunityIcons name="logout-variant" size={25} color={"black"} />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+        </SafeAreaView>
     );
 
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white'
+    },
     header: {
-        backgroundColor: "#DCDCDC",
+        backgroundColor: "#e6e6e6",
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        marginBottom: 10
     },
     headerContent: {
         padding: 30,
@@ -86,35 +172,25 @@ const styles = StyleSheet.create({
     },
     userInfo: {
         fontSize: 16,
-        color: "#778899",
+        color: "#333333",
         fontWeight: '600',
     },
-    body: {
-        backgroundColor: "#778899",
-        height: 500,
+    row: {
+        flexDirection: 'row',
+        marginHorizontal: 10,
+        marginVertical: 5,
         alignItems: 'center',
     },
-    item: {
-        flexDirection: 'row',
-    },
-    infoContent: {
-        flex: 1,
-        alignItems: 'flex-start',
-        paddingLeft: 5
-    },
-    iconContent: {
-        flex: 1,
-        alignItems: 'flex-end',
-        paddingRight: 5,
-    },
-    icon: {
-        width: 30,
-        height: 30,
-        marginTop: 20,
-    },
     info: {
-        fontSize: 18,
-        marginTop: 20,
-        color: "#FFFFFF",
+        fontSize: 17,
+        marginLeft: 10,
+        color: "black",
+    },
+    viewButton: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginHorizontal: 10,
+        marginVertical: 5,
     }
 });

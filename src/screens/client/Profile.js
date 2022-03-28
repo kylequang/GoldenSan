@@ -9,20 +9,40 @@ import {
     Switch
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons ,FontAwesome, FontAwesome5 ,MaterialCommunityIcons } from '@expo/vector-icons';
-import { getCurrentUser } from '../../service/getData';
+import { Ionicons, FontAwesome, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { countDocument, getCurrentUser} from '../../service/getData';
 import { auth } from '../../database/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export default function Profile({navigation}) {
+import Loading from '../../components/animation/Loading';
+export default function Profile({ navigation }) {
     const [isEnabled, setIsEnabled] = useState(true);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-    const [dataUser, setDataUser] = useState([]);
-    useEffect(async () => {
-        const data = await getCurrentUser();
-        setDataUser(data);
-    }, [])
-    return (
+    const [dataUser, setDataUser] = useState({});
+    const [countOrder, setCountOrder] = useState(0);
+    const [countOrderDoing, setCountOrderDoing] = useState(0);
+    const [countOrderSuccess, setCountOrderSuccess] = useState(0);
+    const [countOrderCancel, setCountOrderCancel] = useState(0);
 
+    const [loading, setLoading] = useState(true);
+    useEffect(async () => {
+        const data = await getCurrentUser('client');
+        setDataUser(data);
+        setCountOrder(await countDocument('order', 'uid_client'));
+        setCountOrderCancel(await countDocument('orderCancel', 'uid_client'));
+        setCountOrderDoing(await countDocument('orderDoing', 'uid_client'));
+        setCountOrderSuccess(await countDocument('orderSuccess', 'uid_client'));
+        setLoading(false)
+        const unsubscribe = navigation.addListener('focus', async () => {
+            console.log("Render again profile by focus navigation");
+            setCountOrder(await countDocument('order', 'uid_client'));
+            setCountOrderCancel(await countDocument('orderCancel', 'uid_client'));
+            setCountOrderDoing(await countDocument('orderDoing', 'uid_client'));
+            setCountOrderSuccess(await countDocument('orderSuccess', 'uid_client'));
+        });
+        return unsubscribe;
+    }, [navigation])
+    if (loading) return <Loading />
+    return (
         <SafeAreaView style={styles.container}>
             {
                 dataUser && <ScrollView>
@@ -40,42 +60,43 @@ export default function Profile({navigation}) {
                     <View style={{ flexDirection: 'row', marginHorizontal: 10, marginVertical: 5, justifyContent: 'space-between' }}>
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <Ionicons name="list-circle-outline" size={35} color={'#ff6600'} />
+                            <Text>{countOrder}</Text>
                             <Text>Đơn đặt</Text>
                         </View>
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <MaterialCommunityIcons name='circle-edit-outline' size={35} color={'#ff6600'} />
+                            <Text>{countOrderDoing}</Text>
                             <Text>Đang sửa</Text>
                         </View>
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <FontAwesome5 name="check-circle" size={35} color={'#ff6600'} />
+                            <Text>{countOrderSuccess}</Text>
                             <Text>Đã Xong</Text>
                         </View>
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <MaterialCommunityIcons name='cancel' size={35} color={'#ff6600'} />
+                            <Text>{countOrderCancel}</Text>
                             <Text>Hủy</Text>
                         </View>
                     </View>
                     <View style={{ marginVertical: 15 }}>
                         <View style={styles.row}>
-                        <FontAwesome name="intersex" size={30} color={'#ff6600'} />
+                            <FontAwesome name="intersex" size={26} color={'#ff6600'} />
                             <Text style={styles.info}>Giới tính: {dataUser.sex}</Text>
                         </View>
                         <View style={styles.row}>
-                            <MaterialCommunityIcons name='account-circle-outline' size={30} color={'#ff6600'} />
+                            <MaterialCommunityIcons name='account-circle-outline' size={26} color={'#ff6600'} />
                             <Text style={styles.info}>Độ Tuổi: {dataUser.age}</Text>
                         </View>
                         <View style={styles.row}>
-                            <MaterialCommunityIcons name='phone-forward' size={30} color={'#ff6600'} />
+                            <MaterialCommunityIcons name='phone-forward' size={26} color={'#ff6600'} />
                             <Text style={styles.info}>SĐT: {dataUser.phoneNumber}</Text>
                         </View>
                         <View style={styles.row}>
-                            <MaterialCommunityIcons name='email-box' size={30} color={'#ff6600'} />
+                            <MaterialCommunityIcons name='email-box' size={26} color={'#ff6600'} />
                             <Text style={styles.info}>Email: {dataUser.email}</Text>
                         </View>
-                        <View style={styles.row}>
-                            <MaterialCommunityIcons name='map-marker-circle' size={30} color={'#ff6600'} />
-                            <Text style={styles.info}>Địa Chỉ: 101B Lê Hữu Trác,Phước Mỹ</Text>
-                        </View>
+
 
                     </View>
                     <View style={styles.viewButton}>
@@ -113,7 +134,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     header: {
-        backgroundColor: "#ff9933",
+        backgroundColor: "#e6e6e6",
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
         marginBottom: 10

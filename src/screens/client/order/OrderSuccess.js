@@ -94,7 +94,7 @@ export default function OrderSuccess({ navigation }) {
 
     <List.Section>
       {
-        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
       }
     </List.Section>
 

@@ -93,10 +93,9 @@ export default function CancelOrder({ navigation }) {
     }
     if (loading) return <ActivityIndicatorLoading color="blue" />
     return (
-      
             <List.Section>
                 {
-                    listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+                    listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
                 }
             </List.Section>
        

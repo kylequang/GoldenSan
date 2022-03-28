@@ -1,25 +1,13 @@
-import { Text, StyleSheet, Image, LogBox, TouchableOpacity, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getData } from '../../service/getData';
-import Loading from '../../components/animation/Loading';
-export default function Index({ navigation }) {
-    const [category, setCategory] = useState([]);
-    const [showLoading, setShowLoading] = useState(true);
 
-    useEffect(async () => {
-        LogBox.ignoreLogs(['Setting a timer']);
-        setCategory(await getData('category'));
-        if(category){
-            setShowLoading(false)
-        }
-       
-        console.log('Category');
-    }, [])
-
+export default function Index({ navigation, route }) {
+    const category = route.params.category;
     const renderItem = ({ item }) => {
         return (
             <TouchableOpacity
+                key={item.role}
                 style={styles.button}
                 onPress={() => navigation.navigate('listRepairmen', { name: item.name, job: item.job })}
             >
@@ -31,13 +19,13 @@ export default function Index({ navigation }) {
             </TouchableOpacity>
         );
     };
-    if(showLoading) return <Loading />
     return (
         <SafeAreaView style={styles.container}>
             {
                 category &&
                 <FlatList
                     data={category}
+                    keyExtractor={item => item.role}
                     numColumns={2}
                     renderItem={renderItem}
                     showsVerticalScrollIndicator={false}
