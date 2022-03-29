@@ -1,18 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { LogBox } from "react-native";
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import IndexRepairmen from '../../screens/repairmen/IndexRepairmen';
 import Activity_Order from '../../screens/repairmen/Activity_Order';
-import More from '../../screens/repairmen/More';
-import Contact from '../../screens/Contact';
-import Report from '../../screens/repairmen/Report';
+
 import MapRepairmen from '../../screens/repairmen/MapRepairmen';
 import ScanLocation from '../../screens/repairmen/ScanLocation';
 import NotificationApp from '../../screens/repairmen/NotificationApp';
 import Profile from '../../screens/repairmen/Profile';
+import Loading from '../../components/animation/Loading';
+import { getCurrentUser, getUidUser,getAnDocument } from '../../service/getData';
 const Tab = createBottomTabNavigator();
 
 export default function BottomRepairmen() {
+    const [dataUser, setDataUser] = useState({});
+    const [listWork, setListWork] = useState({});
+    const [loading, setLoading] = useState(true);
+    useEffect(async () => {
+        LogBox.ignoreLogs(['Setting a timer']);
+        const data = await getCurrentUser('repairmen');
+        const uid = await getUidUser();
+        const getListWork = await getAnDocument('listWork', uid)
+        setDataUser(data);
+        setListWork(getListWork);
+        setTimeout(() => {
+            console.log(dataUser);
+            if (dataUser!=null) {
+                console.log(dataUser);
+                setLoading(false)
+            }
+        }, 4000)
+
+    }, [])
+    if (loading) return <Loading />
     return (
         <Tab.Navigator
             initialRouteName="Trang Chủ"
@@ -43,7 +65,7 @@ export default function BottomRepairmen() {
                 }
             })}
         >
-            <Tab.Screen name="Trang Chủ" component={IndexRepairmen} />
+            <Tab.Screen name="Trang Chủ" component={IndexRepairmen} initialParams={{ dataUser: dataUser, listWork: listWork }} />
             <Tab.Screen name="Hoạt Động" component={Activity_Order} />
             <Tab.Screen name='Thông Báo' component={NotificationApp} />
             <Tab.Screen name='Bản Đồ' component={MapRepairmen} />

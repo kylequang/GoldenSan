@@ -1,98 +1,82 @@
-import React from "react";
-import {
-    TouchableOpacity,
-    StyleSheet,
-    Text,
-    View,
-    ScrollView,
-} from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView } from "react-native-safe-area-context";
+{/* <GooglePlacesAutocomplete
+        fetchDetails={true}
+        GooglePlacesSearchQuery={{
+          rankby: "distance"
+        }}
+        placeholder='Tìm kiếm'
 
-import { auth } from '../../database/firebase';
+        onPress={(data, details = null) => {
+          console.log(data);
+          setRegion({
+            latitude: details.geometry.location.lat,
+            longitude: details.geometry.location.lng,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421
+          })
+        }}
+        query={{
+          key: 'AIzaSyADmgzD_ESR2S1ZZ3ShM6cmbB9X55UUuT0',
+          language: 'en',
+          components: "country:us",
+          types: "establishment",
+          radius: 30000,
+          location: `${region.latitude}, ${region.longitude}`
+        }}
+        styles={{
+          container: { flex: 0, position: "absolute", width: "100%", zIndex: 1 },
+          listView: { backgroundColor: "red" }
+        }}
+      />
+      <MapView style={{
+        width: '100%',
+        height: 400,
+      }}
+        initialRegion={{
+          latitude: 16.060932,
+          longitude: 108.241346,
+          latitudeDelta: 0.0043,
+          longitudeDelta: 0.0034
+        }}
+        provider="google"
+      >
+        <Marker coordinate={{ latitude: region.latitude, longitude: region.longitude }} />
+        <Marker
+          coordinate={pin}
+          pinColor="red"
+          draggable={true}
+          onDragStart={(e) => {
+            console.log("Drag start", e.nativeEvent.coordinates)
+          }}
+          onDragEnd={(e) => {
+            setPin({
+              latitude: e.nativeEvent.coordinate.latitude,
+              longitude: e.nativeEvent.coordinate.longitude
+            })
+          }}
+        >
+          <Callout>
+            <Text>Hiện Tại</Text>
+          </Callout>
+        </Marker>
 
 
-export default function More({ navigation }) {
-    return (
-        <SafeAreaView>
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <Text>Quản lí tài khoản</Text>
-                <Text>Quản lí tài khoản</Text>
-                <Text>Quản lí tài khoản</Text>
-                <Text>Quản lí tài khoản</Text>
-                <Text>Quản lí tài khoản</Text>
-                <Text>Quản lí tài khoản</Text>
-                <View style={styles.footer}>
-                    <TouchableOpacity style={styles.BtnItem}
-                        onPress={
-                            () => {
-                                auth.signOut().then(() => { console.log("Sign out") })
-                                AsyncStorage.clear().then(() => console.log('Cleared'))
-                                navigation.navigate('LoginAgain')
-                            }}>
-                        <Text style={styles.leftContent}>Logout</Text>
-                        <View style={styles.rightContent}>
-                            <Ionicons name="log-out-outline" size={19} color={"black"} />
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    )
-}
-const styles = StyleSheet.create({
-    scrollView: {
-        backgroundColor: "#F7F8F9",
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 10,
-        marginBottom: 15
-    },
-    contentRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: 'yellow',
-    },
+        <Circle radius={100} center={{
+          latitude: 16.060932,
+          longitude: 108.241346,
+        }} />
 
-    BtnItem: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-        width: "100%",
-        fontSize: 14,
-        marginRight: 5,
-    },
 
-    block: {
-        paddingVertical: 5,
-        paddingHorizontal: 9,
-        backgroundColor: "#ffff",
-        flexDirection: "column",
-        flexWrap: "wrap",
-        marginBottom: 12,
-    },
-
-    footer: {
-        paddingVertical: 5,
-        paddingHorizontal: 9,
-        backgroundColor: "#ffff",
-        flexDirection: "column",
-        flexWrap: "wrap",
-    },
-    rightContent: {
-        padding: 11,
-    },
-    leftContent: {
-        color: "black",
-        padding: 11,
-    },
-    boldText: {
-        color: "#2D1F21",
-        fontWeight: "700",
-    },
-});
+      </MapView> */}
+      
+  const [pin, setPin] = useState({
+    latitude: 16.060932,
+    longitude: 108.241346,
+    latitudeDelta: 0.08,
+    longitudeDelta: 0.04
+  });
+  const [region, setRegion] = useState({
+    latitude: 1,
+    longitude: 1,
+    latitudeDelta: 1,
+    longitudeDelta: 1
+  })

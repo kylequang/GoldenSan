@@ -1,25 +1,38 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getQueryCollection, getUidUser } from '../../../service/getData';
+import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
-import Nodata from '../../../components/Nodata/Nodata';
+import { deleteDocument } from '../../../service/deleteData';
+import { pushData, schedulePushNotification } from '../../../service/pushData';
+import { updateNotification } from '../../../service/updateData';
+
+export default function DoingOrder({ navigation }) {
 
 
-
-export default function DoingOrder() {
-  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
-  const [listOrder, setListOrder] = useState([]); // list order of client
+  const [listOrder, setListOrder] = useState([]); // list order of client;
+  const [uid, setUid] = useState();
   useEffect(async () => {
-    console.log("Danh sách đơn hàng đang Sửa Chữa");
-    const uid = await getUidUser();
-    const dataOrder = await getQueryCollection('order', 'uid_client', 'status', 'Đang Sửa', uid);
-    setListOrder(dataOrder)
-    dataOrder ? setLoading(false) : setLoading(true);
-  }, [])
+    // console.log("Render list order getAgain");
+    const id = await getUidUser();
+    setUid(id)
+    const data = getRealtimeQueryACollection(setData, 'orderDoing', 'uid_client', id);
+    setListOrder(data);
+    console.log("render list order");
+    const unsubscribe = navigation.addListener('focus', async () => {
+      console.log("render again list order by focus navigation");
+      const data = getRealtimeQueryACollection(setData, 'orderDoing', 'uid_client', id);
+      setListOrder(data);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  function setData(data) {
+    setListOrder(data);
+  }
+
 
   const renderItem = ({ item }) => {
     const expanded = item.id == selectedId ? true : false;
@@ -27,28 +40,22 @@ export default function DoingOrder() {
       <List.Accordion
         key={item.id}
         title={item.order.informationClient.name}
-        description={
-          item.order.informationClient.sdt + '    ' + item.order.status
-        }
+        description={item.order.informationClient.sdt + '    ' + item.order.status + "\n" +
+          "Tổng đơn hàng: " + formatPrice(item.order.totalPrice) + " vnđ"}
         titleNumberOfLines={15}
-        left={() =>
-          <Image style={styles.avatar}
-            source={{ uri: item.order.informationClient.photoURL }} />}
+        left={() => <Image style={styles.avatar} source={{ uri: item.order.informationClient.photoURL }} />}
         expanded={expanded}
         onPress={() => { selectedId ? setSelectedId(null) : setSelectedId(item.id) }}>
         <View style={{ paddingVertical: 10 }}>
-          <Text style={{ fontSize: 18 }}>Thời Gian Sửa Chữa</Text>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}> {item.order.time + ' ' + item.order.date}</Text>
-          <Text>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
+          <Text style={{ fontSize: 16 }}>Thời gian sửa chữa: {item.order.time + ' ' + item.order.date}</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
         </View>
-        <View>
+        <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
             <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
-            <View style={{ marginLeft: 5 }}>
-              <Text style={{ fontSize: 18 }}>Thông tin cá nhân </Text>
-              <Text style={styles.textOrder}>Tuổi: {item.order.informationClient.age}</Text>
-              <Text>Giới tính: {item.order.informationClient.sex}</Text>
-              <Text style={styles.textOrder}>SDT: {item.order.informationClient.sdt}</Text>
+            <View style={{ marginLeft: 5, marginRight: 15, }}>
+              <Text style={{ fontSize: 18 }}>Thông tin bản thân </Text>
+              <Text style={styles.textOrder}>Giới tính: {item.order.informationClient.sex}  {item.order.informationClient.age} tuổi</Text>
               <Text style={styles.textOrder}>Địa chỉ: {item.order.address}</Text>
               <Text style={styles.textOrder}>Khoảng cách: {item.order.distance} km</Text>
             </View>
@@ -56,14 +63,13 @@ export default function DoingOrder() {
           <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
             <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
             <View style={{ marginLeft: 5 }}>
-              <Text style={{ fontSize: 18 }}>Thông tin Thợ </Text>
+              <Text style={{ fontSize: 18 }}>Thông tin thợ </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image style={styles.avatar}
                   source={{ uri: item.order.informationRepairmen.photoURL }} />
                 <View style={{ marginLeft: 5 }}>
-                  <Text>{item.order.informationRepairmen.name}</Text>
-                  <Text style={styles.textOrder}>{item.order.informationRepairmen.age} tuổi</Text>
-                  <Text>Giới tính: {item.order.informationRepairmen.sex}</Text>
+                  <Text style={styles.textOrder}>{item.order.informationRepairmen.name} {item.order.informationRepairmen.age} tuổi</Text>
+                  <Text style={styles.textOrder}>Giới tính: {item.order.informationRepairmen.sex}</Text>
                   <Text style={styles.textOrder}>SDT: {item.order.informationRepairmen.sdt}</Text>
                 </View>
               </View>
@@ -82,23 +88,22 @@ export default function DoingOrder() {
                   </View>
                 ))
               }
+              <Text>Phí dịch vụ ({item.order.distance}km): {formatPrice(item.order.shipPrice)}đ</Text>
             </View>
           </View>
+          <Text>Ngày đặt: {item.order.createDay}</Text>
         </View>
       </List.Accordion>
     )
   }
-  if (loading) return <ActivityIndicatorLoading color="Blue" />
+
   return (
-    <ScrollView>
-      <List.Section>
-        {
-          listOrder.length != 0 ?
-            <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
-            : <Nodata content="Không có đơn hàng đang sửa chữa nào"/>
-        }
-      </List.Section>
-    </ScrollView>
+    <List.Section>
+      {
+        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
+      }
+
+    </List.Section>
   )
 }
 
@@ -121,6 +126,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   textOrder: {
-    marginVertical: 5
+    marginVertical: 5,
+    marginRight: 15,
   }
 })

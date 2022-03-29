@@ -1,7 +1,7 @@
 import {StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react'
-import CardNotification from '../../components/Cart/CardNotification';
+import CardNotification from '../../components/Card/CardNotification';
 import {  getRealtimeAnDocument, getUidUser } from '../../service/getData';
 
 
@@ -19,12 +19,12 @@ export default function NotificationApp() {
     }
 
     const renderItem = ({ item }) => (
-        <CardNotification item={item} />
+        <CardNotification item={item} key={item.time}/>
     )
     return (
         <SafeAreaView style={styles.container}>
             {
-                listNotification && <FlatList data={listNotification.notification} renderItem={renderItem} keyExtractor={item => item.id} />
+                listNotification && <FlatList data={listNotification.notification} renderItem={renderItem} keyExtractor={item => item.time} />
             }
         </SafeAreaView>
     )

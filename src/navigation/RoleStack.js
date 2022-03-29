@@ -10,7 +10,8 @@ import BookOrder from '../screens/client/BookOrder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Activity_Order from '../screens/client/Activity_Order';
 import AuthScreen from './AuthScreen';
-
+import WatchOnGoogleMap from '../screens/repairmen/order/WatchOnGoogleMap';
+import EditListWork from '../screens/repairmen/EditListWork';
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + '...' : str;
 }
@@ -70,6 +71,18 @@ export default function AppStack() {
         options={{ headerShown: false }}
       />
 
+      <RoleStacks.Screen name="watchOnGoogleMap"
+        component={WatchOnGoogleMap}
+        options={{ headerShown: false }}
+      />
+
+      <RoleStacks.Screen name="editListWork"
+        component={EditListWork}
+        options={{ 
+          headerShown: true,
+          title:'Danh Sách Công Việc',
+          headerTitleAlign: 'center' }}
+      />
     </RoleStacks.Navigator>
   )
 }

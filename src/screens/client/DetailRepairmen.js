@@ -61,7 +61,7 @@ const OnGoogleMap = (props) => {
                 apikey={GOOGLE_MAPS_APIKEY}
                 strokeWidth={7}
                 strokeColor="blue"
-              
+
 
                 onStart={(params) => {
                     console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
@@ -113,7 +113,6 @@ function ServiceTable(props) {
 }
 
 export default function DetailRepairmen({ navigation, route }) {
-
     const [repairman, setRepairman] = useState({});
     const [loading, setLoading] = useState(true);
     const [listWork, setListWork] = useState({});
@@ -123,7 +122,7 @@ export default function DetailRepairmen({ navigation, route }) {
         setRepairman(route.params.item);
         const location = await getCurrentLocation();
         const listWork = await getAnDocument('listWork', route.params.item.uid);
-        const dataUser = await getCurrentUser();
+        const dataUser = await getCurrentUser('client');
         setListWork(listWork);
         setCurrentLocationOfClient(location);
         setCurrentUser(dataUser);
@@ -137,7 +136,14 @@ export default function DetailRepairmen({ navigation, route }) {
             <View style={styles.row}>
                 <View style={styles.header}>
                     <View style={styles.avatar}>
-                        <Image style={styles.img} source={{ uri: repairman.photoURL }} />
+                        <Image style={{
+                            width: 130,
+                            height: 130,
+                            borderRadius: 63,
+                            borderWidth: 4,
+                            borderColor: "white",
+                            marginBottom: 10,
+                        }} source={{ uri: repairman.photoURL }} />
                         <View style={[styles.row, { position: 'absolute', bottom: 0, left: 30 }]}>
                             <Text style={{ fontSize: 25 }}>{repairman.totalAVG}</Text>
                             <FontAwesome name="star" size={20} color={"#ffcc00"} />
@@ -147,7 +153,7 @@ export default function DetailRepairmen({ navigation, route }) {
                         <Text style={styles.textInfo}>Tuổi: {repairman.age}</Text>
                         <Text style={styles.textInfo}>SDT:  {repairman.phoneNumber}</Text>
                         <Text style={styles.textInfo}>Giới tính:  {repairman.sex}</Text>
-                        <Text style={styles.textInfo}>Đánh Giá:  {repairman.totalCount}</Text>
+                        <Text style={styles.textInfo}>Lượt đánh giá:  {repairman.totalCount}</Text>
                         {distance != 1 && <Text>Khoảng cách: {distance} km</Text>}
                     </View>
                 </View>
@@ -230,10 +236,12 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     avatar: {
-        width: '50%',
+        width: 150,
+        height: 150,
         alignItems: 'center',
         flexDirection: 'row',
-        position: 'relative'
+        position: 'relative',
+        paddingLeft: 10
     },
     info: {
         width: '50%',
@@ -249,7 +257,7 @@ const styles = StyleSheet.create({
         height: 130,
         width: '100%',
         resizeMode: 'contain',
-     
+
     },
     titleTable: {
         fontSize: 16,

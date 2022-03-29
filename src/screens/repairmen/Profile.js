@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { countDocument, getCurrentUser } from '../../service/getData';
+import { countDocument, getCurrentUser, getAnDocument } from '../../service/getData';
 import { auth } from '../../database/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from '../../components/animation/Loading';
@@ -23,16 +23,22 @@ export default function Profile({ navigation }) {
     const [countOrderSuccess, setCountOrderSuccess] = useState(0);
     const [countOrderCancel, setCountOrderCancel] = useState(0);
 
+    const [listWork, setListWork] = useState({});
     const [loading, setLoading] = useState(true);
     useEffect(async () => {
         const data = await getCurrentUser('repairmen');
+
+
         setDataUser(data);
+        setListWork(await getAnDocument('listWork', data.uid))
         setCountOrder(await countDocument('order', 'uid_repairmen'));
         setCountOrderCancel(await countDocument('orderCancel', 'uid_repairmen'));
         setCountOrderDoing(await countDocument('orderDoing', 'uid_repairmen'));
         setCountOrderSuccess(await countDocument('orderSuccess', 'uid_repairmen'));
         setLoading(false)
         const unsubscribe = navigation.addListener('focus', async () => {
+            // setDataUser(data);
+            setListWork(await getAnDocument('listWork', data.uid))
             console.log("Render again profile by focus navigation");
             setCountOrder(await countDocument('order', 'uid_repairmen'));
             setCountOrderCancel(await countDocument('orderCancel', 'uid_repairmen'));
@@ -54,7 +60,7 @@ export default function Profile({ navigation }) {
                             <Image style={styles.avatar}
                                 source={{ uri: dataUser.photoURL }} />
                             <Text style={styles.name}>{dataUser.name}</Text>
-                            <Text style={styles.userInfo}>Hộ Gia Đình</Text>
+                            <Text style={styles.userInfo}>Thợ sửa chữa</Text>
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', marginHorizontal: 10, marginVertical: 5, justifyContent: 'space-between' }}>
@@ -96,9 +102,19 @@ export default function Profile({ navigation }) {
                             <MaterialCommunityIcons name='email-box' size={26} color={'#ff6600'} />
                             <Text style={styles.info}>Email: {dataUser.email}</Text>
                         </View>
-
-
                     </View>
+                    <TouchableOpacity
+                        onPress={
+                            () => {
+                                navigation.navigate('editListWork', { dataListWork: listWork })
+                            }}>
+                        <View style={styles.viewButton}>
+                            <Text style={{ fontSize: 16 }} >Chỉnh sửa dịch vụ</Text>
+                            <View >
+                                <MaterialCommunityIcons name="briefcase-edit-outline" size={24} color="black" />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
                     <View style={styles.viewButton}>
                         <Text style={{ fontSize: 16 }}>Hoạt động</Text>
                         <Switch
@@ -123,23 +139,8 @@ export default function Profile({ navigation }) {
                     </TouchableOpacity>
                 </ScrollView>
             }
-            <TouchableOpacity
-                        onPress={
-                            () => {
-                                auth.signOut().then(() => { console.log("Sign out") })
-                                AsyncStorage.clear().then(() => console.log('Cleared'))
-                                navigation.navigate('LoginAgain')
-                            }}>
-                        <View style={styles.viewButton}>
-                            <Text style={{ fontSize: 16 }} >Đăng Xuất</Text>
-                            <View >
-                                <MaterialCommunityIcons name="logout-variant" size={25} color={"black"} />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
         </SafeAreaView>
     );
-
 }
 
 const styles = StyleSheet.create({

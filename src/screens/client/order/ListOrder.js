@@ -18,18 +18,15 @@ export default function ListOrder({ navigation }) {
     const [uid, setUid] = useState();
     useEffect(async () => {
         // console.log("Render list order getAgain");
-        // const id = await getUidUser();
-        // setUid(id)
-        // const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
-        // setListOrder(data);
-
+        const id = await getUidUser();
+        setUid(id)
+        const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
+        setListOrder(data);
         console.log("render list order");
         const unsubscribe = navigation.addListener('focus', async () => {
             console.log("render again list order by focus navigation");
-            const id = await getUidUser();
             const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
             setListOrder(data);
-
         });
         return unsubscribe;
     }, [navigation]);
@@ -39,11 +36,10 @@ export default function ListOrder({ navigation }) {
     }
 
     const CancelOrder = async (item, uid) => {
+        console.log('item', item);
         item.order.status = "Bị hủy";
         item.order.cancelDay = new Date();
-
         console.log('Đơn hàng: ', item.order);
-
         await pushData('orderCancel', item.order); // push to cancel order
         await deleteDocument('order', item.id);// delete from list order;
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
@@ -54,10 +50,10 @@ export default function ListOrder({ navigation }) {
             body: 'Quý khách đã hủy đơn hàng thành công!',
             time: new Date()
         })
-        setListOrder([]);
         await updateNotification('notification', uid, notificationArray);
-        navigation.navigate('Bị hủy')
+        navigation.navigate('Bị Hủy')
     }
+
 
     const renderItem = ({ item }) => {
         const expanded = item.id == selectedId ? true : false;

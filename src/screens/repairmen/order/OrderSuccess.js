@@ -1,20 +1,16 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
-import { formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
-import { deleteDocument } from '../../../service/deleteData';
-import { pushData, schedulePushNotification } from '../../../service/pushData';
-import { updateNotification } from '../../../service/updateData';
+import { getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
+import { formatPrice, formatDateTime } from '../../../service/formatCode';
 
 export default function OrderSuccess({ navigation }) {
 
-  const [loading, setLoading] = useState(true);
+
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client
-  const [getAgain, setGetAgain] = useState(false);
+
   const [uid, setUid] = useState();
   useEffect(async () => {
     console.log("Render list order getAgain");
@@ -22,15 +18,14 @@ export default function OrderSuccess({ navigation }) {
     setUid(id)
     const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_repairmen', id);
     setListOrder(data);
-    setLoading(false)
+
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log("render again", getAgain);
       const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_repairmen', id);
       setListOrder(data);
-      setLoading(false)
+
     });
     return unsubscribe;
-  }, [navigation, getAgain]);
+  }, [navigation]);
 
   function setData(data) {
     setListOrder(data);
@@ -78,15 +73,15 @@ export default function OrderSuccess({ navigation }) {
             </View>
           </View>
           <Text>Ngày đặt: {item.order.createDay}</Text>
+          <Text>Thời gian hoàn thành: {formatDateTime(item.order.doneDay.toDate(), item.order.doneDay.toDate())}</Text>
         </View>
       </List.Accordion>
     )
   }
-  if (loading) return <ActivityIndicatorLoading color="Blue" />
   return (
     <List.Section>
       {
-        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
       }
     </List.Section>
   )

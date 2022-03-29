@@ -200,8 +200,8 @@ export default function Activity_Order() {
         <OrderTab.Screen name='Chờ Xác Nhận' component={ListOrder} />
         <OrderTab.Screen name='Chờ Sửa' component={WaitingDo} />
         <OrderTab.Screen name='Đang Sửa' component={DoingOrder} />
-        <OrderTab.Screen name='Thành công' component={OrderSuccess} />
-        <OrderTab.Screen name='Bị hủy' component={CancelOrder} />
+        <OrderTab.Screen name='Thành Công' component={OrderSuccess} />
+        <OrderTab.Screen name='Bị Hủy' component={CancelOrder} />
       </OrderTab.Navigator>
     </SafeAreaView>
   )

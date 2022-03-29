@@ -5,7 +5,6 @@ import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
 import { deleteDocument } from '../../../service/deleteData';
 import { pushData, schedulePushNotification } from '../../../service/pushData';
 import { updateNotification } from '../../../service/updateData';
@@ -14,27 +13,22 @@ import { updateNotification } from '../../../service/updateData';
 import call from 'react-native-phone-call';
 
 export default function WaitingDo({ navigation }) {
-
-  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client
-  const [getAgain, setGetAgain] = useState(false);
   const [uid, setUid] = useState();
   useEffect(async () => {
     console.log("Render list order getAgain");
     const id = await getUidUser();
     setUid(id)
-    const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', id);
+    const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', uid);
     setListOrder(data);
-    setLoading(false)
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log("render again", getAgain);
-      const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', id);
+      const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', uid);
       setListOrder(data);
-      setLoading(false)
+
     });
     return unsubscribe;
-  }, [navigation, getAgain]);
+  }, [navigation]);
 
   function setData(data) {
     setListOrder(data);
@@ -45,12 +39,26 @@ export default function WaitingDo({ navigation }) {
       number: phoneNumber,
       prompt: true,
     };
-    // Make a call
     call(args).catch(console.error);
   };
-  const watchOnGoogleMap = () => {
-    alert('hi')
+
+  const DoingOrder = async (item, uid) => {
+    item.order.status = "Đang Sửa";
+    await pushData('orderDoing', item.order); // push to cancel order
+    await deleteDocument('orderWaiting', item.id);// delete from list order;
+    await schedulePushNotification('HelpHouse thông báo', 'Bạn đã bắt đầu thực hiện việc sửa chữa!');
+    const notificationOfUser = await getAnDocument('notification', uid);
+    const notificationArray = notificationOfUser.notification;
+    notificationArray.unshift({
+      title: 'HelpHouse thông báo',
+      body: 'Bạn đã bắt đầu thực hiện việc sửa chữa!',
+      time: new Date()
+    })
+    await updateNotification('notification', uid, notificationArray);
+    navigation.navigate('Đang Sửa')
   }
+
+
 
   const renderItem = ({ item }) => {
     const expanded = item.id == selectedId ? true : false;
@@ -102,22 +110,21 @@ export default function WaitingDo({ navigation }) {
             onPress={() => triggerCall(item.order.informationClient.sdt)}>
             <MaterialCommunityIcons name='phone' size={30} color='#ff6600' />
           </TouchableOpacity>
-          {/* <TouchableOpacity style={{ marginLeft: 10 }} onPress={() => 
-          navigation.navigate('watchOnGoogleMap',{repairmenLocation:item.order., clientLocation:item.order.toAddress})}>
+          <TouchableOpacity style={{ marginLeft: 10 }} onPress={() =>
+            navigation.navigate('watchOnGoogleMap', { repairmenLocation: item.order.locationRepairmen, clientLocation: item.order.toAddress })}>
             <MaterialCommunityIcons name='map-marker' size={30} color='#ff6600' />
-          </TouchableOpacity> */}
-          <TouchableOpacity style={[styles.button, { backgroundColor: 'green' }]} onPress={() => Confirm(item, uid)} >
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, { backgroundColor: 'green' }]} onPress={() => DoingOrder(item, uid)} >
             <Text style={{ color: 'white' }}>Bắt đầu </Text>
           </TouchableOpacity>
         </View>
       </List.Accordion>
     )
   }
-  if (loading) return <ActivityIndicatorLoading color="Blue" />
   return (
     <List.Section>
       {
-        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.time} />
+        listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
       }
     </List.Section>
   )
