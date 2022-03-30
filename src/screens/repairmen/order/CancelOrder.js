@@ -1,33 +1,26 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
+import { getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatDateTime, formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
-import { deleteDocument } from '../../../service/deleteData';
-import { pushData, schedulePushNotification } from '../../../service/pushData';
-import { updateNotification } from '../../../service/updateData';
-
 
 export default function CancelOrder({ navigation }) {
-
-
-    const [loading, setLoading] = useState(true);
+ 
     const [selectedId, setSelectedId] = useState(null);
-    const [listOrder, setListOrder] = useState([]); // list order of client
-    const [uid, setUid] = useState();
+    const [listOrder, setListOrder] = useState([]);
     useEffect(async () => {
-        console.log("Render list order getAgain");
+        console.log("Render cancel order 1 lần");
         const id = await getUidUser();
-        setUid(id)
         const data = getRealtimeQueryACollection(setData, 'orderCancel', 'uid_repairmen', id);
         setListOrder(data);
-        setLoading(false)
-        const unsubscribe = navigation.addListener('focus', () => {
+    }, [])
+
+    useEffect(async () => {
+        const unsubscribe = navigation.addListener('focus', async () => {
+            const id = await getUidUser();
             const data = getRealtimeQueryACollection(setData, 'orderCancel', 'uid_repairmen', id);
             setListOrder(data);
-            setLoading(false)
         });
         return unsubscribe;
     }, [navigation]);
@@ -35,28 +28,6 @@ export default function CancelOrder({ navigation }) {
     function setData(data) {
         setListOrder(data);
     }
-
-
-    const Finish = async (item, uid) => {
-        item.order.status = "Thành Công";
-        item.order.doneDay = new Date();
-
-
-        await pushData('orderSuccess', item.order); // push to cancel order
-        await deleteDocument('orderDoing', item.id);// delete from list order;
-        await schedulePushNotification('HelpHouse thông báo', 'Bạn đã hoàn thành việc sửa chữa!');
-        const notificationOfUser = await getAnDocument('notification', uid);
-        const notificationArray = notificationOfUser.notification;
-        notificationArray.unshift({
-            title: 'HelpHouse thông báo',
-            body: 'Bạn đã hoàn thành việc sửa chữa!',
-            time: new Date()
-        })
-        await updateNotification('notification', uid, notificationArray);
-        navigation.navigate('Thành Công')
-    }
-
-
 
     const renderItem = ({ item }) => {
         const expanded = item.id == selectedId ? true : false;
@@ -106,7 +77,7 @@ export default function CancelOrder({ navigation }) {
             </List.Accordion>
         )
     }
-    if (loading) return <ActivityIndicatorLoading color="Blue" />
+  
     return (
         <List.Section>
             {

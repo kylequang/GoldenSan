@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { LogBox } from "react-native";
-
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import IndexRepairmen from '../../screens/repairmen/IndexRepairmen';
 import Activity_Order from '../../screens/repairmen/Activity_Order';
-
 import MapRepairmen from '../../screens/repairmen/MapRepairmen';
-import ScanLocation from '../../screens/repairmen/ScanLocation';
 import NotificationApp from '../../screens/repairmen/NotificationApp';
 import Profile from '../../screens/repairmen/Profile';
 import Loading from '../../components/animation/Loading';

@@ -7,8 +7,23 @@ export const updateData = async (nameCollection, id, changStatus) => {
   });
 }
 
-export const updateNotification = async(nameCollection,uid,data)=>{
-  await updateDoc(doc(db,nameCollection,uid),{
+export const updateNotification = async (nameCollection, uid, data) => {
+  await updateDoc(doc(db, nameCollection, uid), {
     notification: data
+  })
+}
+
+export const updateRatingRepairmen = async (nameCollection, uid, data) => {
+  await updateDoc(doc(db, nameCollection, uid), {
+    totalAVG: data.totalAVG,
+    totalCount: data.totalCount,
+    totalScore: data.totalScore
+  })
+}
+
+export const updateListWork = async (nameCollection, uid, data) => {
+  console.log("Dữ liệu cập nhật",data);
+  await updateDoc(doc(db, nameCollection, uid), {
+    listWork: data
   })
 }

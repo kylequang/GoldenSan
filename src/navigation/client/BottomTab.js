@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Index from '../../screens/client/IndexClient';
 import Activity_Order from '../../screens/client/Activity_Order';
-import Notification from '../../screens/client/Notification';
 import Contact from '../../screens/Contact';
 import NotificationApp from '../../screens/client/NotificationApp';
 import Profile from '../../screens/client/Profile';

@@ -6,6 +6,7 @@ import DoingOrder from './order/DoingOrder';
 import CancelOrder from './order/CancelOrder';
 import OrderSuccess from './order/OrderSuccess'
 import WaitingDo from './order/WaitingDo';
+import RatingRepairmen from './order/RatingRepairmen';
 const OrderTab = createMaterialTopTabNavigator();
 
 export default function Activity_Order() {
@@ -22,6 +23,7 @@ export default function Activity_Order() {
         <OrderTab.Screen name='Chờ Xác Nhận' component={ListOrder} />
         <OrderTab.Screen name='Chờ Sửa' component={WaitingDo} />
         <OrderTab.Screen name='Đang Sửa' component={DoingOrder} />
+        <OrderTab.Screen name='Đánh Giá' component={RatingRepairmen} />
         <OrderTab.Screen name='Thành Công' component={OrderSuccess} />
         <OrderTab.Screen name='Bị Hủy' component={CancelOrder} />
       </OrderTab.Navigator>

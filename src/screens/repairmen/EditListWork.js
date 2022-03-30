@@ -6,16 +6,28 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatPrice } from '../../service/formatCode';
+import { updateListWork } from '../../service/updateData';
+import { schedulePushNotification } from '../../service/pushData';
 export default function EditListWork({ route }) {
     console.log(route.params.dataListWork);
+    console.log(route.params.uid)
     const [listWork, setListWork] = useState(route.params.dataListWork.listWork);
     const [modalVisible, setModalVisible] = useState(false);
-    const handleAddListWork = (item) => {
-        setListWork((listWorkOfRepairmen) => [...listWorkOfRepairmen, item])
+
+    const handleAddListWork = async (item) => {
+        setListWork((listWorkOfRepairmen) => [...listWorkOfRepairmen, item]);
+    }
+    const deleteListWork = async (work) => {
+        setListWork(listWork.filter(item => item.id !== work.id));
+    }
+    const handlePushListWork = async () => {
+        console.log("Hoàn thành update");
+        await updateListWork('listWork', route.params.uid, listWork);
+        await schedulePushNotification('HelpHouse thông báo', 'Bạn đã cập nhật công việc thành công!');
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal:10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 10 }}>
                 <TouchableOpacity style={{
                     flexDirection: 'row',
                     justifyContent: 'center',
@@ -29,32 +41,32 @@ export default function EditListWork({ route }) {
                     flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                }}>
+                }}
+                    onPress={() => handlePushListWork()}>
                     <Text>Hoàn thành</Text>
                     <MaterialCommunityIcons name="check-circle" size={30} color="#ff6600" />
                 </TouchableOpacity>
             </View>
 
 
-
             <ScrollView horizontal style={{ flexDirection: 'row' }}>
-                <DataTable style={{width:'100%'}}>
+                <DataTable style={{ width: '100%' }}>
                     <DataTable.Row>
-                        <DataTable.Cell style={{flex:2}}>Công Việc</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2 }}>Công Việc</DataTable.Cell>
                         <DataTable.Cell numeric >Chi Phí</DataTable.Cell>
-                        <DataTable.Cell numeric style={{flex:1/2}}>Bảo Hành</DataTable.Cell>
-                        <DataTable.Cell numeric style={{flex:1/2}}>Xóa</DataTable.Cell>
+                        <DataTable.Cell numeric style={{ flex: 1 / 2 }}>Bảo Hành</DataTable.Cell>
+                        <DataTable.Cell numeric style={{ flex: 1 / 2 }}>Xóa</DataTable.Cell>
                     </DataTable.Row>
 
                     {
                         listWork && listWork.map((item, index) => (
                             <DataTable.Row key={index}>
-                                <DataTable.Cell style={{flex:2}}>{item.nameService}</DataTable.Cell>
-                                <DataTable.Cell numeric >{ formatPrice(item.price)}đ</DataTable.Cell>
-                                <DataTable.Cell numeric style={{flex:1/2}}>{item.insurance} tuần</DataTable.Cell>
-                                <DataTable.Cell numeric style={{flex:1/2}}>
+                                <DataTable.Cell style={{ flex: 2 }}>{item.nameService}</DataTable.Cell>
+                                <DataTable.Cell numeric >{formatPrice(item.price)}đ</DataTable.Cell>
+                                <DataTable.Cell numeric style={{ flex: 1 / 2 }}>{item.insurance} tuần</DataTable.Cell>
+                                <DataTable.Cell numeric style={{ flex: 1 / 2 }}>
                                     <TouchableOpacity onPress={() => {
-                                        alert('xóa')
+                                        deleteListWork(item)
                                     }}
                                     >
                                         <MaterialCommunityIcons name='delete' size={25} color='#ff6600' />

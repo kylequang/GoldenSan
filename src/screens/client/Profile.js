@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { countDocument, getCurrentUser} from '../../service/getData';
+import { countDocument, getCurrentUser } from '../../service/getData';
 import { auth } from '../../database/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from '../../components/animation/Loading';
@@ -33,6 +33,8 @@ export default function Profile({ navigation }) {
         setCountOrderSuccess(await countDocument('orderSuccess', 'uid_client'));
         setLoading(false)
         const unsubscribe = navigation.addListener('focus', async () => {
+            const data = await getCurrentUser('client');
+            setDataUser(data);
             console.log("Render again profile by focus navigation");
             setCountOrder(await countDocument('order', 'uid_client'));
             setCountOrderCancel(await countDocument('orderCancel', 'uid_client'));

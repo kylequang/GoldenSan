@@ -1,29 +1,56 @@
-import { View, Text, StyleSheet, FlatList, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, LogBox } from 'react-native';
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { DataTable } from 'react-native-paper';
+import Loading from '../../components/animation/Loading';
 import { formatDateTime, formatPrice } from '../../service/formatCode';
-import { countDocument } from '../../service/getData';
-export default function IndexRepairmen({ navigation, route }) {
-  const [listWork, setListWork] = useState(route.params.listWork);
-  const [dataUser, setDataUser] = useState(route.params.dataUser);
+import { countDocument, getCurrentUser, getUidUser, getAnDocument } from '../../service/getData';
+export default function IndexRepairmen({ navigation }) {
+
+  const [loading, setLoading] = useState(true);
+  const [listWork, setListWork] = useState({});
+  const [dataUser, setDataUser] = useState({});
   const [countOrder, setCountOrder] = useState(0);
   const [countCancelOrder, setCountCancelOrder] = useState(0);
   const [countSuccessOrder, setCountSuccessOrder] = useState(0);
-  console.log('reload repairmen home')
+
+
+
   useEffect(async () => {
+    LogBox.ignoreLogs(['Setting a timer']);
+    const data = await getCurrentUser('repairmen');
+    const uid = await getUidUser();
+    const getListWork = await getAnDocument('listWork', uid)
+    setDataUser(data);
+    setListWork(getListWork);
     setCountOrder(await countDocument('order', 'uid_repairmen'));
     setCountSuccessOrder(await countDocument('orderSuccess', 'uid_repairmen'));
     setCountCancelOrder(await countDocument('orderCancel', 'uid_repairmen'));
+    
+      if (dataUser != null) {
+        setLoading(false)
+      }
+  }, [])
+
+
+  useEffect(async () => {
+
     const unsubscribe = navigation.addListener('focus', async () => {
+      const data = await getCurrentUser('repairmen');
+      const uid = await getUidUser();
+      const getListWork = await getAnDocument('listWork', uid)
+      setDataUser(data);
+      setListWork(getListWork);
       console.log("Render again by focus home page");
       setCountOrder(await countDocument('order', 'uid_repairmen'));
       setCountSuccessOrder(await countDocument('orderSuccess', 'uid_repairmen'));
       setCountCancelOrder(await countDocument('orderCancel', 'uid_repairmen'));
     });
     return unsubscribe;
-  }, [navigation])
+  }, [navigation]);
+
+  if (loading) return <Loading />
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -42,7 +69,7 @@ export default function IndexRepairmen({ navigation, route }) {
           </View>
         </View>
         <View style={styles.listWork}>
-          <View style={{ alignItems: 'center',marginVertical:10 }}>
+          <View style={{ alignItems: 'center', marginVertical: 10 }}>
             <Text style={{ fontWeight: 'bold' }}>Dịch Vụ Công Việc Sửa Chữa Của Bạn</Text>
           </View>
           <DataTable>

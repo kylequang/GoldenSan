@@ -1,28 +1,26 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
+import { getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import { deleteDocument } from '../../../service/deleteData';
-import { pushData, schedulePushNotification } from '../../../service/pushData';
-import { updateNotification } from '../../../service/updateData';
+
 
 export default function DoingOrder({ navigation }) {
 
-
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client;
-  const [uid, setUid] = useState();
+
+
   useEffect(async () => {
-    // console.log("Render list order getAgain");
     const id = await getUidUser();
-    setUid(id)
     const data = getRealtimeQueryACollection(setData, 'orderDoing', 'uid_client', id);
     setListOrder(data);
-    console.log("render list order");
+  }, [])
+  useEffect(async () => {
+
     const unsubscribe = navigation.addListener('focus', async () => {
-      console.log("render again list order by focus navigation");
+      const id = await getUidUser();
       const data = getRealtimeQueryACollection(setData, 'orderDoing', 'uid_client', id);
       setListOrder(data);
     });

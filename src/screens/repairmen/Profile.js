@@ -103,18 +103,6 @@ export default function Profile({ navigation }) {
                             <Text style={styles.info}>Email: {dataUser.email}</Text>
                         </View>
                     </View>
-                    <TouchableOpacity
-                        onPress={
-                            () => {
-                                navigation.navigate('editListWork', { dataListWork: listWork })
-                            }}>
-                        <View style={styles.viewButton}>
-                            <Text style={{ fontSize: 16 }} >Chỉnh sửa dịch vụ</Text>
-                            <View >
-                                <MaterialCommunityIcons name="briefcase-edit-outline" size={24} color="black" />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
                     <View style={styles.viewButton}>
                         <Text style={{ fontSize: 16 }}>Hoạt động</Text>
                         <Switch
@@ -123,6 +111,19 @@ export default function Profile({ navigation }) {
                             onValueChange={toggleSwitch}
                             value={isEnabled} />
                     </View>
+                    <TouchableOpacity
+                        onPress={
+                            () => {
+                                navigation.navigate('editListWork', { dataListWork: listWork, uid: dataUser.uid })
+                            }}>
+                        <View style={styles.viewButton}>
+                            <Text style={{ fontSize: 16 }} >Chỉnh sửa công việc</Text>
+                            <View >
+                                <MaterialCommunityIcons name="briefcase-edit-outline" size={24} color="black" />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         onPress={
                             () => {

@@ -1,28 +1,32 @@
-import { View, Text, FlatList, StyleSheet, Image,} from 'react-native'
+import { View, Text, FlatList, StyleSheet, Image, } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getUidUser } from '../../../service/getData';
-import { formatPrice } from '../../../service/formatCode';
+import { formatDateTime, formatPrice } from '../../../service/formatCode';
 import { getRealtimeQueryACollection } from '../../../service/getData';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
+
 
 export default function OrderSuccess({ navigation }) {
 
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client
-  const [loading, setLoading] = useState(true);
+  
+  useEffect(async() => {
+    const id = await getUidUser();
+    const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_client', id);
+    setListOrder(data);
+  }, [])
 
-  useEffect(() => {
+  useEffect(async () => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      const uid = await getUidUser();
-      const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_client', uid);
+      const id = await getUidUser();
+      const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_client', id);
       setListOrder(data)
-      setLoading(false);
-      console.log("Render again orderSuccess");
     });
     return unsubscribe;
   }, [navigation]);
+
   function setData(data) {
     setListOrder(data);
   }
@@ -85,11 +89,11 @@ export default function OrderSuccess({ navigation }) {
             </View>
           </View>
           <Text>Ngày đặt: {item.order.createDay}</Text>
+          <Text>Ngày hoàn thành: { formatDateTime(item.order.doneDay.toDate(), item.order.doneDay.toDate())}</Text>
         </View>
       </List.Accordion>
     )
   }
-  if (loading) return <ActivityIndicatorLoading color="blue" />
   return (
 
     <List.Section>

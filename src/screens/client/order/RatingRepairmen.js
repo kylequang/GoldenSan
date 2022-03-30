@@ -1,30 +1,31 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { AirbnbRating } from 'react-native-ratings';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
+import { getAnDocument, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
+import { getRealtimeQueryACollection } from '../../../service/getData';
+import { updateRatingRepairmen } from '../../../service/updateData';
 import { deleteDocument } from '../../../service/deleteData';
-import { pushData, schedulePushNotification } from '../../../service/pushData';
-import { updateNotification } from '../../../service/updateData';
+export default function RatingRepairmen({ navigation }) {
 
-export default function ListOrder({ navigation }) {
+
+    const [rate, setRate] = useState(4);
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
-    const [uid, setUid] = useState();
+
     useEffect(async () => {
-        console.log("Render list order 1 lần Repairmen");
+        console.log("Render 1 lần Rating");
         const id = await getUidUser();
-        setUid(id);
-        const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
+        const data = getRealtimeQueryACollection(setData, 'orderRating', 'uid_client', id);
         setListOrder(data);
     }, [])
 
     useEffect(async () => {
         const unsubscribe = navigation.addListener('focus', async () => {
             const id = await getUidUser();
-            setUid(id);
-            const data = getRealtimeQueryACollection(setData, 'order', 'uid_repairmen', id);
+            const data = getRealtimeQueryACollection(setData, 'orderRating', 'uid_client', id);
             setListOrder(data);
         });
         return unsubscribe;
@@ -34,44 +35,28 @@ export default function ListOrder({ navigation }) {
         setListOrder(data);
     }
 
-    const CancelOrder = async (item, uid) => {
-        item.order.status = "Bị hủy";
-        item.order.cancelDay = new Date();
-        await pushData('orderCancel', item.order); // push to cancel order
-        await deleteDocument('order', item.id);// delete from list order;
-        await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
-        const notificationOfUser = await getAnDocument('notification', uid);
-        const notificationArray = notificationOfUser.notification;
-        notificationArray.unshift({
-            title: 'HelpHouse thông báo',
-            body: 'Quý khách đã hủy đơn hàng thành công!',
-            time: new Date()
-        })
-        await updateNotification('notification', uid, notificationArray);
-        navigation.navigate('Bị Hủy')
+    function handleRating(rate) {
+        setRate(rate);
     }
 
-
-
-    const Confirm = async (item, uid) => {
-        item.order.status = "Đã xác nhận";
-        await pushData('orderWaiting', item.order); // push to cancel order
-        await deleteDocument('order', item.id);// delete from list order;
-        await schedulePushNotification('HelpHouse thông báo', 'Bạn đã nhận đơn hàng thành công!');
-        const notificationOfUser = await getAnDocument('notification', uid);
-        const notificationArray = notificationOfUser.notification;
-        notificationArray.unshift({
-            title: 'HelpHouse thông báo',
-            body: 'Bạn đã nhận đơn hàng thành công!',
-            time: new Date()
-        })
-        await updateNotification('notification', uid, notificationArray);
-        navigation.navigate('Chờ Sửa');
+    async function finishedRate(item) {
+        const uidRepairmen = await getAnDocument('repairmen', item.order.uid_repairmen)
+        uidRepairmen.totalCount += 1;
+        uidRepairmen.totalScore += rate;
+        uidRepairmen.totalAVG = (uidRepairmen.totalScore / uidRepairmen.totalCount).toFixed(1);
+        const data = {
+            totalScore: uidRepairmen.totalScore,
+            totalAVG: uidRepairmen.totalAVG,
+            totalCount: uidRepairmen.totalCount
+        };
+        console.log("Điểm Đánh Giá: ", data);
+        console.log("Điểm Trung Bình: ", uidRepairmen.totalAVG);
+        await deleteDocument('orderRating', item.id);// delete from list order;
+        await updateRatingRepairmen('repairmen', uidRepairmen.uid, data);
+        navigation.navigate('Trang Chủ')
     }
-
     const renderItem = ({ item }) => {
         const expanded = item.id == selectedId ? true : false;
-       
         return (
             <List.Accordion
                 key={item.id}
@@ -86,14 +71,29 @@ export default function ListOrder({ navigation }) {
                     <Text style={{ fontSize: 16 }}>Thời gian sửa chữa: {item.order.time + ' ' + item.order.date}</Text>
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
                 </View>
-                <View style={{ marginBottom: 20 }}>
+                <View style={{ marginBottom: 50 }}>
                     <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
                         <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
                         <View style={{ marginLeft: 5, marginRight: 15, }}>
-                            <Text style={{ fontSize: 18 }}>Thông tin khách hàng </Text>
+                            <Text style={{ fontSize: 18 }}>Thông tin bản thân </Text>
                             <Text style={styles.textOrder}>Giới tính: {item.order.informationClient.sex}  {item.order.informationClient.age} tuổi</Text>
                             <Text style={styles.textOrder}>Địa chỉ: {item.order.address}</Text>
                             <Text style={styles.textOrder}>Khoảng cách: {item.order.distance} km</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
+                        <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
+                        <View style={{ marginLeft: 5 }}>
+                            <Text style={{ fontSize: 18 }}>Thông tin thợ </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image style={styles.avatar}
+                                    source={{ uri: item.order.informationRepairmen.photoURL }} />
+                                <View style={{ marginLeft: 5 }}>
+                                    <Text style={styles.textOrder}>{item.order.informationRepairmen.name} {item.order.informationRepairmen.age} tuổi</Text>
+                                    <Text style={styles.textOrder}>Giới tính: {item.order.informationRepairmen.sex}</Text>
+                                    <Text style={styles.textOrder}>SDT: {item.order.informationRepairmen.sdt}</Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', marginVertical: 5 }}>
@@ -113,29 +113,37 @@ export default function ListOrder({ navigation }) {
                         </View>
                     </View>
                     <Text>Ngày đặt: {item.order.createDay}</Text>
-                    <TouchableOpacity style={{ flexDirection: 'row', marginTop: 10, alignItems: 'center' }} onPress={() =>
-                        navigation.navigate('watchOnGoogleMap', { repairmenLocation: item.order.locationRepairmen, clientLocation: item.order.toAddress })}>
-                        <MaterialCommunityIcons name='map-marker' size={30} color='#ff6600' />
-                        <Text style={{ fontSize: 18 }}>Bản đồ</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: 'gray' }]} onPress={() => CancelOrder(item, uid)} >
-                        <Text style={{ color: 'white' }}>Hủy Đơn</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: 'green' }]} onPress={() => Confirm(item, uid)} >
-                        <Text style={{ color: 'white' }}>Chấp Nhận</Text>
-                    </TouchableOpacity>
+
+                    <AirbnbRating
+                        count={5}
+                        reviews={["Tồi tệ", "Tệ", "Ổn", "Tốt", "Rất Tốt"]}
+                        defaultRating={4}
+                        size={35}
+                        onFinishRating={handleRating}
+                    />
+
+                    <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity style={[styles.button, { backgroundColor: 'red' }]} >
+                            <Text style={{ color: 'white' }}>Báo Cáo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => finishedRate(item)}
+                            style={[styles.button, { backgroundColor: '#33cc33' }]} >
+                            <Text style={{ color: 'white' }}>Xác Nhận</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </List.Accordion>
         )
     }
     return (
+
         <List.Section>
             {
                 listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
             }
         </List.Section>
+
     )
 }
 
@@ -157,7 +165,7 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     },
     textOrder: {
-        marginVertical: 5,
-        marginRight: 15,
+        marginVertical: 5
     }
 })
+

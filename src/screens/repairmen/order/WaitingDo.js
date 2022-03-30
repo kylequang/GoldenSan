@@ -17,15 +17,20 @@ export default function WaitingDo({ navigation }) {
   const [listOrder, setListOrder] = useState([]); // list order of client
   const [uid, setUid] = useState();
   useEffect(async () => {
-    console.log("Render list order getAgain");
+    console.log("Render waiting order 1 lần");
     const id = await getUidUser();
     setUid(id)
-    const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', uid);
+    const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', id);
     setListOrder(data);
-    const unsubscribe = navigation.addListener('focus', () => {
-      const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', uid);
-      setListOrder(data);
+  }, [])
 
+
+  useEffect(async () => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      const id = await getUidUser();
+      setUid(id)
+      const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_repairmen', id);
+      setListOrder(data);
     });
     return unsubscribe;
   }, [navigation]);
@@ -64,7 +69,7 @@ export default function WaitingDo({ navigation }) {
     const expanded = item.id == selectedId ? true : false;
     return (
       <List.Accordion
-        key={item.id}
+        // key={item.id}
         title={item.order.informationClient.name}
         description={item.order.informationClient.sdt + '    ' + item.order.status + "\n" +
           "Tổng đơn hàng: " + formatPrice(item.order.totalPrice) + " vnđ"}

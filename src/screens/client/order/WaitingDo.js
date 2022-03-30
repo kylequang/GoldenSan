@@ -5,33 +5,40 @@ import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
 import { deleteDocument } from '../../../service/deleteData';
 import { pushData, schedulePushNotification } from '../../../service/pushData';
 import { updateNotification } from '../../../service/updateData';
-import Nodata from '../../../components/Nodata/Nodata';
 
 
-export default function WaitingDo({navigation}) {
+
+export default function WaitingDo({ navigation }) {
 
 
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client;
   const [uid, setUid] = useState();
+
+
+
   useEffect(async () => {
-    // console.log("Render list order getAgain");
+    console.log("Render list order getAgain");
     const id = await getUidUser();
     setUid(id)
     const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_client', id);
     setListOrder(data);
     console.log("render list order");
     const unsubscribe = navigation.addListener('focus', async () => {
+      const id = await getUidUser();
+      setUid(id)
       console.log("render again list order by focus navigation");
       const data = getRealtimeQueryACollection(setData, 'orderWaiting', 'uid_client', id);
       setListOrder(data);
     });
     return unsubscribe;
   }, [navigation]);
+
+
+
 
   function setData(data) {
     setListOrder(data);
@@ -43,7 +50,7 @@ export default function WaitingDo({navigation}) {
     item.order.cancelDay = new Date();
     console.log('Đơn hàng: ', item.order);
     await pushData('orderCancel', item.order); // push to cancel order
-    await deleteDocument('order', item.id);// delete from list order;
+    await deleteDocument('orderWaiting', item.id);// delete from list order;
     await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
     const notificationOfUser = await getAnDocument('notification', uid);
     const notificationArray = notificationOfUser.notification;
@@ -61,7 +68,7 @@ export default function WaitingDo({navigation}) {
     const expanded = item.id == selectedId ? true : false;
     return (
       <List.Accordion
-        key={item.id}
+        // key={item.id}
         title={item.order.informationClient.name}
         description={item.order.informationClient.sdt + '    ' + item.order.status + "\n" +
           "Tổng đơn hàng: " + formatPrice(item.order.totalPrice) + " vnđ"}
@@ -128,7 +135,6 @@ export default function WaitingDo({navigation}) {
       {
         listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
       }
-
     </List.Section>
   )
 }

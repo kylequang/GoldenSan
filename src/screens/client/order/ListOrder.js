@@ -4,27 +4,29 @@ import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getAnDocument, getRealtimeQueryACollection, getUidUser } from '../../../service/getData';
 import { formatPrice } from '../../../service/formatCode';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
 import { deleteDocument } from '../../../service/deleteData';
 import { pushData, schedulePushNotification } from '../../../service/pushData';
 import { updateNotification } from '../../../service/updateData';
-import Nodata from '../../../components/Nodata/Nodata';
+
 
 export default function ListOrder({ navigation }) {
 
-
     const [selectedId, setSelectedId] = useState(null);
-    const [listOrder, setListOrder] = useState([]); // list order of client;
+    const [listOrder, setListOrder] = useState([]);
     const [uid, setUid] = useState();
+
     useEffect(async () => {
-        // console.log("Render list order getAgain");
         const id = await getUidUser();
         setUid(id)
         const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
         setListOrder(data);
-        console.log("render list order");
+    }, [])
+
+
+    useEffect(async () => {
         const unsubscribe = navigation.addListener('focus', async () => {
-            console.log("render again list order by focus navigation");
+            const id = await getUidUser();
+            setUid(id)
             const data = getRealtimeQueryACollection(setData, 'order', 'uid_client', id);
             setListOrder(data);
         });
@@ -39,9 +41,8 @@ export default function ListOrder({ navigation }) {
         console.log('item', item);
         item.order.status = "Bị hủy";
         item.order.cancelDay = new Date();
-        console.log('Đơn hàng: ', item.order);
-        await pushData('orderCancel', item.order); // push to cancel order
-        await deleteDocument('order', item.id);// delete from list order;
+        await deleteDocument('order', item.id);
+        await pushData('orderCancel', item.order);
         await schedulePushNotification('HelpHouse thông báo', 'Quý khách đã hủy đơn hàng thành công!');
         const notificationOfUser = await getAnDocument('notification', uid);
         const notificationArray = notificationOfUser.notification;
@@ -60,11 +61,11 @@ export default function ListOrder({ navigation }) {
         return (
             <List.Accordion
                 key={item.id}
-                title={item.order.informationClient.name}
-                description={item.order.informationClient.sdt + '    ' + item.order.status + "\n" +
+                title={"Thông Tin Thợ" + '\n' + item.order.informationRepairmen.name + "   " + item.order.informationRepairmen.sex}
+                description={item.order.informationRepairmen.sdt + '    ' + item.order.status + "\n" +
                     "Tổng đơn hàng: " + formatPrice(item.order.totalPrice) + " vnđ"}
                 titleNumberOfLines={15}
-                left={() => <Image style={styles.avatar} source={{ uri: item.order.informationClient.photoURL }} />}
+                left={() => <Image style={styles.avatar} source={{ uri: item.order.informationRepairmen.photoURL }} />}
                 expanded={expanded}
                 onPress={() => { selectedId ? setSelectedId(null) : setSelectedId(item.id) }}>
                 <View style={{ paddingVertical: 10 }}>
@@ -75,25 +76,11 @@ export default function ListOrder({ navigation }) {
                     <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
                         <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
                         <View style={{ marginLeft: 5, marginRight: 15, }}>
-                            <Text style={{ fontSize: 18 }}>Thông tin bản thân </Text>
+                            <Text style={{ fontSize: 18 }}>Thông tin của bạn </Text>
+                            <Text style={styles.textOrder}>Họ Tên: {item.order.informationClient.name}</Text>
                             <Text style={styles.textOrder}>Giới tính: {item.order.informationClient.sex}  {item.order.informationClient.age} tuổi</Text>
                             <Text style={styles.textOrder}>Địa chỉ: {item.order.address}</Text>
                             <Text style={styles.textOrder}>Khoảng cách: {item.order.distance} km</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
-                        <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
-                        <View style={{ marginLeft: 5 }}>
-                            <Text style={{ fontSize: 18 }}>Thông tin thợ </Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image style={styles.avatar}
-                                    source={{ uri: item.order.informationRepairmen.photoURL }} />
-                                <View style={{ marginLeft: 5 }}>
-                                    <Text style={styles.textOrder}>{item.order.informationRepairmen.name} {item.order.informationRepairmen.age} tuổi</Text>
-                                    <Text style={styles.textOrder}>Giới tính: {item.order.informationRepairmen.sex}</Text>
-                                    <Text style={styles.textOrder}>SDT: {item.order.informationRepairmen.sdt}</Text>
-                                </View>
-                            </View>
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', marginVertical: 5 }}>

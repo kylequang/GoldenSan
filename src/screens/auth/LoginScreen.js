@@ -726,9 +726,9 @@ const PhoneNumber = ({ navigation }) => {
                                     <TouchableOpacity
                                         onPress={handleSubmit}
                                         disabled={!isValid}
-                                        style={{ backgroundColor: '#3366ff', padding: 10, borderRadius: 10, margin: 5 }}
+                                        style={{ backgroundColor: '#ff6600', padding: 10, borderRadius: 10, margin: 5 }}
                                     >
-                                        <Text style={{ fontSize: 22 }}>Thêm dịch vụ</Text>
+                                        <Text style={{ fontSize: 22,color:'white',fontWeight:'bold' }}>Thêm dịch vụ</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={{ backgroundColor: 'gray', padding: 8, borderRadius: 10, margin: 5 }}

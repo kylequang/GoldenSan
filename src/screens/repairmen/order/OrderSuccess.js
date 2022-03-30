@@ -7,22 +7,21 @@ import { formatPrice, formatDateTime } from '../../../service/formatCode';
 
 export default function OrderSuccess({ navigation }) {
 
-
   const [selectedId, setSelectedId] = useState(null);
   const [listOrder, setListOrder] = useState([]); // list order of client
 
-  const [uid, setUid] = useState();
   useEffect(async () => {
-    console.log("Render list order getAgain");
+    console.log("Render order Success 1 lần");
     const id = await getUidUser();
-    setUid(id)
     const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_repairmen', id);
     setListOrder(data);
+  }, [])
 
-    const unsubscribe = navigation.addListener('focus', () => {
+  useEffect(async () => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      const id = await getUidUser();
       const data = getRealtimeQueryACollection(setData, 'orderSuccess', 'uid_repairmen', id);
       setListOrder(data);
-
     });
     return unsubscribe;
   }, [navigation]);
@@ -31,6 +30,7 @@ export default function OrderSuccess({ navigation }) {
     setListOrder(data);
   }
   const renderItem = ({ item }) => {
+   
     const expanded = item.id == selectedId ? true : false;
     return (
       <List.Accordion

@@ -4,22 +4,25 @@ import React, { useState, useEffect } from 'react'
 import { List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getUidUser } from '../../../service/getData';
-import { formatPrice } from '../../../service/formatCode';
+import { formatDateTime, formatPrice } from '../../../service/formatCode';
 import { getRealtimeQueryACollection } from '../../../service/getData';
-import Nodata from '../../../components/Nodata/Nodata';
-import ActivityIndicatorLoading from '../../../components/animation/ActivityIndicatorLoading';
+
 export default function CancelOrder({ navigation }) {
 
     const [selectedId, setSelectedId] = useState(null);
     const [listOrder, setListOrder] = useState([]); // list order of client
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    useEffect(async() => {
+        const uid = await getUidUser();
+        const data = getRealtimeQueryACollection(setData, 'orderCancel', 'uid_client', uid);
+        setListOrder(data)
+    }, [])
+
+    useEffect(async () => {
         const unsubscribe = navigation.addListener('focus', async () => {
             const uid = await getUidUser();
             const data = getRealtimeQueryACollection(setData, 'orderCancel', 'uid_client', uid);
             setListOrder(data)
-            setLoading(false);
             console.log("Render again orderCancel");
         });
         return unsubscribe;
@@ -45,7 +48,7 @@ export default function CancelOrder({ navigation }) {
                     <Text style={{ fontSize: 16 }}>Thời gian sửa chữa: {item.order.time + ' ' + item.order.date}</Text>
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Tổng: {formatPrice(item.order.totalPrice)} vnđ</Text>
                 </View>
-                <View style={{marginBottom:50}}>
+                <View style={{ marginBottom: 50 }}>
                     <View style={{ flexDirection: 'row', marginBottom: 2, marginTop: 2 }}>
                         <MaterialCommunityIcons name='credit-card' size={25} color='#ffa366' />
                         <View style={{ marginLeft: 5, marginRight: 15, }}>
@@ -87,18 +90,18 @@ export default function CancelOrder({ navigation }) {
                         </View>
                     </View>
                     <Text>Ngày đặt: {item.order.createDay}</Text>
+                    <Text>Ngày hủy: {formatDateTime(item.order.cancelDay.toDate(), item.order.cancelDay.toDate())}</Text>
                 </View>
             </List.Accordion>
         )
     }
-    if (loading) return <ActivityIndicatorLoading color="blue" />
     return (
-            <List.Section>
-                {
-                    listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
-                }
-            </List.Section>
-       
+        <List.Section>
+            {
+                listOrder && <FlatList data={listOrder} renderItem={renderItem} keyExtractor={item => item.id} />
+            }
+        </List.Section>
+
     )
 }
 
