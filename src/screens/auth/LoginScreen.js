@@ -474,21 +474,7 @@ const PhoneNumber = ({ navigation }) => {
                                 },
                                 active: true
                             });
-                            // await schedulePushNotification('HelpHouse thông báo', 'Chào mừng quý khách đến với HelpHouse!');
-
-                            // const addNotification = {
-                            //     title: 'HelpHouse thông báo',
-                            //     body: 'Chào mừng quý khách đến với HelpHouse!',
-                            //     time: new Date()
-                            // }
-                            // const array = [];
-                            // array.push(addNotification)
-                            // const data = { id: uid, notification: array }
-
-                            // await setDocument('notification', uid, data)
                             setStep('CreateListWork');
-                            //navigation.navigate('checkRole');
-
                         }
                         }
                         validationSchema={yup.object().shape({
@@ -658,8 +644,8 @@ const PhoneNumber = ({ navigation }) => {
                         <Formik
                             initialValues={{
                                 nameService: '',
-                                price: 0,
-                                insurance: 0,
+                                price: '',
+                                insurance: '',
                             }}
                             onSubmit={
                                 (values) => {

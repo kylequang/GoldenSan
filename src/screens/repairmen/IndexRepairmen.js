@@ -55,9 +55,6 @@ export default function IndexRepairmen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
-          <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
-            <Text style={[styles.textInfo, { color: 'black' }]}>Hôm Nay                {formatDateTime(new Date(), new Date())}</Text>
-          </View>
           <View style={styles.headerContent}>
             <Image style={styles.avatar}
               source={{ uri: dataUser.photoURL }} />
@@ -66,6 +63,9 @@ export default function IndexRepairmen({ navigation }) {
               <Text style={styles.textInfo}>Thợ {dataUser.job}</Text>
               <Text style={styles.textInfo}>{dataUser.phoneNumber}</Text>
             </View>
+          </View>
+          <View style={{ justifyContent: 'center', alignItems: 'center',marginBottom:10 }}>
+            <Text style={[styles.textInfo, { color: 'black' }]}>Hôm Nay                {formatDateTime(new Date(), new Date())}</Text>
           </View>
         </View>
         <View style={styles.listWork}>

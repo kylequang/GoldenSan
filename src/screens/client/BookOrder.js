@@ -32,6 +32,8 @@ export default function BookOrder({ navigation, route }) {
     }, [])
 
     const handleBookOrder = async () => {
+        console.log("link Ảnh",route.params.dataUser.photoURL);
+        // return '';
         const data = {
             uid_client: route.params.dataUser.uid,
             uid_repairmen: route.params.repairmen.uid,

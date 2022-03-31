@@ -24,7 +24,7 @@ export default function Profile({ navigation }) {
     const [countOrderCancel, setCountOrderCancel] = useState(0);
 
     const [loading, setLoading] = useState(true);
-    useEffect(async () => {
+    useEffect(async()=>{
         const data = await getCurrentUser('client');
         setDataUser(data);
         setCountOrder(await countDocument('order', 'uid_client'));
@@ -32,6 +32,9 @@ export default function Profile({ navigation }) {
         setCountOrderDoing(await countDocument('orderDoing', 'uid_client'));
         setCountOrderSuccess(await countDocument('orderSuccess', 'uid_client'));
         setLoading(false)
+    },[])
+    useEffect(async () => {
+     
         const unsubscribe = navigation.addListener('focus', async () => {
             const data = await getCurrentUser('client');
             setDataUser(data);

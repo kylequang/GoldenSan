@@ -17,7 +17,7 @@ import RepairmenLoading from '../../components/animation/RepairmenLoading';
 
 const TabDetailRepairmen = createMaterialTopTabNavigator();
 
-var distance = 1;
+var distance = 1.325;
 var time = 0;
 const OnGoogleMap = (props) => {
     console.log('Địa chỉ khách hàng: ', props.clientLocation);
@@ -123,6 +123,7 @@ export default function DetailRepairmen({ navigation, route }) {
         const location = await getCurrentLocation();
         const listWork = await getAnDocument('listWork', route.params.item.uid);
         const dataUser = await getCurrentUser('client');
+        console.log("Kiểm tra tài khoản: ",dataUser);
         setListWork(listWork);
         setCurrentLocationOfClient(location);
         setCurrentUser(dataUser);

@@ -34,10 +34,11 @@ export const getUidUser = async () => {
   const currentUser = dataUser != null ? JSON.parse(dataUser) : 'null';
   return currentUser.user.uid;
 }
+
 //get current user 
 export const getCurrentUser = async (nameCollection) => {
   const data = await AsyncStorage.getItem('dataUser');
-  const currentUser = data != null ? JSON.parse(data) : 'null';
+  const currentUser = data != null ? JSON.parse(data) : null;
   const dataUser = await getAnDocument(nameCollection, currentUser.user.uid);
   return dataUser;
 }
